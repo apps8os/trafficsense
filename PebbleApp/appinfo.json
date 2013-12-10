@@ -1,0 +1,18 @@
+{
+    "versionLabel": "1.0",
+    "uuid": "7546bdd2-5c59-4239-bf79-c3b5ae27326e",
+    "appKeys": {},
+    "longName": "testi",
+    "versionCode": 1,
+    "capabilities": [
+        ""
+    ],
+    "shortName": "testi",
+    "companyName": "attes",
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": []
+    }
+}
