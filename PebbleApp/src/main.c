@@ -1,87 +1,69 @@
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
+#include <pebble.h>
 
+static Window * window;
+static TextLayer *text_layer;
 
-#define MY_UUID { 0x83, 0xEE, 0xF3, 0x82, 0x21, 0xA4, 0x47, 0x3A, 0xA1, 0x89, 0xCE, 0xFF, 0xA4, 0x2F, 0x86, 0xB1 }
-PBL_APP_INFO(MY_UUID,
-             "Test App", "Software development project",
-             1, 0, /* App version */
-             DEFAULT_MENU_ICON,
-             APP_INFO_STANDARD_APP);
-
-Window window;
-TextLayer hello_layer;
+void message_received(DictionaryIterator *iterator) {
+	Tuple *tupleWithKey0 = dict_find(iterator, 0);
+	if (tupleWithKey0) {
+		text_layer_set_text(text_layer, tupleWithKey0->value->cstring);
+	}
+		
+}
 
 static void send_cmd(uint8_t cmd) {
 	Tuplet value = TupletInteger(0, cmd);
 	DictionaryIterator *iter;
-	app_message_out_get(&iter);
-	if (iter == NULL)
+	app_message_outbox_begin(&iter); // returns AppMessageResult
+	if (iter == NULL) // if app_message_outbox_begin fails, iter == NULL
 		return;
 	dict_write_tuplet(iter, &value);
 	dict_write_end(iter);
-	app_message_out_send();
-	app_message_out_release();
+	app_message_outbox_send(); //returns AppMessageResult
 }
 
-void up_click_handler(ClickRecognizerRef recognizer, Window *window) {
+void hellowindow_single_click_handler(ClickRecognizerRef recognizer, void* context) {
+	text_layer_set_text(text_layer, "Up button pressed");
 	send_cmd(0);
-}
-
-void click_config_provider(ClickConfig **config, void *context) {
-    config[BUTTON_ID_UP]->click.handler = (ClickHandler)up_click_handler;
-    config[BUTTON_ID_UP]->context = context;
-    config[BUTTON_ID_UP]->click.repeat_interval_ms = 100;
 
 }
-
-void handle_init(AppContextRef ctx) {
-  (void)ctx;
-
-  window_init(&window, "Main window");
-  window_stack_push(&window, true /* Animated */);
-	text_layer_init(&hello_layer, GRect(0, 65, 144, 30));
-	text_layer_set_text_alignment(&hello_layer, GTextAlignmentCenter);
-	text_layer_set_text(&hello_layer, "Hello world!");
-	text_layer_set_font(&hello_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-	layer_add_child(&window.layer, &hello_layer.layer);
-	window_set_click_config_provider(&window, (ClickConfigProvider)click_config_provider);
+void hellowindow_click_config_provider(Window *window) {
+	window_single_click_subscribe(BUTTON_ID_UP, hellowindow_single_click_handler);
 }
 
-void my_out_sent_handler(DictionaryIterator *sent, void *context) {
-  // outgoing message was delivered
+void init(void) {
+	window = window_create();
+	window_stack_push(window, true /* Animated */);
+	Layer *window_layer = window_get_root_layer(window);
+	GRect bounds = layer_get_frame(window_layer);
+	text_layer = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+	text_layer_set_text(text_layer, "Press up to send to phone");
+	text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+	layer_add_child(window_layer, text_layer_get_layer(text_layer));
+	
+	
+	window_set_click_config_provider(window, (ClickConfigProvider)hellowindow_click_config_provider);
+	
+	
+	app_message_open(64, 16);
+	//set the function that will be called when a message is received from the phone
+	app_message_register_inbox_received((AppMessageInboxReceived)message_received);
+	//and when it's dropped
+	//app_message_register_inbox_dropped(message_dropped)
+		
+	//and for messages to phone (outbox)
+	//app_message_register_outbox_sent(message_sent);
+	//app_message_register_outbox_failed(message_failed);
 	
 }
-void my_out_fail_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  // outgoing message failed
-}
-void my_in_rcv_handler(DictionaryIterator *received, void *context) {
-    Tuple* in_tuple = dict_find(received, 0);
-	if (in_tuple) {
-		text_layer_set_text(&hello_layer, in_tuple->value->cstring);
-	}
-}
-void my_in_drp_handler(void *context, AppMessageResult reason) {
-  // incoming message dropped
-	text_layer_set_text(&hello_layer, "message dropped");
+
+void deinit(void) {
+	text_layer_destroy(text_layer);
+	window_destroy(window);
 }
 
-void pbl_main(void *params) {
-  PebbleAppHandlers handlers = {
-    .init_handler = &handle_init,
-	.messaging_info = {
-		.buffer_sizes = {
-			.inbound = 64,
-			.outbound = 16,
-		},
-		.default_callbacks.callbacks = {
-      	  .out_sent = my_out_sent_handler,
-     	  .out_failed = my_out_fail_handler,
-     	  .in_received = my_in_rcv_handler,
-          .in_dropped = my_in_drp_handler,
-        },
-	},
-  };
-  app_event_loop(params, &handlers);
+int main(void) {
+	init();
+	app_event_loop();
+	deinit();
 }
