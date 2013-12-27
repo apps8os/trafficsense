@@ -70,7 +70,7 @@ public class MainActivity extends Activity {
         	@Override
         	public void onClick(View v) {
         		//sendMessageToPebble(message.getText().toString());
-        		sendMessageToPebbleApp(message.getText().toString());
+        		sendStop("Alvar Aallon puisto", "12:59", 1);
         	}
         });
     }
@@ -93,19 +93,20 @@ public class MainActivity extends Activity {
         sendBroadcast(i);
     }
     
-    private void sendMessageToPebbleApp(String message) {
-    	// send a message to the app
-    	if (message.length() < BUFFER_LENGTH) {
+
+    private void sendStop(String stopName, String time, int stop) {
+    	stopName = stopName.substring(0, 10); //limit to 10 characters
+    	String s = stopName + " - " + time;
+    	if (s.length() < BUFFER_LENGTH) {
     		PebbleDictionary dictionary = new PebbleDictionary();
-    		//key = 0 now
-    		dictionary.addString(0, message);
+    		//key = stop, value = s
+    		dictionary.addString(stop, s);
     		PebbleKit.sendDataToPebble(getApplicationContext(), APP_UUID, dictionary);
     	} else {
     		Log.i("sendStringToPebble", "string too long");
     	}
+    
     }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
