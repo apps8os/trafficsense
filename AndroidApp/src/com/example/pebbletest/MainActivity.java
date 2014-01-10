@@ -25,7 +25,7 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 public class MainActivity extends Activity {
 
 	private static final UUID APP_UUID = UUID.fromString("83eef382-21a4-473a-a189-ceffa42f86b1");
-	private static final int BUFFER_LENGTH = 32;
+	private static final int BUFFER_LENGTH = 64;
 	private PebbleKit.PebbleDataReceiver dataHandler;
 	
 	@Override
@@ -95,7 +95,8 @@ public class MainActivity extends Activity {
     
 
     private void sendStop(String stopName, String time, int stop) {
-    	stopName = stopName.substring(0, 10); //limit to 10 characters
+    	int charLimit = Math.min(stopName.length(), 20);
+    	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
     	String s = stopName + " - " + time;
     	if (s.length() < BUFFER_LENGTH) {
     		PebbleDictionary dictionary = new PebbleDictionary();
