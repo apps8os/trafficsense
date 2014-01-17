@@ -12,7 +12,6 @@ typedef struct Stop Stop;
 
 static Window *window;
 static Stop stopArray[NUM_STOPS];
-//static TextLayer *stopArray [NUM_STOPS];
 static MenuLayer *menu_layer;
 
 
@@ -140,37 +139,21 @@ void init_menu() {
 }
 
 void init(void) {
-	//Initializes the app, called when the 
+	//Initializes the app, called when the app is started, in main()
 	window = window_create();
 	window_stack_push(window, true /* Animated */);
-	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_frame(window_layer);
-	int spacing = 30;
-	/*/
-	for (int i = 0; i < NUM_STOPS; i++) {
-		stopArray[i] = text_layer_create((GRect){ .origin = { 0, i * spacing }, .size = bounds.size });
-		text_layer_set_text_alignment(stopArray[i], GTextAlignmentCenter);
-		text_layer_set_font(stopArray[i], (GFont)fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-		layer_add_child(window_layer, text_layer_get_layer(stopArray[i]));
-	}
-	/*/
+
 	for (int i = 0; i < NUM_STOPS; i++) {
 		strncpy(stopArray[i].name, "A stop", STOP_NAME_LENGTH-1);
 		strncpy(stopArray[i].time, "00:00", TIME_STR_LENGTH-1);
 	}
 	
 	init_menu();
-	/*/
-	text_layer_set_text(stopArray[0], "Next stop");
-	text_layer_set_text(stopArray[1], "Second stop");
-	text_layer_set_text(stopArray[2], "Last stop");
-	/*/
 	
-
 	// The click config for sending the test command to Android
 	//window_set_click_config_provider(window, (ClickConfigProvider)hellowindow_click_config_provider);
 	
-	
+	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
 	app_message_open(64, 16);
 	//set the function that will be called when a message is received from the phone
 	app_message_register_inbox_received((AppMessageInboxReceived)message_received);
@@ -189,6 +172,7 @@ void deinit(void) {
 		text_layer_destroy(stopArray[i]);
 	}
 	/*/
+	menu_layer_destroy(menu_layer);
 	window_destroy(window);
 }
 
