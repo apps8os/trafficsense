@@ -1,0 +1,57 @@
+Friday 17.1.2014
+Departure
+13:02 Lentoasema T2, Vantaa 
+    Walking 0,1 km 
+    13:03 Lentoasema T2 
+ 
+13:03 Lentoasema T2 
+    615 
+    13:03 Lentoasema T2 (V5351) 
+    13:05 Ilmailutie (V5302) 
+    13:07 Veromiehen teoll.al. (V5204) 
+    13:08 Vantaanportti (V5202) 
+    13:08 Vantaanportti (V5263) 
+    13:11 Ylästön ramppi () 
+    13:13 Tammisto (V5010) 
+    13:17 Muurimestarintie (2444) 
+    13:19 Käskynhaltijantie (2442) 
+    13:20 Käpylän asema (2440) 
+    13:21 Käpylänaukio (2438) 
+    13:22 Koskelantie (2436) 
+ 
+13:22 Koskelantie 
+    Walking 0,1 km 
+    13:22 Koskelantie 
+    13:23 Mäkelänkatu 
+ 
+13:32 Mäkelänkatu 
+    506 
+    13:32 Mäkelänkatu (2136) 
+    13:33 Ilmattarentie (2194) 
+    13:36 Vaihdemiehenkatu (2184) 
+    13:38 Pasilan asema (2101) 
+    13:40 Palkkatilanportti (2106) 
+    13:42 Eläintarha (2074) 
+    13:43 Auroran sairaala (2072) 
+    13:44 Reijolankatu (2077) 
+    13:45 Töölön tulli (1379) 
+    13:46 Tukholmankatu (1381) 
+    13:49 Meilahdentie (1385) 
+    13:49 Paciuksenkaari (1387) 
+    13:51 Munkkiniemen aukio (1407) 
+    13:52 Saunalahti (1409) 
+    13:54 Kuusiniementie (1411) 
+    13:55 Kuusisaarenkuja (1413) 
+    13:56 Lehtisaarentie (1415) 
+    13:57 Otaniemenristi (E2201) 
+    13:58 Otakallio (E2203) 
+ 
+13:58 Otakallio 
+    Walking 0,4 km 
+    13:58 Otakallio 
+    14:00 Otakaari 
+ 
+14:03 Otakaari 11, Espoo 
+Arrival
+
+
