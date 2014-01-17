@@ -1,25 +1,15 @@
-#include <pebble.h>
-#define NUM_STOPS		3
-#define KEY_FIRST_STOP		0
-#define STOP_NAME_LENGTH	21
-#define TIME_STR_LENGTH		6
+#include "main.h"
 
-struct Stop {
-	char name[STOP_NAME_LENGTH];
-	char time[TIME_STR_LENGTH];
-};
-typedef struct Stop Stop;
+Stop stopArray[NUM_STOPS];
 
-static Window *window;
-static Stop stopArray[NUM_STOPS];
-static MenuLayer *menu_layer;
+Window *window;
+MenuLayer *menu_layer;
 
-
-static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
+uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
   return 2;
 }
 
-static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     case 0:
       return NUM_STOPS - 1;
@@ -32,8 +22,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
   }
 }
 
-static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  // This is a define provided in pebble.h that you may use for the default height
+int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     // Section 0: Upcoming stops, return 0 not to show this header at all
     case 0:
@@ -46,7 +35,7 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return 0;
 }
 
-static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
+void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   // Determine which section we're working with
   switch (section_index) {
     case 0:
@@ -60,7 +49,7 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
   }
 }
 
-static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
   int row = cell_index->row;
   switch (cell_index->section) {
@@ -98,7 +87,7 @@ void message_received(DictionaryIterator *iterator) {
 		
 }
 
-static void send_cmd(uint8_t cmd) {
+  void send_cmd(uint8_t cmd) {
 	//Sends the value cmd to the phone as a tuple with key 0.
 	Tuplet value = TupletInteger(0, cmd);
 	DictionaryIterator *iter;
@@ -167,11 +156,6 @@ void init(void) {
 }
 
 void deinit(void) {
-	/*/
-	for (int i = 0; i < NUM_STOPS; i++) {
-		text_layer_destroy(stopArray[i]);
-	}
-	/*/
 	menu_layer_destroy(menu_layer);
 	window_destroy(window);
 }
