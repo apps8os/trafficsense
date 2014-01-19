@@ -70,19 +70,6 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *da
 
 void message_received(DictionaryIterator *iterator) {
 	//Automatically called when a message is received from the phone.
-	/*/
-	for (int i = 0; i < NUM_STOPS; i++) {
-		Tuple *stopTuple = dict_find(iterator, KEY_FIRST_STOP + i);
-		if (stopTuple) {
-			//text_layer_set_text(stopArray[i], stopTuple->value->cstring);
-			char name[STOP_NAME_LENGTH];
-			for (int i2 = 0; i2 < STOP_NAME_LENGTH; i2++) {
-				name[i2] = stopTuple->value->cstring[i2];
-			}
-			strncpy(stopArray[i].name, name, STOP_NAME_LENGTH);
-		}
-	}
-	/*/
 	Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
 	if (commandTuple) {
 	  uint8_t command = commandTuple->value->data[0];
