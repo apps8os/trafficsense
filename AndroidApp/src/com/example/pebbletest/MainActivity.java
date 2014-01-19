@@ -26,6 +26,12 @@ public class MainActivity extends Activity {
 
 	private static final UUID APP_UUID = UUID.fromString("83eef382-21a4-473a-a189-ceffa42f86b1");
 	private static final int BUFFER_LENGTH = 64;
+	private static final int KEY_COMMAND = 0;
+	private static final int COMMAND_GET_STOP = 0;
+	private static final int KEY_STOP_NUM = 1;
+	private static final int KEY_STOP_NAME = 2;
+	private static final int KEY_STOP_TIME = 3;
+	
 	private PebbleKit.PebbleDataReceiver dataHandler;
 	
 	@Override
@@ -70,7 +76,7 @@ public class MainActivity extends Activity {
         	@Override
         	public void onClick(View v) {
         		//sendMessageToPebble(message.getText().toString());
-        		sendStop("Alvar Aallon puisto", "12:59", 1);
+        		sendStop("A stop with a very very long name", "12:59", 1);
         	}
         });
     }
@@ -94,18 +100,16 @@ public class MainActivity extends Activity {
     }
     
 
-    private void sendStop(String stopName, String time, int stop) {
+    private void sendStop(String stopName, String time, int stopNum) {
+    	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(stopName.length(), 20);
     	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
-    	String s = stopName + " - " + time;
-    	if (s.length() < BUFFER_LENGTH) {
-    		PebbleDictionary dictionary = new PebbleDictionary();
-    		//key = stop, value = s
-    		dictionary.addString(stop, s);
-    		PebbleKit.sendDataToPebble(getApplicationContext(), APP_UUID, dictionary);
-    	} else {
-    		Log.i("sendStringToPebble", "string too long");
-    	}
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_GET_STOP);
+		dictionary.addUint8(KEY_STOP_NUM, (byte)stopNum);
+		dictionary.addString(KEY_STOP_NAME, stopName);
+		dictionary.addString(KEY_STOP_TIME, time);
+		PebbleKit.sendDataToPebble(getApplicationContext(), APP_UUID, dictionary);
     
     }
     @Override

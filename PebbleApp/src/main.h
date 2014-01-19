@@ -1,6 +1,14 @@
 #include <pebble.h>
-#define NUM_STOPS		3
-#define KEY_FIRST_STOP		0
+
+#define NUM_STOPS		3	// Number of stops shown in the pebble screen, including the last stop
+
+// Constants for receiving commands
+#define KEY_COMMAND		0	// The key of the command tuple (the value of this tuple is the command)
+// Constants related to the command for receiving a stop
+#define COMMAND_GET_STOP	0
+#define KEY_STOP_NUM		1	// The value of a tuple with this key defines where the stop is in the list	
+#define KEY_STOP_NAME		2
+#define KEY_STOP_TIME		3
 #define STOP_NAME_LENGTH	21
 #define TIME_STR_LENGTH		6
 
