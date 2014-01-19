@@ -30,7 +30,8 @@ public class MainActivity extends Activity {
 	private static final int COMMAND_GET_STOP = 0;
 	private static final int KEY_STOP_NUM = 1;
 	private static final int KEY_STOP_NAME = 2;
-	private static final int KEY_STOP_TIME = 3;
+	private static final int KEY_STOP_CODE = 3;
+	private static final int KEY_STOP_TIME = 4;
 	
 	private PebbleKit.PebbleDataReceiver dataHandler;
 	
@@ -76,7 +77,9 @@ public class MainActivity extends Activity {
         	@Override
         	public void onClick(View v) {
         		//sendMessageToPebble(message.getText().toString());
-        		sendStop("A stop with a very very long name", "12:59", 1);
+        		sendStop("Ääkkösiä", "1234", "15:29", 0);
+        		sendStop("Kemisti", "E1234", "15:59", 1);
+        		sendStop("Some stop", "Ki1234", "16:59", 2);
         	}
         });
     }
@@ -100,7 +103,7 @@ public class MainActivity extends Activity {
     }
     
 
-    private void sendStop(String stopName, String time, int stopNum) {
+    private void sendStop(String stopName, String stopCode, String time, int stopNum) {
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(stopName.length(), 20);
     	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
@@ -108,8 +111,10 @@ public class MainActivity extends Activity {
 		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_GET_STOP);
 		dictionary.addUint8(KEY_STOP_NUM, (byte)stopNum);
 		dictionary.addString(KEY_STOP_NAME, stopName);
+		dictionary.addString(KEY_STOP_CODE, stopCode);
 		dictionary.addString(KEY_STOP_TIME, time);
 		PebbleKit.sendDataToPebble(getApplicationContext(), APP_UUID, dictionary);
+		
     
     }
     @Override

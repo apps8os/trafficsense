@@ -1,5 +1,6 @@
 #include "main.h"
 
+int viewMode;
 Stop stopArray[NUM_STOPS];
 
 Window *window;
@@ -52,15 +53,13 @@ void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t 
 void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
   int row = cell_index->row;
-  switch (cell_index->section) {
-    case 0:
-      // Use the row to specify which item we'll draw
-	menu_cell_basic_draw(ctx, cell_layer, stopArray[row].name, stopArray[row].time, NULL);
-    	break;
-
-    case 1:
-      menu_cell_basic_draw(ctx, cell_layer, stopArray[NUM_STOPS-1].name, stopArray[NUM_STOPS-1].time, NULL);
-  }
+  int section = cell_index->section;
+  // Use the values of row and section to determine which item we'll draw
+  int index = (NUM_STOPS-1)*section + row;
+  if (viewMode == VIEW_MODE_NAMES)
+    menu_cell_basic_draw(ctx, cell_layer, stopArray[index].name, stopArray[index].time, NULL);
+  else if (viewMode == VIEW_MODE_CODES)
+    menu_cell_basic_draw(ctx, cell_layer, stopArray[index].code, stopArray[index].time, NULL);
 }
 
 // Here we capture when a user selects a menu item
@@ -76,12 +75,13 @@ void message_received(DictionaryIterator *iterator) {
 	    if (command == COMMAND_GET_STOP) {
 	        uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
 		char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
+	        char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
 	        char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
 		strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
+	        strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
 	        strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
 	    }
 	}
-	uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
 	// Update the menu, otherwise the new stop will not be shown before it's selected
 	// Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen
 	layer_mark_dirty(menu_layer_get_layer(menu_layer));
@@ -99,14 +99,15 @@ void send_cmd(uint8_t cmd) {
 	app_message_outbox_send(); //returns AppMessageResult
 }
 
-void hellowindow_single_click_UP_handler(ClickRecognizerRef recognizer, void* context) {
-	//Called when the UP button is clicked once.
-	send_cmd(0);
+void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context) {
+	//Called when the MIDDLE button is clicked once.
+	viewMode = (viewMode + 1) % NUM_VIEW_MODES;
+	layer_mark_dirty(menu_layer_get_layer(menu_layer));
 
 }
-void hellowindow_click_config_provider(Window *window) {
+void stoplist_window_click_config_provider(Window *window) {
 	//Function for setting callbacks for button clicks.
-	window_single_click_subscribe(BUTTON_ID_UP, hellowindow_single_click_UP_handler);
+	window_single_click_subscribe(BUTTON_ID_SELECT, stoplist_window_single_click_SELECT_handler);
 }
 
 void init_menu() {
@@ -123,7 +124,7 @@ void init_menu() {
 	    .select_click = menu_select_callback,
 	});
 
-	menu_layer_set_click_config_onto_window(menu_layer, window);
+	//menu_layer_set_click_config_onto_window(menu_layer, window);
 	layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
 }
 
@@ -131,16 +132,17 @@ void init(void) {
 	//Initializes the app, called when the app is started, in main()
 	window = window_create();
 	window_stack_push(window, true /* Animated */);
-
+	viewMode = VIEW_MODE_NAMES;
 	for (int i = 0; i < NUM_STOPS; i++) {
 		strncpy(stopArray[i].name, "A stop", STOP_NAME_LENGTH-1);
+		strncpy(stopArray[i].code, "1234", STOP_CODE_LENGTH-1);
 		strncpy(stopArray[i].time, "00:00", TIME_STR_LENGTH-1);
 	}
 	
 	init_menu();
 	
 	// The click config for sending the test command to Android
-	//window_set_click_config_provider(window, (ClickConfigProvider)hellowindow_click_config_provider);
+	window_set_click_config_provider(window, (ClickConfigProvider)stoplist_window_click_config_provider);
 	
 	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
 	app_message_open(64, 16);
