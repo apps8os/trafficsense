@@ -48,4 +48,6 @@ proguard/
 *.x86_64
 *.hex
 
-
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]

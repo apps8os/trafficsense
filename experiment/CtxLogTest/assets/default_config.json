@@ -1,0 +1,10 @@
+{
+ "name": "ContextLoggerConfig",
+ "version": 1,
+ "dataArchivePeriod": 60,
+ "dataRequests":{
+  "org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe": [
+   {}
+  ]
+ }
+}
