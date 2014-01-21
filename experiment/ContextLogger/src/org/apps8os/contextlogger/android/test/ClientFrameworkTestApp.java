@@ -29,7 +29,7 @@ import java.util.Locale;
 import org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe;
 import org.apps8os.contextlogger.android.io.MainPipeline;
 import org.apps8os.contextlogger.android.utils.Constants;
-import org.sizzlelab.contextlogger.android.R;
+import org.apps8os.contextlogger.android.R;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
