@@ -23,3 +23,4 @@ TODO
    Currently it creates lots of encrypted .db files, some of which are empty.
 3. There are more features from funf_analyze remain unexplored.
 4. Only 'application event' is demonstrated in this app. The other use of Application Probe is 'application activity'. (Section 5.6.3 of Nalin)
+5. It works with Funf v0.3, an old version.

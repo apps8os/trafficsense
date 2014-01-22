@@ -4,9 +4,19 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <!-- Launching -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <!-- All probes -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Config downloading/Data uploading -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- WifiProbe -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- CellProbe -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     
     <uses-sdk
         android:minSdkVersion="14"
@@ -30,16 +40,18 @@
             </intent-filter>
         </activity>
         
+        <!-- ContextLogger framework services -->
         <service android:name="org.apps8os.contextlogger.android.io.MainPipeline"/>
         <service android:name="edu.mit.media.funf.storage.HttpUploadService"/>
         <service android:name="edu.mit.media.funf.storage.NameValueDatabaseService"/>
-        <service android:name="org.apps8os.contextlogger.android.CustomProbe$ApplicationProbe"/>
+
+        <!-- Probes -->
+        <service android:name="edu.mit.media.funf.probe.builtin.CellProbe" />
+        <service android:name="edu.mit.media.funf.probe.builtin.WifiProbe" />
+        <!-- Please ignore the warning saying use '$' instead of '.'
+             It breaks stuff!  -->
+        <service android:name="org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe" />
         
-        <receiver
-            android:name="org.apps8os.contextlogger.android.CustomProbe$ApplicationProbe" android:enabled="true">
-            <action android:name="edu.mit.media.funf.probe.Probe.REQUEST" />
-            <action android:name="org.apps8os.contextlogger.android.customIntentAction" />
-        </receiver>
     </application>
 
 </manifest>

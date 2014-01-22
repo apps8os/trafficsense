@@ -61,11 +61,14 @@
     <service android:name="edu.mit.media.funf.probe.builtin.TemperatureSensorProbe"></service>
     <service android:name="edu.mit.media.funf.probe.builtin.ScreenProbe"></service>
     <service android:name="edu.mit.media.funf.probe.builtin.BrowserSearchesProbe"></service>
-    -->
     <service android:name="edu.mit.media.funf.probe.builtin.RunningApplicationsProbe"></service>
     <service android:name="edu.mit.media.funf.probe.builtin.AndroidInfoProbe"></service>
-    <service android:name="org.apps8os.contextlogger.android.CustomProbe$ApplicationProbe"></service>
-
+    -->
+    
+    <!-- Please ignore the warning saying use '$' instead of '.'
+         It breaks stuff!  -->
+    <service android:name="org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe"></service>
+    
     <!-- Framework services -->
     <service android:name="org.apps8os.contextlogger.android.io.MainPipeline"/>
     <service android:name="edu.mit.media.funf.storage.NameValueDatabaseService"/>

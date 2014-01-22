@@ -5,6 +5,12 @@
  "dataRequests":{
   "org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe": [
    {}
+  ],
+  "edu.mit.media.funf.probe.builtin.WifiProbe": [
+    { "PERIOD": 900 }
+  ],
+  "edu.mit.media.funf.probe.builtin.CellProbe": [
+    { "PERIOD": 900 }
   ]
  }
 }
