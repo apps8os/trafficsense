@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 
 import com.getpebble.android.kit.PebbleKit;
+import com.getpebble.android.kit.PebbleKit.PebbleAckReceiver;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 public class MainActivity extends Activity {
@@ -80,6 +81,7 @@ public class MainActivity extends Activity {
         		sendStop("Ääkkösiä", "1234", "15:29", 0);
         		sendStop("Kemisti", "E1234", "15:59", 1);
         		sendStop("Some stop", "Ki1234", "16:59", 2);
+        		Log.i(getLocalClassName(), "Button clicked");
         	}
         });
     }
@@ -104,6 +106,14 @@ public class MainActivity extends Activity {
     
 
     private void sendStop(String stopName, String stopCode, String time, int stopNum) {
+    	PebbleAckReceiver r = new PebbleAckReceiver(APP_UUID) {
+  		  @Override
+  		  public void receiveAck(Context context, int transactionId) {
+  		    Log.i(getLocalClassName(), "Received ack for transaction " + transactionId);
+  		  }};
+  		  
+    	PebbleKit.registerReceivedAckHandler(getApplicationContext(), r);
+    	
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(stopName.length(), 20);
     	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
@@ -113,7 +123,7 @@ public class MainActivity extends Activity {
 		dictionary.addString(KEY_STOP_NAME, stopName);
 		dictionary.addString(KEY_STOP_CODE, stopCode);
 		dictionary.addString(KEY_STOP_TIME, time);
-		PebbleKit.sendDataToPebble(getApplicationContext(), APP_UUID, dictionary);
+		PebbleKit.sendDataToPebbleWithTransactionId(getApplicationContext(), APP_UUID, dictionary, stopNum);
 		
     
     }
