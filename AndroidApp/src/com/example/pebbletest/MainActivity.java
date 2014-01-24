@@ -36,6 +36,8 @@ public class MainActivity extends Activity {
 	
 	private PebbleKit.PebbleDataReceiver dataHandler;
 	
+	private int s = 0;
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -78,7 +80,7 @@ public class MainActivity extends Activity {
         	@Override
         	public void onClick(View v) {
         		//sendMessageToPebble(message.getText().toString());
-        		sendStop("Ääkkösiä", "1234", "15:29", 0);
+        		sendStop("����kk��si��", "1234", "15:29", 0);
         		sendStop("Kemisti", "E1234", "15:59", 1);
         		sendStop("Some stop", "Ki1234", "16:59", 2);
         		Log.i(getLocalClassName(), "Button clicked");
@@ -110,10 +112,10 @@ public class MainActivity extends Activity {
   		  @Override
   		  public void receiveAck(Context context, int transactionId) {
   		    Log.i(getLocalClassName(), "Received ack for transaction " + transactionId);
+  		    notify(); // This stops the calling thread from waiting
   		  }};
   		  
     	PebbleKit.registerReceivedAckHandler(getApplicationContext(), r);
-    	
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(stopName.length(), 20);
     	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
@@ -124,7 +126,12 @@ public class MainActivity extends Activity {
 		dictionary.addString(KEY_STOP_CODE, stopCode);
 		dictionary.addString(KEY_STOP_TIME, time);
 		PebbleKit.sendDataToPebbleWithTransactionId(getApplicationContext(), APP_UUID, dictionary, stopNum);
-		
+		try {
+			r.wait();
+		} catch (InterruptedException e) {
+			// When current thread is activated before r is ready
+			e.printStackTrace();
+		}
     
     }
     @Override
