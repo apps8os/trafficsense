@@ -3,6 +3,8 @@
 	<name>PebbleTest</name>
 	<comment></comment>
 	<projects>
+		<project>google-play-services_lib</project>
+		<project>PEBBLE_KIT</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
+import android.app.Activity;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -41,6 +42,19 @@ public class PebbleCommunication {
 		// Set the android application context
 		mApplicationContext = applicationContext;
 	}
+	
+    private void sendStop(String stopName, String stopCode, String time, int stopNum) {
+    	// Sends a single stop to Pebble to a place of the list defined by stopNum
+    	int charLimit = Math.min(stopName.length(), 20);
+    	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_GET_STOP);
+		dictionary.addUint8(KEY_STOP_NUM, (byte)stopNum);
+		dictionary.addString(KEY_STOP_NAME, stopName);
+		dictionary.addString(KEY_STOP_CODE, stopCode);
+		dictionary.addString(KEY_STOP_TIME, time);
+		//PebbleKit.sendDataToPebbleWithTransactionId(getApplicationContext(), APP_UUID, dictionary, stopNum);
+    }
 	
 	public void startAppOnPebble() {
 		PebbleKit.startAppOnPebble(mApplicationContext, APP_UUID);
