@@ -1,26 +1,16 @@
-#include <pebble.h>
-#define NUM_STOPS		3
-#define KEY_FIRST_STOP		0
-#define STOP_NAME_LENGTH	21
-#define TIME_STR_LENGTH		6
+#include "main.h"
 
-struct Stop {
-	char name[STOP_NAME_LENGTH];
-	char time[TIME_STR_LENGTH];
-};
-typedef struct Stop Stop;
+int viewMode;
+Stop stopArray[NUM_STOPS];
 
-static Window *window;
-static Stop stopArray[NUM_STOPS];
-//static TextLayer *stopArray [NUM_STOPS];
-static MenuLayer *menu_layer;
+Window *window;
+MenuLayer *menu_layer;
 
-
-static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
+uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
   return 2;
 }
 
-static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     case 0:
       return NUM_STOPS - 1;
@@ -33,8 +23,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
   }
 }
 
-static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  // This is a define provided in pebble.h that you may use for the default height
+int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     // Section 0: Upcoming stops, return 0 not to show this header at all
     case 0:
@@ -47,7 +36,7 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return 0;
 }
 
-static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
+void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   // Determine which section we're working with
   switch (section_index) {
     case 0:
@@ -61,18 +50,16 @@ static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
   }
 }
 
-static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
   int row = cell_index->row;
-  switch (cell_index->section) {
-    case 0:
-      // Use the row to specify which item we'll draw
-	menu_cell_basic_draw(ctx, cell_layer, stopArray[row].name, stopArray[row].time, NULL);
-    	break;
-
-    case 1:
-      menu_cell_basic_draw(ctx, cell_layer, stopArray[NUM_STOPS-1].name, stopArray[NUM_STOPS-1].time, NULL);
-  }
+  int section = cell_index->section;
+  // Use the values of row and section to determine which item we'll draw
+  int index = (NUM_STOPS-1)*section + row;
+  if (viewMode == VIEW_MODE_NAMES)
+    menu_cell_basic_draw(ctx, cell_layer, stopArray[index].name, stopArray[index].time, NULL);
+  else if (viewMode == VIEW_MODE_CODES)
+    menu_cell_basic_draw(ctx, cell_layer, stopArray[index].code, stopArray[index].time, NULL);
 }
 
 // Here we capture when a user selects a menu item
@@ -82,24 +69,25 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *da
 
 void message_received(DictionaryIterator *iterator) {
 	//Automatically called when a message is received from the phone.
-	for (int i = 0; i < NUM_STOPS; i++) {
-		Tuple *stopTuple = dict_find(iterator, KEY_FIRST_STOP + i);
-		if (stopTuple) {
-			//text_layer_set_text(stopArray[i], stopTuple->value->cstring);
-			char name[STOP_NAME_LENGTH];
-			for (int i2 = 0; i2 < STOP_NAME_LENGTH; i2++) {
-				name[i2] = stopTuple->value->cstring[i2];
-			}
-			strncpy(stopArray[i].name, name, STOP_NAME_LENGTH);
-		}
+	Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
+	if (commandTuple) {
+	  uint8_t command = commandTuple->value->data[0];
+	    if (command == COMMAND_GET_STOP) {
+	        uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
+		char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
+	        char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
+	        char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
+		strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
+	        strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
+	        strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
+	    }
 	}
 	// Update the menu, otherwise the new stop will not be shown before it's selected
 	// Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen
 	layer_mark_dirty(menu_layer_get_layer(menu_layer));
-		
 }
 
-static void send_cmd(uint8_t cmd) {
+void send_cmd(uint8_t cmd) {
 	//Sends the value cmd to the phone as a tuple with key 0.
 	Tuplet value = TupletInteger(0, cmd);
 	DictionaryIterator *iter;
@@ -111,14 +99,15 @@ static void send_cmd(uint8_t cmd) {
 	app_message_outbox_send(); //returns AppMessageResult
 }
 
-void hellowindow_single_click_UP_handler(ClickRecognizerRef recognizer, void* context) {
-	//Called when the UP button is clicked once.
-	send_cmd(0);
+void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context) {
+	//Called when the MIDDLE button is clicked once.
+	viewMode = (viewMode + 1) % NUM_VIEW_MODES;
+	layer_mark_dirty(menu_layer_get_layer(menu_layer));
 
 }
-void hellowindow_click_config_provider(Window *window) {
+void stoplist_window_click_config_provider(Window *window) {
 	//Function for setting callbacks for button clicks.
-	window_single_click_subscribe(BUTTON_ID_UP, hellowindow_single_click_UP_handler);
+	window_single_click_subscribe(BUTTON_ID_SELECT, stoplist_window_single_click_SELECT_handler);
 }
 
 void init_menu() {
@@ -135,42 +124,27 @@ void init_menu() {
 	    .select_click = menu_select_callback,
 	});
 
-	menu_layer_set_click_config_onto_window(menu_layer, window);
+	//menu_layer_set_click_config_onto_window(menu_layer, window);
 	layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
 }
 
 void init(void) {
-	//Initializes the app, called when the 
+	//Initializes the app, called when the app is started, in main()
 	window = window_create();
 	window_stack_push(window, true /* Animated */);
-	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_frame(window_layer);
-	int spacing = 30;
-	/*/
-	for (int i = 0; i < NUM_STOPS; i++) {
-		stopArray[i] = text_layer_create((GRect){ .origin = { 0, i * spacing }, .size = bounds.size });
-		text_layer_set_text_alignment(stopArray[i], GTextAlignmentCenter);
-		text_layer_set_font(stopArray[i], (GFont)fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-		layer_add_child(window_layer, text_layer_get_layer(stopArray[i]));
-	}
-	/*/
+	viewMode = VIEW_MODE_NAMES;
 	for (int i = 0; i < NUM_STOPS; i++) {
 		strncpy(stopArray[i].name, "A stop", STOP_NAME_LENGTH-1);
+		strncpy(stopArray[i].code, "1234", STOP_CODE_LENGTH-1);
 		strncpy(stopArray[i].time, "00:00", TIME_STR_LENGTH-1);
 	}
 	
 	init_menu();
-	/*/
-	text_layer_set_text(stopArray[0], "Next stop");
-	text_layer_set_text(stopArray[1], "Second stop");
-	text_layer_set_text(stopArray[2], "Last stop");
-	/*/
 	
-
 	// The click config for sending the test command to Android
-	//window_set_click_config_provider(window, (ClickConfigProvider)hellowindow_click_config_provider);
+	window_set_click_config_provider(window, (ClickConfigProvider)stoplist_window_click_config_provider);
 	
-	
+	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
 	app_message_open(64, 16);
 	//set the function that will be called when a message is received from the phone
 	app_message_register_inbox_received((AppMessageInboxReceived)message_received);
@@ -184,11 +158,7 @@ void init(void) {
 }
 
 void deinit(void) {
-	/*/
-	for (int i = 0; i < NUM_STOPS; i++) {
-		text_layer_destroy(stopArray[i]);
-	}
-	/*/
+	menu_layer_destroy(menu_layer);
 	window_destroy(window);
 }
 

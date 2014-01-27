@@ -1,0 +1,14 @@
+{
+  "name": "TriggersConfig",
+  "version":1,
+  "triggersConfigUpdateUrl":"http:\/\/0.0.0.0:8080\/SQLiteDBFileReceiver\/receiver?type=tConfig",
+  "triggersConfigUpdatePeriod":3600,
+  "triggers": [
+  {
+    "action": "null",
+    "config":
+    {       
+    }
+  }
+  ]
+}

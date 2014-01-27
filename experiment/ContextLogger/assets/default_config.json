@@ -1,10 +1,10 @@
 {       
   "name": "ContextLoggerConfig",
   "version":1,
-  "configUpdateUrl":"http:\/\/46.137.181.14:8080\/SQLiteDBFileReceiver\/receiver?type=clConfig",
+  "configUpdateUrl":"http:\/\/127.0.0.1:8080\/SQLiteDBFileReceiver\/receiver?type=clConfig",
   "configUpdatePeriod":3600,
   "dataArchivePeriod":3600,
-  "dataUploadUrl":"http:\/\/46.137.181.14:8080\/SQLiteDBFileReceiver\/receiver",
+  "dataUploadUrl":"http:\/\/127.0.0.1:8080\/SQLiteDBFileReceiver\/receiver",
   "dataUploadPeriod":3600,
   "dataRequests":{
     "edu.mit.media.funf.probe.builtin.LocationProbe": [
@@ -22,7 +22,7 @@
     "edu.mit.media.funf.probe.builtin.AccelerometerSensorProbe": [
       { "PERIOD": 900, "DURATION": 30 }
     ],
-    "org.sizzlelab.contextlogger.android.CustomProbe.ApplicationProbe": [
+    "org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe": [
       {}
     ],
     "edu.mit.media.funf.probe.builtin.LinearAccelerationSensorProbe": [
