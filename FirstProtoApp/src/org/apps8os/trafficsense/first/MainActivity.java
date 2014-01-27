@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	GmailReader reader; //gets email from a gmail folder
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,13 +20,7 @@ public class MainActivity extends Activity {
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
-		reader = new GmailReader();
-		try {
-			reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
-		} catch (EmailException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(this);
 	}
@@ -54,7 +47,9 @@ public class MainActivity extends Activity {
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
 		Email email = new Email();
+		GmailReader reader = new GmailReader();
 		try {
+			reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
 			email=reader.getNextEmail();		
 		} catch (EmailException e) {
 			// TODO Auto-generated catch block
