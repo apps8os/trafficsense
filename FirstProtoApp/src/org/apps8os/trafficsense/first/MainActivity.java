@@ -1,14 +1,18 @@
 package org.apps8os.trafficsense.first;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
+import org.apps8os.trafficsense.first.GmailReader.EmailException;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	GmailReader reader; //gets email from a gmail folder
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -17,6 +21,13 @@ public class MainActivity extends Activity {
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
+		reader = new GmailReader();
+		try {
+			reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(this);
 	}
@@ -42,7 +53,22 @@ public class MainActivity extends Activity {
 	
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
-		// TODO: Jussi
+		Email email = new Email();
+		try {
+			email=reader.getNextEmail();		
+		} catch (EmailException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		TextView view = (TextView) findViewById(R.id.textView4);
+		String emailText=email.toString();
+		if(emailText!=null){
+			view.setText(emailText);
+		}
+		else{
+			view.setText("Error:reached end of mail box");
+		}
+		
 	}
 	
     public void onClick_parse(View v) {
