@@ -5,18 +5,21 @@ import org.apps8os.trafficsense.first.GmailReader.EmailException;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.res.Resources;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
+	Resources mRes;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		mRes = getResources();
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
@@ -69,6 +72,10 @@ public class MainActivity extends Activity {
     public void onClick_parse(View v) {
     	System.out.println("DBG onClick_parse");
 		// TODO: Catarina
+    	JsonParser parser = new JsonParser();
+    	parser.parseString(mRes.getString(R.string.hard_coded_json));
+    	TextView view = (TextView) findViewById(R.id.textView2);
+    	view.setText(parser.getJSONText());
 	}
 
     public void onClick_activate(View v) {
