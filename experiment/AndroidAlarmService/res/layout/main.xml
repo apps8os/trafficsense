@@ -9,16 +9,19 @@
  android:layout_height="wrap_content"
  android:text="@string/hello"
  />
+
 <Button
- android:id="@+id/startalarm"
- android:layout_width="fill_parent"
- android:layout_height="wrap_content"
- android:text="Start"
- />
+    android:id="@+id/startalarm"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onClick_start"
+    android:text="@string/start" />
+
 <Button
  android:id="@+id/cancelalarm"
  android:layout_width="fill_parent"
  android:layout_height="wrap_content"
- android:text="Cancel"
+ android:onClick="onClick_cancel"
+ android:text="@string/cancel"
  />
 </LinearLayout>

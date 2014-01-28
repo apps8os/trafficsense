@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 public class AndroidAlarmService extends Activity {
@@ -17,7 +16,7 @@ public class AndroidAlarmService extends Activity {
 private PendingIntent pendingIntent;
 private ResponseReceiver receiver;
 
- /** Called when the activity 	is first created. */
+ /** Called when the activity is first created. */
  @Override
  public void onCreate(Bundle savedInstanceState) {
      super.onCreate(savedInstanceState);
@@ -33,42 +32,25 @@ private ResponseReceiver receiver;
  public void onDestroy() {
      this.unregisterReceiver(receiver);
      super.onDestroy();
-     
-     Button buttonStart = (Button)findViewById(R.id.startalarm);
-     Button buttonCancel = (Button)findViewById(R.id.cancelalarm);
-  
-     buttonStart.setOnClickListener(new Button.OnClickListener(){
-
-  @Override
-  public void onClick(View arg0) {
-   // TODO Auto-generated method stub
-  
-   Intent myIntent = new Intent(AndroidAlarmService.this, MyAlarmService.class);
-   pendingIntent = PendingIntent.getService(AndroidAlarmService.this, 0, myIntent, 0);
-
-            AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.add(Calendar.SECOND, 10);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-         
-   Toast.makeText(AndroidAlarmService.this, "Start Alarm", Toast.LENGTH_LONG).show();
-  }});
-  
-     buttonCancel.setOnClickListener(new Button.OnClickListener(){
-
-  @Override
-  public void onClick(View arg0) {
-   // TODO Auto-generated method stub
-   AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-   alarmManager.cancel(pendingIntent);
-
-            // Tell the user about what we did.
-            Toast.makeText(AndroidAlarmService.this, "Cancel!", Toast.LENGTH_LONG).show();
-
-  
-  }});
-  
  }
+ 
+ public void onClick_start(View v) {
+	  Intent myIntent = new Intent(AndroidAlarmService.this, MyAlarmService.class);
+	  pendingIntent = PendingIntent.getService(AndroidAlarmService.this, 0, myIntent, 0);
+      AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+	  Calendar calendar = Calendar.getInstance();
+	  calendar.setTimeInMillis(System.currentTimeMillis());
+	  calendar.add(Calendar.SECOND, 10);
+	  alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+	  System.out.println("DBG alarm onClick_start");
+	  Toast.makeText(AndroidAlarmService.this, "Start Alarm", Toast.LENGTH_LONG).show();
+ }
+ 
+ public void onClick_cancel(View v) {
+	  AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+	  alarmManager.cancel(pendingIntent);
+	  System.out.println("DBG alarm onClick_cancel");
+      Toast.makeText(AndroidAlarmService.this, "Cancel!", Toast.LENGTH_LONG).show();
+  }
+ 
 }

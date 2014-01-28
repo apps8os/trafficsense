@@ -5,21 +5,20 @@ import android.content.Intent;
 
 public class MyAlarmService extends IntentService {
 
-	public MyAlarmService(String name) {
+	public MyAlarmService() {
 		super("IntentService");
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-        System.out.println(System.currentTimeMillis());
+        System.out.println("DBG alarm onHandleIntent "+System.currentTimeMillis());
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(ResponseReceiver.ACTION_RESP);
         broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
         sendBroadcast(broadcastIntent);
     }
-		
-	}
+	
+}
 
 
 
