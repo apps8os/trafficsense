@@ -21,8 +21,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		TextView textview1 = (TextView) findViewById(R.id.textView1);
-		textview1.setMovementMethod(new ScrollingMovementMethod());
+		
 		mRes = getResources();
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
@@ -56,6 +55,7 @@ public class MainActivity extends Activity {
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
 		final TextView textview = (TextView) findViewById(R.id.textView1);
+		textview.setMovementMethod(new ScrollingMovementMethod());
 		new Thread(new Runnable(){
 			public void run(){
 				Email email = new Email();
@@ -68,9 +68,8 @@ public class MainActivity extends Activity {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				TextView view = (TextView) findViewById(R.id.textView4);
 				final String emailText=email.toString();
-				System.out.println(emailText);
+				//System.out.println(emailText);
 				textview.post(new Runnable(){
 					public void run(){
 						if(emailText!=null){
@@ -93,16 +92,21 @@ public class MainActivity extends Activity {
     	JsonParser parser = new JsonParser();
     	parser.parseString(mRes.getString(R.string.hard_coded_json));
     	TextView view = (TextView) findViewById(R.id.textView2);
+    	view.setMovementMethod(new ScrollingMovementMethod());
     	view.setText(parser.getJSONText());
 	}
 
     public void onClick_activate(View v) {
     	System.out.println("DBG onClick_activate");
     	// TODO: Javier
+    	TextView view = (TextView) findViewById(R.id.textView3);
+    	view.setMovementMethod(new ScrollingMovementMethod());
     }
     
     public void onClick_send(View v) {
     	System.out.println("DBG onClick_send");
+    	TextView view = (TextView) findViewById(R.id.textView4);
+    	view.setMovementMethod(new ScrollingMovementMethod());
 		// TODO: Send the actual stops received from email (Atte)
     	// Now: send stops with dummy data
     	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
