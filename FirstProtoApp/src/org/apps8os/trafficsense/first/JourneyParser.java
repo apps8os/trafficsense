@@ -4,23 +4,21 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-public class JsonParser {
-	private JSONObject _mainObj ; // Declare the JSON object 
-	private JSONArray _segmentsArray;
+public class JourneyParser {
+	private JsonObject _mainObj ; // Declare the JSON object 
+	private JsonArray _segmentsArray;
 	
 	private ArrayList<String> _textArray = new ArrayList<String>();
 	private int _nline = 0 ; // Line number of txt file 
 	private String _txtLine ; // the line read it from the txt
 	
-	private final String WRITE_FILE = "/tmp/outJSON.js";
- 
-	public JsonParser() {
-		_mainObj = new JSONObject(); 
-		_segmentsArray = new JSONArray();
+	public JourneyParser() {
+		_mainObj = new JsonObject(); 
+		_segmentsArray = new JsonArray();
 	}
 	
 	private int getLine(){
@@ -55,69 +53,74 @@ public class JsonParser {
 		this.getTextArray().add(line.trim());
 	}
 
-
-	public JSONObject getJSONObj(){		
+	public JsonObject getJsonObj(){		
 		return _mainObj ;
 	}
 	
-	private void setJSONObj(String key, Object value){
-		try {
-			_mainObj.put(key, value);
-		} catch (JSONException ex) {
-			// TODO
-		}
+	private void setJsonObj(String key, String value){
+		_mainObj.addProperty(key, value);
 	}
 	
-	private JSONArray getSegmentsArray(){
+	private void setJsonObj(String key, JsonElement element) {
+		_mainObj.add(key, element);
+	}
+	
+	private JsonArray getSegmentsArray(){
 		return _segmentsArray;
 	}
 	
-	private void setSegmentsArray(Object value){
-		 _segmentsArray.put(value);
+	private void setSegmentsArray(JsonElement value){
+		 _segmentsArray.add(value);
 	}
 	
 	
 		
-	public void addJSONObject(){
+	public void addJsonObject(){
 		
 		if(this.getLine() == 1){
-			this.setJSONObj("date", this.getTxtLine());
+			this.setJsonObj("date", this.getTxtLine());
 			return;
 		}
 		
 		if(this.getLine() == 3){
-			
 			String[] parts = this.getTxtLine().split(" ",2);
-			this.setJSONObj("start",parts[1]);
+			this.setJsonObj("start",parts[1]);
 			return;
 		}
 		
 	
-		// The str has the time and location and will split into two parts 
-		String str = getTextArray().get(0);
-		String[] str_split = str.split(" ",2); // will just split one time = 2 parts
+		// The str has the time and location and will split into two parts
+		String str;
+		String[] str_split;
+		
+		try {
+			str = getTextArray().get(0);
+			str_split = str.split(" ",2); // will just split one time = 2 parts
+		} catch (IndexOutOfBoundsException ex) {
+			// this is an extra blank line, just ignore it
+			return;
+		}
 		
 		
 		
 		if(! getTextArray().get(1).equals("Arrival")){
 		
-			try {
-			JSONObject SegmentsObj = new JSONObject();
-			SegmentsObj.put("startTime", str_split[0]);
-			SegmentsObj.put("startPoint", str_split[1]);
-			SegmentsObj.put("mode", getTextArray().get(1));
+			JsonObject SegmentsObj = new JsonObject();
+			SegmentsObj.addProperty("startTime", str_split[0]);
+			SegmentsObj.addProperty("startPoint", str_split[1]);
+			SegmentsObj.addProperty("mode", getTextArray().get(1));
 			
 			this.setSegmentsArray(SegmentsObj);
 			
-			JSONArray waypointsArray = new JSONArray();	
+			JsonArray waypointsArray = new JsonArray();	
 				
 			for(int i=2 ; i < getTextArray().size() ; i++) {
 	
-				JSONObject waypointsObj = new JSONObject();
+				JsonObject waypointObj = new JsonObject();
 				
 				str_split = getTextArray().get(i).split(" ",2);
-				waypointsObj.put("time",str_split[0]);
-				waypointsObj.put("name",str_split[1]);
+				waypointObj.addProperty("time",str_split[0]);
+				waypointObj.addProperty("name",str_split[1]);
 				
 				
 				if(! getTextArray().get(1).contains("Walking")){
@@ -129,29 +132,24 @@ public class JsonParser {
 					end = str_split[1].indexOf( ")" );
 					stopCode = str_split[1].substring(start,end); 
 							
-					waypointsObj.remove("name");
-					waypointsObj.put("name",str_split[1].substring(0, start-1));
-					waypointsObj.put("stopCode",stopCode);
+					waypointObj.remove("name");
+					waypointObj.addProperty("name",str_split[1].substring(0, start-1));
+					waypointObj.addProperty("stopCode",stopCode);
 				}
 				
-				waypointsArray.put(waypointsObj);
+				waypointsArray.add(waypointObj);
 			}
 			
-			SegmentsObj.put("waypoints", waypointsArray);
-			
-			} catch (JSONException ex) {
-				// TODO
-			}
+			SegmentsObj.add("waypoints", waypointsArray);
 			
 		}else{
 			// Last line of the file, "Arrival" line 
 			
 			//System.out.println("ARRAY " + this.getSegmentsArray());
-			this.setJSONObj("dest",str_split[1]);
-			this.setJSONObj("arrivalTime",str_split[0]);
+			this.setJsonObj("dest",str_split[1]);
+			this.setJsonObj("arrivalTime",str_split[0]);
 	
-			this.setJSONObj("segments", this.getSegmentsArray());
-			System.out.println("OBJECT" + this.getJSONObj());
+			this.setJsonObj("segments", this.getSegmentsArray());
 		}
 	}
 	
@@ -161,14 +159,12 @@ public class JsonParser {
 	 *Will add the different objects and arrays to JSON file
 	 */
 	
-	public void organizeJSON(String line){
-		
+	public void organizeJson(String line){
 		
 		switch(this.getLine()){
-		
-		case 1 : this.addJSONObject();return; // Add to json object the key value "date"
+		case 1 : this.addJsonObject();return; // Add to json object the key value "date"
 		case 2: return; // "Departure" line
-		case 3: this.addJSONObject(); // Add to json object the key value "start"
+		case 3: this.addJsonObject(); // Add to json object the key value "start"
 		}
 			
 		
@@ -177,7 +173,7 @@ public class JsonParser {
 		 */
 			if(line.trim().equals("")){
 				// The line is blank 
-				this.addJSONObject();
+				this.addJsonObject();
 				//System.out.println("ARRAY: " + text);
 				//System.out.println("FLUSH ********");
 				this.flushTextArray();
@@ -187,24 +183,21 @@ public class JsonParser {
 			}
 			
 			if( this.getTxtLine().equals("Arrival")) {
-				this.addJSONObject();
+				this.addJsonObject();
 				this.flushTextArray();
-				// End of the txt file and will write to the json file 
-				this.writeJSONFile(); 
-				return;
 			}
 	
 	}
 	
-	public String getJSONText() {
+	public String getJsonText() {
 		return _mainObj.toString();
 	}
 	
-	public void writeJSONFile(){	
+	public void writeJsonFile(String outFileName){	
 		try {
 			 
-			FileWriter file = new FileWriter(WRITE_FILE);
-			file.write(this.getJSONObj().toString());
+			FileWriter file = new FileWriter(outFileName);
+			file.write(this.getJsonObj().toString());
 			file.flush();
 			file.close();
 	 
@@ -214,9 +207,10 @@ public class JsonParser {
 	}
 	
 	private void parseOneLine(String line) {
+		//System.out.println("Line: "+line);
     	this.setTxtLine(line);
     	this.incrementLine(); // will increment a read line on txt file, counter starts 0
-    	this.organizeJSON(line);
+    	this.organizeJson(line);
 	}
 	
 	/* parse a journey supplied in a String */
@@ -243,9 +237,6 @@ public class JsonParser {
             		break;
             	}
             }	
-             
-           // System.out.println(this.getJSONObj());
-            
             bufferedReader.close(); // Close the file			
         }
         catch(FileNotFoundException ex) {

@@ -1,0 +1,61 @@
+Sunday 22.12.2013
+Departure
+15:14 Konemies, Espoo 
+    Walking 0,1 km 
+    15:14 Konemies 
+ 
+15:14 Konemies 
+    103T 
+    15:14 Konemies (E2213) 
+    15:15 Alvar Aallon puisto (E2226) 
+    15:15 Dipoli (E2204) 
+    15:17 Miestenmetsä (E2215) 
+    15:18 Keilaniemi (E2024) 
+    15:19 Itämetsä (E2022) 
+    15:19 Karhusaari (E2310) 
+    15:21 Hanasaari (E2332) 
+    15:23 Katajaharju (1066) 
+    15:25 Lahnalahdentie (1064) 
+    15:25 Lahnalahden puisto (1061) 
+    15:26 Lauttasaarentie 32 (1024) 
+    15:26 Koillisväylä (1020) 
+    15:27 Lauttasaaren silta (1018) 
+    15:29 Salmisaari (1016) 
+    15:30 Länsiväylä (1014) 
+ 
+15:30 Länsiväylä 
+    Walking 0,2 km 
+    15:30 Länsiväylä 
+    15:30 Itämerentori 
+    15:32 Itämerenkatu 
+    15:33 Ruoholahti 
+ 
+15:40 Ruoholahti 
+    metro 
+    15:40 Ruoholahti (0012) 
+    15:42 Kamppi (0013) 
+    15:43 Rautatientori (0014) 
+    15:44 Kaisaniemi (0015) 
+ 
+15:44 Kaisaniemi 
+    Walking 0,9 km 
+    15:44 Kaisaniemi 
+    15:45 Vuorikatu 
+    15:47 Yliopistonkatu 
+    15:49 Unioninkatu 
+    15:52 Katariinankatu 
+    15:54 Pohjoisesplanadi 
+    15:56 Kauppatori 
+ 
+16:00 Kauppatori 
+    ferry 
+    16:00 Kauppatori (0099) 
+    16:15 Suomenlinna (0098) 
+ 
+16:15 Suomenlinna 
+    Walking 1 km 
+    16:15 Suomenlinna 
+ 
+16:28 Suomenlinna open-air theatre, Helsinki 
+Arrival
+
