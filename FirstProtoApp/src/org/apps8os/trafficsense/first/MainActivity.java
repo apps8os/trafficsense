@@ -12,7 +12,9 @@ import android.view.View;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
+	
+	private PebbleCommunication mPebbleCommunication;
+	
 	Resources mRes;
 	
 	@Override
@@ -28,6 +30,7 @@ public class MainActivity extends Activity {
 
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(this);
+		mPebbleCommunication = new PebbleCommunication(getApplicationContext());
 	}
 	
 	@Override
@@ -99,7 +102,9 @@ public class MainActivity extends Activity {
     
     public void onClick_send(View v) {
     	System.out.println("DBG onClick_send");
-		// TODO: Atte
+		// TODO: Send the actual stops received from email
+    	// Now: send stops with dummy data
+    	
 	}
 
 }
