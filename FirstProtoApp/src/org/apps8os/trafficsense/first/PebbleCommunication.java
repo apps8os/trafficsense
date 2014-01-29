@@ -9,6 +9,7 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 import android.content.Context;
+import android.util.Log;
 
 /**
 Handles all communication between Android and Pebble
@@ -53,6 +54,7 @@ public class PebbleCommunication {
 		dictionary.addString(KEY_STOP_TIME, time);
 		// Offer the message to messageManager, which will handle queuing and finally sending the message
 		messageManager.offer(dictionary);
+		Log.i("Pebble", "Stop passed to messageManager with name" + stopName);
     }
 	
 	/** 

@@ -71,6 +71,7 @@ public class MessageManager implements Runnable {
                 synchronized (isMessagePending) {
                     isMessagePending = Boolean.valueOf(false);
                 }
+                Log.i("Pebble", "Received ack from stop: " + messageQueue.peek().toString());
                 messageQueue.remove();
             }
         });

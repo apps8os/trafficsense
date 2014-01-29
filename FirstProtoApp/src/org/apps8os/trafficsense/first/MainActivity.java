@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(this);
 		mPebbleCommunication = new PebbleCommunication(getApplicationContext());
+		mPebbleCommunication.startAppOnPebble();
 	}
 	
 	@Override
@@ -102,9 +103,12 @@ public class MainActivity extends Activity {
     
     public void onClick_send(View v) {
     	System.out.println("DBG onClick_send");
-		// TODO: Send the actual stops received from email
+		// TODO: Send the actual stops received from email (Atte)
     	// Now: send stops with dummy data
-    	
+    	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
+    	mPebbleCommunication.sendStop("Alvar Aallon puisto", "E1235", "13:41", 1);
+    	mPebbleCommunication.sendStop("Konemies", "E1236", "13:42", 2);
+    	// Should work, but doesn't!
 	}
 
 }
