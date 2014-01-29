@@ -28,9 +28,7 @@
             android:layout_below="@+id/textLabel1"
             android:layout_marginBottom="32dp"
             android:background="@drawable/textview1border"
-            android:maxLines="10"
             android:maxWidth="168dp"
-            android:scrollbars="vertical"
             android:text="@string/hello_world" />
         
         <Button
@@ -60,9 +58,7 @@
             android:layout_below="@+id/textLabel2"
             android:layout_marginBottom="32dp"
             android:background="@drawable/textview1border"
-            android:maxLines="10"
             android:maxWidth="168dp"
-            android:scrollbars="vertical"
             android:text="@string/hello_world" />
         
         <Button
@@ -91,9 +87,7 @@
             android:layout_below="@+id/textLabel3"
             android:layout_marginBottom="32dp"
             android:background="@drawable/textview1border"
-            android:maxLines="10"
             android:maxWidth="168dp"
-            android:scrollbars="vertical"
             android:text="@string/hello_world" />
         
         <Button
@@ -121,9 +115,7 @@
             android:layout_alignLeft="@+id/textLabel1"
             android:layout_below="@+id/textLabel4"
             android:background="@drawable/textview1border"
-            android:maxLines="10"
             android:maxWidth="168dp"
-            android:scrollbars="vertical"
             android:text="@string/hello_world" />
     
         <Button

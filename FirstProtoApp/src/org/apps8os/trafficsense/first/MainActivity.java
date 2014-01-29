@@ -6,7 +6,6 @@ import org.apps8os.trafficsense.first.GmailReader.EmailException;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.res.Resources;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -55,7 +54,6 @@ public class MainActivity extends Activity {
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
 		final TextView textview = (TextView) findViewById(R.id.textView1);
-		textview.setMovementMethod(new ScrollingMovementMethod());
 		new Thread(new Runnable(){
 			public void run(){
 				Email email = new Email();
@@ -92,7 +90,6 @@ public class MainActivity extends Activity {
     	JsonParser parser = new JsonParser();
     	parser.parseString(mRes.getString(R.string.hard_coded_json));
     	TextView view = (TextView) findViewById(R.id.textView2);
-    	view.setMovementMethod(new ScrollingMovementMethod());
     	view.setText(parser.getJSONText());
 	}
 
@@ -100,14 +97,12 @@ public class MainActivity extends Activity {
     	System.out.println("DBG onClick_activate");
     	// TODO: Javier
     	TextView view = (TextView) findViewById(R.id.textView3);
-    	view.setMovementMethod(new ScrollingMovementMethod());
     }
     
     public void onClick_send(View v) {
     	System.out.println("DBG onClick_send");
     	TextView view = (TextView) findViewById(R.id.textView4);
-    	view.setMovementMethod(new ScrollingMovementMethod());
-		// TODO: Send the actual stops received from email (Atte)
+    	// TODO: Send the actual stops received from email (Atte)
     	// Now: send stops with dummy data
     	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
     	mPebbleCommunication.sendStop("Alvar Aallon puisto", "E1235", "13:41", 1);
