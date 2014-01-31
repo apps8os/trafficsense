@@ -19,6 +19,9 @@
     <!-- CellProbe -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     
+    <!-- Alarm test -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
@@ -49,6 +52,7 @@
         <!-- Please ignore the warning saying use '$' instead of '.', it breaks stuff. -->
         <service android:name="org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe" />
         
+        <receiver android:name="AlarmBroadcastReceiver"></receiver>
     </application>
 
 </manifest>

@@ -1,19 +1,14 @@
 package org.apps8os.trafficsense.first;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.first.GmailReader.EmailException;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -23,7 +18,10 @@ public class MainActivity extends Activity {
 	private PebbleCommunication mPebbleCommunication;
 	
 	Resources mRes;
-	String emailContent;
+	String mJourneyText;
+	JourneyParser mJourneyParser;
+	// TODO: change this to the format agreed by Javier & Atte
+	String mStatusMessage;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +29,9 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		mRes = getResources();
+		mJourneyText = new String("");
+		mJourneyParser = new JourneyParser();
+
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
@@ -68,22 +69,22 @@ public class MainActivity extends Activity {
 				Email email = new Email();
 				GmailReader reader = new GmailReader();
 
-				try {					
+				try {
+					// TODO: hard-coded credentials
 					reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
-					email=reader.getNextEmail();	  	
+					email = reader.getNextEmail();	  	
 				} catch (EmailException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					textview.setText(e.getMessage());
+					mJourneyText = "";
 				}
-				emailContent=email.getContent();
-				//System.out.println(emailText);
+				mJourneyText = email.getContent();
 				textview.post(new Runnable(){
 					public void run(){
-						if(emailContent!=null){
-							textview.setText(emailContent);
+						if(mJourneyText != null){
+							textview.setText(mJourneyText);
 						}
 						else{
-							textview.setText("Error:reached end of mail box");
+							textview.setText("Unable to retrieve journey text");
 						}
 					}
 				});
@@ -94,12 +95,8 @@ public class MainActivity extends Activity {
 	}
 	
     public void onClick_parse(View v) {
-    	
-    
     	System.out.println("DBG onClick_parse");
-		// TODO: Catarina
     	TextView view = (TextView) findViewById(R.id.textView2);
-    	JourneyParser parser = new JourneyParser();
     	/**
     	// TODO
     	// read journey text from assets/ line-by-line and put them into a long
@@ -119,16 +116,25 @@ public class MainActivity extends Activity {
     		Log.d(getLocalClassName(), "IOEx", ex);
     	}
     	
-    	parser.parseString(buf.toString());
+    	mJourneyParser.parseString(buf.toString());
     	**/
-    	parser.parseString(emailContent);
-    	view.setText(parser.getJsonText());
+    	mJourneyParser.parseString(mJourneyText);
+    	view.setText(mJourneyParser.getJsonText());
 	}
 
     public void onClick_activate(View v) {
     	System.out.println("DBG onClick_activate");
     	// TODO: Javier
     	TextView view = (TextView) findViewById(R.id.textView3);
+
+    	// sets an alarm which expires x seconds later.
+    	int x = 5;
+    	Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(
+				this.getApplicationContext(), 0, intent, 0);
+   		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+   		alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+   				+ (x * 1000), pendingIntent);
     }
     
     public void onClick_send(View v) {
