@@ -6,7 +6,7 @@ from pprint import pprint
 from jsonschema import validate
 
 
-json_data = open('journey.js')
+json_data = open('/Users/catarinamoura/Desktop/trafficsense/JSON/hsl/src/hsl/itenerary.json')
 data = json.load(json_data)
 json_schema = open('route_schema.js')
 schema = json.load(json_schema)

@@ -1,4 +1,5 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,110 +8,123 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
+        
+    <RelativeLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/textLabel1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/email_content" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textLabel1"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="92dp"
-        android:text="@string/hello_world" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView4"
-        android:layout_alignLeft="@+id/textView4"
-        android:layout_marginBottom="73dp"
-        android:text="@string/hello_world" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView3"
-        android:layout_alignLeft="@+id/textView3"
-        android:layout_marginBottom="82dp"
-        android:text="@string/hello_world" />
-
-    <TextView
-        android:id="@+id/textLabel4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView4"
-        android:layout_alignLeft="@+id/textView4"
-        android:layout_marginBottom="16dp"
-        android:text="@string/message_to_pebble" />
-
-    <TextView
-        android:id="@+id/textLabel3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView3"
-        android:layout_alignLeft="@+id/textView3"
-        android:layout_marginBottom="14dp"
-        android:text="@string/latest_alarm" />
-
-    <TextView
-        android:id="@+id/textLabel2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textView2"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_marginBottom="17dp"
-        android:text="@string/parsed_json" />
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textLabel1"
-        android:layout_below="@+id/textLabel1"
-        android:text="@string/hello_world" />
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/button1"
-        android:layout_alignTop="@+id/textLabel2"
-        android:onClick="onClick_parse"
-        android:text="@string/parse" />
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/button2"
-        android:layout_alignTop="@+id/textLabel3"
-        android:onClick="onClick_activate"
-        android:text="@string/activate" />
-
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/button3"
-        android:layout_alignTop="@+id/textLabel4"
-        android:onClick="onClick_send"
-        android:text="@string/send" />
-
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/textLabel1"
-        android:layout_marginRight="22dp"
-        android:onClick="onClick_fetch"
-        android:text="@string/fetch" />
-
-</RelativeLayout>
+        <TextView
+            android:id="@+id/textLabel1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/email_content" />
+    
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textLabel1"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/textview1border"
+            android:maxWidth="168dp"
+            android:text="@string/hello_world" />
+        
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/textLabel1"
+            android:layout_marginRight="22dp"
+            android:onClick="onClick_fetch"
+            android:text="@string/fetch" />
+    
+        <TextView
+            android:id="@+id/textLabel2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textView1"
+            android:layout_marginBottom="16dp"
+            android:text="@string/parsed_json" />
+    
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textLabel2"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/textview1border"
+            android:maxWidth="168dp"
+            android:text="@string/hello_world" />
+        
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/button1"
+            android:layout_alignTop="@+id/textLabel2"
+            android:onClick="onClick_parse"
+            android:text="@string/parse" />
+        
+        <TextView
+            android:id="@+id/textLabel3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textView2"
+            android:layout_marginBottom="16dp"
+            android:text="@string/latest_alarm" />
+        
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textLabel3"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/textview1border"
+            android:maxWidth="168dp"
+            android:text="@string/hello_world" />
+        
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/button1"
+            android:layout_alignTop="@+id/textLabel3"
+            android:onClick="onClick_activate"
+            android:text="@string/activate" />
+        
+        <TextView
+            android:id="@+id/textLabel4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textView3"
+            android:layout_marginBottom="16dp"
+            android:text="@string/message_to_pebble" />
+            
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel1"
+            android:layout_below="@+id/textLabel4"
+            android:background="@drawable/textview1border"
+            android:maxWidth="168dp"
+            android:text="@string/hello_world" />
+    
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/button1"
+            android:layout_alignTop="@+id/textLabel4"
+            android:onClick="onClick_send"
+            android:text="@string/send" />
+    </RelativeLayout>
+</ScrollView>

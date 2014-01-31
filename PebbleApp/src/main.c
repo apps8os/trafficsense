@@ -145,7 +145,7 @@ void init(void) {
 	window_set_click_config_provider(window, (ClickConfigProvider)stoplist_window_click_config_provider);
 	
 	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
-	app_message_open(64, 16);
+	app_message_open(APP_MESSAGE_INBOX_SIZE_MINIMUM, 16);
 	//set the function that will be called when a message is received from the phone
 	app_message_register_inbox_received((AppMessageInboxReceived)message_received);
 	//and when it's dropped

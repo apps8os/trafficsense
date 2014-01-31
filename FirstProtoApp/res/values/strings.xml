@@ -127,5 +127,7 @@
  ]
 }
     </string>
+    
+    <string name="hard_coded_journey">hard_coded_journey.txt</string>
 
 </resources>
