@@ -1,6 +1,7 @@
 package org.apps8os.trafficsense.first;
 
 
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -75,6 +76,7 @@ public class GmailReader {
 	 */
 	public Email getNextEmail() throws EmailException {
 		Message msg;
+		
 		//if msgPointer is less than 1 then the end of the mailbox has been reached and 
 		//we return a null;
 		if(msgPointer<1){
@@ -84,24 +86,48 @@ public class GmailReader {
 		try {
 			msg = inbox.getMessage(msgPointer);
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error retreiving email");
+			throw new EmailException("Error: error retreiving email"); 
 		}
-		
+		System.out.println(msg.toString());
          //create a email object and put the current emails information into it. 
-        Address[] in;
         Email email = new Email();
 		try {
 			email.setSender(msg.getFrom()[0].toString());
-			email.setSendTime(msg.getSentDate().toString());
-			email.setSubject(msg.getSubject().toString());
-	        Multipart mp = (Multipart) msg.getContent();
-	        BodyPart bp = mp.getBodyPart(0);
-	        email.setContent(bp.getContent().toString());
 			
 		} catch (Exception e) {
-			throw new EmailException("Error: error parsing email information");
+			throw new EmailException("Error: error parsing sender");
 		}
-		
+		try {
+			email.setSendTime(msg.getSentDate().toString());
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			email.setSubject(msg.getSubject().toString());
+		} catch (MessagingException e) {
+			throw new EmailException("Error: error parsing subject");
+		}
+        Multipart mp;
+        String msgContent; 
+		try {
+			Object obj = msg.getContent();
+			if(obj instanceof Multipart){
+				mp = (Multipart) obj;
+				BodyPart bp;
+				bp = mp.getBodyPart(0);
+				email.setContent(bp.getContent().toString());
+			}
+			else{
+				email.setContent((String) obj);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new EmailException("Error: error 1 parsing content");
+			
+		}
+		        
 		//decrease the msgPointer by one so the next getNextEmail call returns the next email. 
 		msgPointer--;
 		

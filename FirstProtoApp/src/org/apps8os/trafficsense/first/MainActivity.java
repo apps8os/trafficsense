@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
 	private PebbleCommunication mPebbleCommunication;
 	
 	Resources mRes;
+	String emailContent;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,17 +68,17 @@ public class MainActivity extends Activity {
 
 				try {					
 					reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
-					email=reader.getNextEmail();		
+					email=reader.getNextEmail();	  	
 				} catch (EmailException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				final String emailText=email.toString();
+				emailContent=email.getContent();
 				//System.out.println(emailText);
 				textview.post(new Runnable(){
 					public void run(){
-						if(emailText!=null){
-							textview.setText(emailText);
+						if(emailContent!=null){
+							textview.setText(emailContent);
 						}
 						else{
 							textview.setText("Error:reached end of mail box");
@@ -91,10 +92,13 @@ public class MainActivity extends Activity {
 	}
 	
     public void onClick_parse(View v) {
+    	
+    
     	System.out.println("DBG onClick_parse");
 		// TODO: Catarina
     	TextView view = (TextView) findViewById(R.id.textView2);
     	JourneyParser parser = new JourneyParser();
+    	/**
     	// TODO
     	// read journey text from assets/ line-by-line and put them into a long
     	// string with line breaks and then parse them line-by-line (done in parseString() )
@@ -114,6 +118,8 @@ public class MainActivity extends Activity {
     	}
     	
     	parser.parseString(buf.toString());
+    	**/
+    	parser.parseString(emailContent);
     	view.setText(parser.getJsonText());
 	}
 
