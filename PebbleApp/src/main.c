@@ -24,6 +24,10 @@ void deinit(void) {
   }
 }
 
+void alarm_get_off() {
+  show_get_off_alarm();
+}
+
 int main(void) {
 	init();
 	app_event_loop();

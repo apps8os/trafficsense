@@ -7,10 +7,15 @@
 #define KEY_COMMAND		0	// The key of the command tuple (the value of this tuple is the command)
 // Constants related to the command for receiving a stop
 #define COMMAND_GET_STOP	0
+
 #define KEY_STOP_NUM		1	// The value of a tuple with this key defines where the stop is in the list	
 #define KEY_STOP_NAME		2
 #define KEY_STOP_CODE		3
 #define KEY_STOP_TIME		4
+
+#define COMMAND_ALARM		1
+#define KEY_ALARM		1
+#define ALARM_GET_OFF		0
 
 // Initialize AppMessage
 void init_app_message();

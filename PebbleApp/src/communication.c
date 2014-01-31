@@ -25,7 +25,12 @@ void message_received(DictionaryIterator *iterator) {
 		strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
 	        strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
 	        strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
-	    }
+	    } else if (command == COMMAND_ALARM) {
+                uint8_t alarmType = dict_find(iterator, KEY_ALARM)->value->data[0];
+	        if (alarmType == ALARM_GET_OFF) {
+                    alarm_get_off();
+                }
+            }
 	}
 	// Update the menu, otherwise the new stop will not be shown before it's selected
 	// Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen

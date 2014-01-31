@@ -43,6 +43,11 @@ public class PebbleCommunication {
 		PebbleKit.startAppOnPebble(mContext, APP_UUID);
 	}
 	
+	public void sendAlarm(String text) {
+		
+		
+	}
+	
     public void sendStop(String stopName, String stopCode, String time, int stopNum) {
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(stopName.length(), 20);

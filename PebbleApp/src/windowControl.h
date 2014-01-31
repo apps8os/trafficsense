@@ -3,9 +3,10 @@
 
 #include "menu.h"
 
-#define NUM_WINDOWS		2
+#define NUM_WINDOWS		3
 #define WINDOW_BASIC		0
 #define WINDOW_3STOP		1
+#define WINDOW_ALARM		2
 
 #define NUM_VIEW_MODES		2
 #define VIEW_MODE_NAMES		0
@@ -19,5 +20,7 @@ void init_windows();
 void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context);
 // Function for setting callbacks for button clicks.
 void stoplist_window_click_config_provider(Window *window);
+// Pop up the get off alarm window and vibrate
+void show_get_off_alarm();
 
 #endif
