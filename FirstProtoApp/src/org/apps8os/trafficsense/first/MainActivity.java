@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.first.GmailReader.EmailException;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -102,7 +104,7 @@ public class MainActivity extends Activity {
     	StringBuilder buf = new StringBuilder();
     	try {
     		InputStream journeyFile =
-    				getAssets().open(mRes.getString(R.string.hard_coded_journey));
+    				getAssets().open(mRes.getString(R.string.hard_coded_json));
     		BufferedReader rd = new BufferedReader(new InputStreamReader(journeyFile));
     		String str;
     		while ((str = rd.readLine()) != null) {
@@ -129,9 +131,8 @@ public class MainActivity extends Activity {
     	// TODO: Send the actual stops received from email (Atte)
     	// Now: send stops with dummy data
     	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
-    	mPebbleCommunication.sendStop("Alvar Aallon puisto", "E1235", "13:41", 1);
+    	mPebbleCommunication.sendStop("Alva", "E1235", "13:41", 1);
     	mPebbleCommunication.sendStop("Konemies", "E1236", "13:42", 2);
-    	// Should work, but doesn't!
 	}
 
 }

@@ -22,6 +22,7 @@ public class PebbleCommunication {
 	private static final int KEY_STOP_NAME = 2;
 	private static final int KEY_STOP_CODE = 3;
 	private static final int KEY_STOP_TIME = 4;
+	private static final int MAX_DICT_SIZE = 124;
 	
 	private Context mContext;
 	private final MessageManager messageManager;
