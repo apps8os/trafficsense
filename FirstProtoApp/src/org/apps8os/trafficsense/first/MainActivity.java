@@ -4,10 +4,14 @@ import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.first.GmailReader.EmailException;
 
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.view.Menu;
 import android.view.View;
@@ -22,6 +26,20 @@ public class MainActivity extends Activity {
 	JourneyParser mJourneyParser;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
+	MyReceiver mRecv;
+	
+	private class MyReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			System.out.println("DBG MyReceiver onReceive");
+			TextView view = (TextView) findViewById(R.id.textView3);
+			view.setText("alarm fired");
+			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			vibrator.vibrate(250);
+		}
+		
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +49,7 @@ public class MainActivity extends Activity {
 		mRes = getResources();
 		mJourneyText = new String("");
 		mJourneyParser = new JourneyParser();
+		mRecv = new MyReceiver();
 
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
@@ -42,6 +61,18 @@ public class MainActivity extends Activity {
 		mPebbleCommunication.startAppOnPebble();
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		IntentFilter filter = new IntentFilter("myaction");
+		registerReceiver(mRecv, filter);
+	}
+	
+	@Override
+	protected void onPause() {
+		unregisterReceiver(mRecv);
+		super.onPause();
+	}
 	@Override
 	protected void onDestroy() {
 		
@@ -127,11 +158,17 @@ public class MainActivity extends Activity {
     	// TODO: Javier
     	TextView view = (TextView) findViewById(R.id.textView3);
 
+    	view.setText("waiting for alarm");
     	// sets an alarm which expires x seconds later.
     	int x = 5;
-    	Intent intent = new Intent(this, AlarmBroadcastReceiver.class);
+    	// TODO This is the trick: Intent action must be set like this ...
+    	Intent intent = new Intent("myaction");
+    	// TODO: flags should be something but zero, check docs.
+    	// TODO: if we send the Intent to a BroadcastReceiver in this Activity,
+    	//        which is able to update the UI elements easily, then the Context
+    	//        here should be the Activity, not the whole application.
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(
-				this.getApplicationContext(), 0, intent, 0);
+				this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
    		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
    		alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
    				+ (x * 1000), pendingIntent);
