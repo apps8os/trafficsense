@@ -1,6 +1,7 @@
 #include "windowControl.h"
 
 Window* windowArray[NUM_WINDOWS];
+Window* alarmWindow;
 TextLayer* alarmText;
 int viewMode;
 
@@ -16,9 +17,9 @@ void stoplist_window_click_config_provider(Window *window) {
 }
 
 void show_get_off_alarm() {
-  windowArray[WINDOW_ALARM] = window_create();
-  window_stack_push(windowArray[WINDOW_ALARM], true /* Animated */);
-  Layer *window_layer = window_get_root_layer(windowArray[WINDOW_ALARM]);
+  alarmWindow = window_create();
+  window_stack_push(alarmWindow, true /* Animated */);
+  Layer *window_layer = window_get_root_layer(alarmWindow);
   GRect bounds = layer_get_frame(window_layer);
   alarmText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
   text_layer_set_text(alarmText, TEXT_GET_OFF);

@@ -3,12 +3,18 @@
  */
 package org.apps8os.trafficsense.first;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 /**
@@ -43,9 +49,23 @@ public class PebbleCommunication {
 		PebbleKit.startAppOnPebble(mContext, APP_UUID);
 	}
 	
-	public void sendAlarm(String text) {
-		
-		
+	public void sendMessage(String title, String message) {
+		// TODO: test whether this method is working with the First prototype app.
+		// Requires the implementation of the alarm service
+    	final Intent i = new Intent("com.getpebble.action.SEND_NOTIFICATION");
+    	
+    	final Map data = new HashMap();
+    	data.put("title", title);
+    	data.put("body", message);
+    	final JSONObject jsonData = new JSONObject(data);
+    	final String notificationData = new JSONArray().put(jsonData).toString();
+    	
+    	i.putExtra("messageType", "PEBBLE_ALERT");
+        i.putExtra("sender", "TrafficSense");
+        i.putExtra("notificationData", notificationData);
+        
+        Log.d("MainActivity", "About to send a modal alert to Pebble: " + notificationData);
+        mContext.sendBroadcast(i);
 	}
 	
     public void sendStop(String stopName, String stopCode, String time, int stopNum) {

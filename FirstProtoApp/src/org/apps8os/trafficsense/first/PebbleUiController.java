@@ -22,7 +22,6 @@ public class PebbleUiController {
 	}
 	
 	public void alarmGetOff() {
-		// TODO: Alarm the user to get off the bus
-		
+		mPebbleCommunication.sendMessage("Alarm", "Get off on the next stop!");
 	}
 }
