@@ -1,6 +1,25 @@
 package org.apps8os.trafficsense.first;
 
-<<<<<<< HEAD
+
+import android.os.Bundle;
+import android.os.Vibrator;
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.view.Menu;
+import android.view.View;
+import android.widget.TextView;
+
+import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
+import org.apps8os.trafficsense.first.GmailReader.EmailException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,34 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
-import org.apps8os.trafficsense.first.GmailReader.EmailException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-=======
-import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
-import org.apps8os.trafficsense.first.GmailReader.EmailException;
->>>>>>> 4cb9129d6ed60ed00932a6e8b147eacc52dcf924
-
-import android.os.Bundle;
-import android.os.Vibrator;
-import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-<<<<<<< HEAD
-import android.content.Intent;
-=======
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
->>>>>>> 4cb9129d6ed60ed00932a6e8b147eacc52dcf924
-import android.content.res.Resources;
-import android.view.Menu;
-import android.view.View;
-import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
@@ -179,7 +170,6 @@ public class MainActivity extends Activity {
 
     public void onClick_activate(View v) {
     	System.out.println("DBG onClick_activate");
-    	int reqCode = 0;
     	JSONconverter();
     	
     	String input = objectRoute.getDepartureTime();
@@ -191,13 +181,13 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		System.out.println("date:" + date);
-	    long milliseconds = date.getTime();
 	  
     	TextView view = (TextView) findViewById(R.id.textView3);
 
     	view.setText("waiting for alarm");
     	// sets an alarm which expires x seconds later.
     	int x = 5;
+    	int reqCode = 0;
     	// TODO This is the trick: Intent action must be set like this ...
     	Intent intent = new Intent("myaction");
     	// TODO: flags should be something but zero, check docs.
@@ -205,7 +195,7 @@ public class MainActivity extends Activity {
     	//        which is able to update the UI elements easily, then the Context
     	//        here should be the Activity, not the whole application.
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(
-				this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+				this, reqCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
    		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
    		alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
    				+ (x * 1000), pendingIntent);
