@@ -1,10 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">AlarmTest</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="hard_coded_json">
 {
  "date": "Sunday 22.12.2013",
  "start": "Konemies, Espoo",
@@ -116,6 +109,4 @@
   }
  ]
 }
-    </string>
 
-</resources>

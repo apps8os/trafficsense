@@ -2,7 +2,11 @@ package com.example.alarmtest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +25,7 @@ public class MainActivity extends Activity {
 
 	int reqCode=0;
 	private ArrayList<Route> routeList = new ArrayList<Route>();
-	
+	 Route objectRoute = new Route();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,7 +48,7 @@ public class MainActivity extends Activity {
 		Toast.makeText(this, "Alarm set in " + i + " seconds",
 				Toast.LENGTH_LONG).show();
 	
-		//JSONconverter();
+		JSONconverter();
 	}
 
 
@@ -79,25 +83,23 @@ public class MainActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    //System.out.println(json.toString());
-	    Route objectRoute = new Route();
-	    try {
-	    	objectRoute.setDate(json.getString("date"));
-	    	objectRoute.setStart(json.getString("start"));
-	    	objectRoute.setDestination("dest");
-	    	objectRoute.setArrivalTime("arrivalTime");
-	    	
-			//object.setDate(json.getString("startTime"));
-			System.out.println(json.getJSONArray("segments").getJSONObject(0).getJSONArray("waypoints"));
-			//System.out.println(json.get("startTime"));
-			//System.out.println(object.getDate());
-		} catch (JSONException e) {
+	    
+	    objectRoute.FillRoute(json);
+	    String input = objectRoute.getDepartureTime();
+	    Date date = new Date();
+		try {
+			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(input);
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    routeList.add(objectRoute);
-	    
-	    
+		System.out.println("date:" + date);
+	    long milliseconds = date.getTime();
+	    System.out.println(milliseconds);
+	    long millisecondsFromNow = milliseconds - (new Date()).getTime();
+	    	    
 	}
+	
+	
 
 }

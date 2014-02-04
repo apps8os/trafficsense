@@ -4,14 +4,23 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.first.GmailReader.EmailException;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.util.Log;
 import android.view.Menu;
@@ -24,6 +33,7 @@ public class MainActivity extends Activity {
 	
 	Resources mRes;
 	String emailContent;
+	Route objectRoute = new Route();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +137,30 @@ public class MainActivity extends Activity {
 
     public void onClick_activate(View v) {
     	System.out.println("DBG onClick_activate");
-    	// TODO: Javier
+    	int reqCode = 0;
+    	JSONconverter();
+    	
+    	String input = objectRoute.getDepartureTime();
+	    Date date = new Date();
+		try {
+			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(input);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("date:" + date);
+	    long milliseconds = date.getTime();
+	  
+    	
+    	
+    	Intent intent = new Intent(this, MyBroadcastReceiver.class);
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(
+				this.getApplicationContext(), reqCode, intent, 0);
+
+		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+				+ (10* 1000), (10*1000), pendingIntent);
+    	
     	TextView view = (TextView) findViewById(R.id.textView3);
     }
     
@@ -139,6 +172,36 @@ public class MainActivity extends Activity {
     	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
     	mPebbleCommunication.sendStop("Alva", "E1235", "13:41", 1);
     	mPebbleCommunication.sendStop("Konemies", "E1236", "13:42", 2);
+	}
+    
+    
+    
+    public void JSONconverter(){
+		String jsonstring = null;
+		JSONObject json =  null;
+	    try {
+	        InputStream is = getAssets().open("sample.js");
+	        int size = is.available();
+	        byte[] buffer = new byte[size];
+	        is.read(buffer);
+	        is.close();
+	        jsonstring = new String(buffer, "UTF-8");
+	    } 
+	    catch (IOException ex) {
+	        ex.printStackTrace();
+	    }
+	    
+	    try {
+			json =  new JSONObject(jsonstring);
+		} 
+	    catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    objectRoute.FillRoute(json);
+	    
+	    	    
 	}
 
 }
