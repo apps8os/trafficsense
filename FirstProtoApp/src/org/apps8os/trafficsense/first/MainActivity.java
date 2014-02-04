@@ -1,5 +1,6 @@
 package org.apps8os.trafficsense.first;
 
+<<<<<<< HEAD
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,14 +16,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+=======
+import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
+import org.apps8os.trafficsense.first.GmailReader.EmailException;
+>>>>>>> 4cb9129d6ed60ed00932a6e8b147eacc52dcf924
 
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+<<<<<<< HEAD
 import android.content.Intent;
+=======
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+>>>>>>> 4cb9129d6ed60ed00932a6e8b147eacc52dcf924
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -34,6 +46,24 @@ public class MainActivity extends Activity {
 	Resources mRes;
 	String emailContent;
 	Route objectRoute = new Route();
+	String mJourneyText;
+	JourneyParser mJourneyParser;
+	// TODO: change this to the format agreed by Javier & Atte
+	String mStatusMessage;
+	MyReceiver mRecv;
+	
+	private class MyReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			System.out.println("DBG MyReceiver onReceive");
+			TextView view = (TextView) findViewById(R.id.textView3);
+			view.setText("alarm fired");
+			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			vibrator.vibrate(250);
+		}
+		
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +71,10 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		mRes = getResources();
+		mJourneyText = new String("");
+		mJourneyParser = new JourneyParser();
+		mRecv = new MyReceiver();
+
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
@@ -51,6 +85,18 @@ public class MainActivity extends Activity {
 		mPebbleCommunication.startAppOnPebble();
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		IntentFilter filter = new IntentFilter("myaction");
+		registerReceiver(mRecv, filter);
+	}
+	
+	@Override
+	protected void onPause() {
+		unregisterReceiver(mRecv);
+		super.onPause();
+	}
 	@Override
 	protected void onDestroy() {
 		
@@ -78,22 +124,22 @@ public class MainActivity extends Activity {
 				Email email = new Email();
 				GmailReader reader = new GmailReader();
 
-				try {					
+				try {
+					// TODO: hard-coded credentials
 					reader.initMailbox("trafficsense.aalto@gmail.com","ag47)h(58P");
-					email=reader.getNextEmail();	  	
+					email = reader.getNextEmail();	  	
 				} catch (EmailException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					textview.setText(e.getMessage());
+					mJourneyText = "";
 				}
-				emailContent=email.getContent();
-				//System.out.println(emailText);
+				mJourneyText = email.getContent();
 				textview.post(new Runnable(){
 					public void run(){
-						if(emailContent!=null){
-							textview.setText(emailContent);
+						if(mJourneyText != null){
+							textview.setText(mJourneyText);
 						}
 						else{
-							textview.setText("Error:reached end of mail box");
+							textview.setText("Unable to retrieve journey text");
 						}
 					}
 				});
@@ -104,12 +150,8 @@ public class MainActivity extends Activity {
 	}
 	
     public void onClick_parse(View v) {
-    	
-    
     	System.out.println("DBG onClick_parse");
-		// TODO: Catarina
     	TextView view = (TextView) findViewById(R.id.textView2);
-    	JourneyParser parser = new JourneyParser();
     	/**
     	// TODO
     	// read journey text from assets/ line-by-line and put them into a long
@@ -129,10 +171,10 @@ public class MainActivity extends Activity {
     		Log.d(getLocalClassName(), "IOEx", ex);
     	}
     	
-    	parser.parseString(buf.toString());
+    	mJourneyParser.parseString(buf.toString());
     	**/
-    	parser.parseString(emailContent);
-    	view.setText(parser.getJsonText());
+    	mJourneyParser.parseString(mJourneyText);
+    	view.setText(mJourneyParser.getJsonText());
 	}
 
     public void onClick_activate(View v) {
@@ -151,17 +193,22 @@ public class MainActivity extends Activity {
 		System.out.println("date:" + date);
 	    long milliseconds = date.getTime();
 	  
-    	
-    	
-    	Intent intent = new Intent(this, MyBroadcastReceiver.class);
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(
-				this.getApplicationContext(), reqCode, intent, 0);
-
-		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-				+ (10* 1000), (10*1000), pendingIntent);
-    	
     	TextView view = (TextView) findViewById(R.id.textView3);
+
+    	view.setText("waiting for alarm");
+    	// sets an alarm which expires x seconds later.
+    	int x = 5;
+    	// TODO This is the trick: Intent action must be set like this ...
+    	Intent intent = new Intent("myaction");
+    	// TODO: flags should be something but zero, check docs.
+    	// TODO: if we send the Intent to a BroadcastReceiver in this Activity,
+    	//        which is able to update the UI elements easily, then the Context
+    	//        here should be the Activity, not the whole application.
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(
+				this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+   		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+   		alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+   				+ (x * 1000), pendingIntent);
     }
     
     public void onClick_send(View v) {
