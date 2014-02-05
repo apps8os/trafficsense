@@ -109,9 +109,13 @@ public class GmailReader {
         Multipart mp;
 		try {
 			Object obj = msg.getContent();
+			//get content returns either a multipart or a string object
+			//so we need to test which it is. 
 			if(obj instanceof Multipart){
 				mp = (Multipart) obj;
 				BodyPart bp;
+				//only showing the first bodypart. There might be more parts 
+				//so this may need to be modified
 				bp = mp.getBodyPart(0);
 				email.setContent(bp.getContent().toString());
 			}
