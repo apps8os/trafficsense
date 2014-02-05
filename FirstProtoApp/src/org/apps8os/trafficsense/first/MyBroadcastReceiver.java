@@ -19,10 +19,10 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 				.getSystemService(Context.VIBRATOR_SERVICE);
 		vibrator.vibrate(2000);
 		
-		int segment = intent.getExtras().getInt(EXTRA_SEGMENT);
-		...stop
-		
-		controller.
+		// TODO
+		//int segment = intent.getExtras().getInt(EXTRA_SEGMENT);
+		//...stop
+		//controller.
 		
 	}
 
