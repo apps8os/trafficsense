@@ -3,7 +3,6 @@
  */
 package org.apps8os.trafficsense.first;
 
-import android.content.Context;
 
 /**
  * Controls the Pebble UI

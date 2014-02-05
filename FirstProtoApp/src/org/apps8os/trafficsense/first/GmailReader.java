@@ -1,10 +1,8 @@
 package org.apps8os.trafficsense.first;
 
 
-import java.io.IOException;
 import java.util.Properties;
 
-import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -109,12 +107,15 @@ public class GmailReader {
 			throw new EmailException("Error: error parsing subject");
 		}
         Multipart mp;
-        String msgContent; 
 		try {
 			Object obj = msg.getContent();
+			//get content returns either a multipart or a string object
+			//so we need to test which it is. 
 			if(obj instanceof Multipart){
 				mp = (Multipart) obj;
 				BodyPart bp;
+				//only showing the first bodypart. There might be more parts 
+				//so this may need to be modified
 				bp = mp.getBodyPart(0);
 				email.setContent(bp.getContent().toString());
 			}
@@ -177,6 +178,7 @@ public class GmailReader {
 	 *A generic exception for possible errors that could happen in this class. 
 	 */
 	public class EmailException extends Exception {
+		private static final long serialVersionUID = 1L;
 		public EmailException() { super(); }
 		public EmailException(String message) { super(message); }
 		public EmailException(String message, Throwable cause) { super(message, cause); }
