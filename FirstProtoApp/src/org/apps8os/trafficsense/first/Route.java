@@ -12,12 +12,43 @@ public class Route {
 	private String destination;
 	private String arrivaltime;
 	private String departure;
+	private int currentSegment=0;
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
 	
+	/**
+	 * gets the next segment in the route
+	 * returns next segment or a null if on last segment
+	 */
+	public Segment getNextSegment(){
+		if(currentSegment+1 < segmentList.size()){
+			return(segmentList.get(currentSegment+1));
+		}
+		else{
+			return null;
+		}
+		
+	}
+
+	//sets the current segement to the next segment
+	//and returns the next segment.
+	//returns null if on last segment.
+	public Segment setNextSegment(){
+		Segment segment = getNextSegment();
+		if(segment ==null){
+			return segment;
+		}
+		else{
+			currentSegment++;
+			return segment;
+		}
+
+	}
 	
-
-
+	public Segment getLastSegment(){
+		return segmentList.get(segmentList.size()-1);
+	}
+	
 	public String getDate() {	
 		return date;
 	}

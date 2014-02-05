@@ -9,9 +9,39 @@ public class Segment {
 		private String startTime;
 		private String startPoint;
 		private String mode;
-		
+		private int currentWaypoint;
 		
 		private ArrayList<Waypoint> waypointList = new ArrayList<Waypoint>();
+		
+		//returns the next waypoint
+		public Waypoint  getNextWaypoint(){
+			if(currentWaypoint+1 < waypointList.size()){
+				return(waypointList.get(currentWaypoint+1));
+			}
+			else{
+				return null;
+			}
+			
+		}
+
+		//sets the current waypoint to the next segment
+		//and returns the next waypoint.
+		//returns null if on last waypoint.
+		public Waypoint setNextWaypoint(){
+			Waypoint waypoint = getNextWaypoint();
+			if(waypoint ==null){
+				return waypoint;
+			}
+			else{
+				currentWaypoint++;
+				return waypoint;
+			}
+
+		}
+		//returns the last waypoint
+		public Waypoint getLastWaypoint(){
+			return waypointList.get(waypointList.size()-1);
+		}
 		
 		public String getSegmentStartTime (){
 			return startTime;

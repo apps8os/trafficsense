@@ -41,6 +41,13 @@
             </intent-filter>
         </activity>
         
+        <service
+             android:name="RouteService"
+             android:exported="false"
+            >
+           
+        </service>
+        
         <!-- ContextLogger3 related services -->
         <!-- framework core -->
         <service android:name="org.apps8os.contextlogger.android.io.MainPipeline"/>

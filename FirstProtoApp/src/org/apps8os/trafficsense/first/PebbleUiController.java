@@ -22,6 +22,7 @@ public class PebbleUiController {
 		// starting from currentStop. Depends on the implementation of the
 		// journey's data structure.
 		Waypoint s = mRoute.getSegmentList().get(currentSegment).getWaypointList().get(currentWaypoint);
+		
 	}
 	
 	public void alarmGetOff() {
