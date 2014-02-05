@@ -12,5 +12,6 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 		Vibrator vibrator = (Vibrator) context
 				.getSystemService(Context.VIBRATOR_SERVICE);
 		vibrator.vibrate(2000);
+		//mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
 	}
 }

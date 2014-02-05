@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
 	Route objectRoute = new Route();
 	String mJourneyText;
 	JourneyParser mJourneyParser;
+	PebbleUiController mPebbleUi;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
 	MyReceiver mRecv;
@@ -74,6 +75,7 @@ public class MainActivity extends Activity {
 		mfAgent.start(this);
 		mPebbleCommunication = new PebbleCommunication(getApplicationContext());
 		mPebbleCommunication.startAppOnPebble();
+		mPebbleUi = new PebbleUiController(mPebbleCommunication, objectRoute);
 	}
 	
 	@Override
