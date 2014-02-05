@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
 	String emailContent;
 	Route objectRoute = new Route();
 	String mJourneyText;
+	PebbleUiController mPebbleui;
 	JourneyParser mJourneyParser;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
@@ -183,6 +184,12 @@ public class MainActivity extends Activity {
     	JSONconverter();
     	
     	String input = objectRoute.getDepartureTime();
+    	
+    	
+    	mPebbleui = new PebbleUiController(mPebbleCommunication, objectRoute);
+    	
+    	
+    	
 	    Date date = new Date();
 		try {
 			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(input);

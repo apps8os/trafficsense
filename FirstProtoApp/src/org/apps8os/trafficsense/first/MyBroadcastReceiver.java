@@ -7,6 +7,10 @@ import android.os.Vibrator;
 
 public class MyBroadcastReceiver extends BroadcastReceiver {
 	
+	public MyBroadcastReceiver(PebbleUiController controller) {
+		
+	}
+	
 	private PebbleCommunication mPebbleCommunication;
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -15,7 +19,11 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
 				.getSystemService(Context.VIBRATOR_SERVICE);
 		vibrator.vibrate(2000);
 		
-		mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
+		int segment = intent.getExtras().getInt(EXTRA_SEGMENT);
+		...stop
+		
+		controller.
+		
 	}
 
 	
