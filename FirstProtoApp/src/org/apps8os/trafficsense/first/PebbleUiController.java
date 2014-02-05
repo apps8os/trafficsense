@@ -16,6 +16,7 @@ public class PebbleUiController {
 		mRoute = route;
 	}
 	
+	
 	public void updateList(int currentSegment, int currentWaypoint) {
 		// TODO: Update the list of stops in pebble to show the new list of stops
 		// starting from currentStop. Depends on the implementation of the
