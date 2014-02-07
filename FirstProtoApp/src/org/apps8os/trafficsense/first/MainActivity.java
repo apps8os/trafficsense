@@ -189,7 +189,7 @@ public class MainActivity extends Activity {
     	System.out.println("DBG onClick_activate");
     	
     	mRoute.setRoute(mJourneyParser.getJsonObj());
-    	mPebbleui = new PebbleUiController(mPebbleCommunication, mRoute);
+    	mPebbleui = new PebbleUiController(getApplicationContext(), mRoute);
     	
     	TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
     	tsContainer.setPebbleUiController(mPebbleUi);

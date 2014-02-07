@@ -47,6 +47,10 @@ public class Segment {
 			return waypointList.get(currentWaypoint);
 		}
 		
+		public int getCurrentIndex() {
+			return currentWaypoint;
+		}
+		
 		public String getSegmentStartTime (){
 			return startTime;
 		}
