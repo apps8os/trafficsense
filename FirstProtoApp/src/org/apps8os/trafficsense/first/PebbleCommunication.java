@@ -24,6 +24,7 @@ public class PebbleCommunication {
 	private static final UUID APP_UUID = UUID.fromString("83eef382-21a4-473a-a189-ceffa42f86b1");
 	private static final int KEY_COMMAND = 0;
 	private static final int COMMAND_GET_STOP = 0;
+	private static final int COMMAND_UPDATELIST = 1;
 	private static final int KEY_STOP_NUM = 1;
 	private static final int KEY_STOP_NAME = 2;
 	private static final int KEY_STOP_CODE = 3;
@@ -79,6 +80,23 @@ public class PebbleCommunication {
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_GET_STOP);
 		dictionary.addUint8(KEY_STOP_NUM, (byte)listIndex);
+		dictionary.addString(KEY_STOP_NAME, name);
+		dictionary.addString(KEY_STOP_CODE, code);
+		dictionary.addString(KEY_STOP_TIME, time);
+		// Offer the message to messageManager, which will handle queuing and finally sending the message
+		messageManager.offer(dictionary);
+		Log.i("Pebble", "Stop passed to messageManager with name" + name);
+    }
+    
+    public void updateList(Waypoint waypoint) {
+    	String name = waypoint.getWaypointName();
+    	String time = waypoint.getWaypointTime();
+    	String code = waypoint.getWaypointStopCode();
+    	// Sends a single stop to Pebble to a place of the list defined by stopNum
+    	int charLimit = Math.min(name.length(), 20);
+    	name = name.substring(0, charLimit); //limit to charLimit characters
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_UPDATELIST);
 		dictionary.addString(KEY_STOP_NAME, name);
 		dictionary.addString(KEY_STOP_CODE, code);
 		dictionary.addString(KEY_STOP_TIME, time);
