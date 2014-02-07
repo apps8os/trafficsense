@@ -62,14 +62,15 @@ public class RouteService extends Service{
 		scheduleNextAlarm(timeToNextWaypoint);
 
 		//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
-		//container.getPebbleUiController().initializeList(currentSegment);
+		//mContainer.getPebbleUiController().initializeList(currentSegment);
+		
 		System.out.println("DBG RouteService.onStartCommand cp");
 	    // We want this service to continue running until it is explicitly
 	    // stopped, so return sticky.
 	    return START_STICKY;
 	}
 	
-	public void onDestroy(){
+	public void onDestr2500oy(){
 		System.out.println("DBG RouteService.onDestroy");
 		unregisterReceiver(mReceiver);
 	}
@@ -89,8 +90,7 @@ public class RouteService extends Service{
 		try {
 			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(timeStr);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("DBG timeStringToDate error: "+e.getMessage());
 		}
 		return date;
 	}
@@ -105,46 +105,50 @@ public class RouteService extends Service{
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			// vibrate the phone
-			Intent vi = new Intent();
-			vi.setAction("myaction");
-			sendBroadcast(vi);
-			
 			System.out.println("DBG NextWaypointReceiver.onReceive");
+			String message = "ERROR: No message set in onReceive()";
+			
 			//get the next waypoint
 			Waypoint nextWaypoint = mContainer.getRoute().getCurrentSegment().setNextWaypoint();
 			//if waypoint is null then get the next segment
-			if(nextWaypoint==null){
+			if(nextWaypoint==null) {
 				Segment nextSegment = mContainer.getRoute().setNextSegment();
 				//if the nextSegment is null then we have reached the end of the route
 				if(nextSegment == null){
-					return;
+					message = "Journey ended.";
+				} else {
+					message = "Segment ended.";
+					nextWaypoint = nextSegment.getCurrentWaypoint();
+					if (mContainer.getPebbleUiController() == null)
+						System.out.println("DBG uicontroller is null");
+					mContainer.getPebbleUiController().initializeList();
 				}
-				
-				Toast toast = Toast.makeText(mContext, "Segment ended", Toast.LENGTH_SHORT);
-				toast.show();
-				
-				nextWaypoint=nextSegment.getCurrentWaypoint();
-				if (mContainer.getPebbleUiController() == null)
-					System.out.println("DBG uicontroller is null");
-				mContainer.getPebbleUiController().initializeList();
 			}
-			mContainer.getPebbleUiController().updateList();
-			System.out.println("DBG NextWaypointReceiver.onReceive cp1");
-			//set the alarm for the next waypoint
-			long timeToNextWaypoint=timeStringToDate(mContainer.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();
-			scheduleNextAlarm(timeToNextWaypoint);
-			System.out.println("DBG NextWaypointReceiver.onReceive cp2");
 			
-			Toast toast = Toast.makeText(mContext, "Next waypoint is: "+nextWaypoint.getWaypointName(), Toast.LENGTH_SHORT);
-			toast.show();
+			if (nextWaypoint != null) {
+				//set the alarm for the next waypoint
+				mContainer.getPebbleUiController().updateList();
+				long timeToNextWaypoint=timeStringToDate(mContainer.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();
+				scheduleNextAlarm(timeToNextWaypoint);
+				message = "Next waypoint is: " + nextWaypoint.getWaypointName();
+			}
 			
+			System.out.println("DBG NextWaypointReceiver.onReceive cp");
+			
+			// send an Intent to MainActivity
+			Intent vi = new Intent();
+			vi.putExtra(MainActivity.ACTION_ROUTE_EVENT_EXTRA_MESSAGE, message);
+			vi.setAction(MainActivity.ACTION_ROUTE_EVENT);
+			sendBroadcast(vi);
+						
+			Toast toast = Toast.makeText(mContext, message, Toast.LENGTH_SHORT);
+			toast.show();			
 		}	
 	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
+		// no bind to this service
 		return null;
 	}
 

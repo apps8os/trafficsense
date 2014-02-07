@@ -2,12 +2,14 @@ package org.apps8os.trafficsense.first;
 
 public class TrafficsenseContainer {
 	   private static TrafficsenseContainer instance = null;
-	   protected TrafficsenseContainer() {
-	      // Exists only to defeat instantiation.
-	   }
 	   
-	   private PebbleUiController pebbleUi;
-	   private Route route;
+	   private PebbleUiController mPebbleUi;
+	   private Route mRoute;
+	   
+	   /*
+	    * This is a singleton, only one instance allowed.
+	    */
+	   protected TrafficsenseContainer() { }
 	   
 	   public static TrafficsenseContainer getInstance() {
 	      if(instance == null) {
@@ -16,20 +18,19 @@ public class TrafficsenseContainer {
 	      return instance;
 	   }
 	   
-	   public void setPebbleUiController(PebbleUiController pebbleUi){
-		   System.out.println("DBG setting the pebbleui to " + pebbleUi);
-		   this.pebbleUi=pebbleUi;
+	   public void setPebbleUiController(PebbleUiController pebbleUi) {
+		   mPebbleUi = pebbleUi;
 	   }
 	   
-	   public void setRoute(Route route){
-		   this.route=route;
+	   public void setRoute(Route route) {
+		   mRoute = route;
 	   }
 	   
-	   public PebbleUiController getPebbleUiController(){
-		   return(pebbleUi);
+	   public PebbleUiController getPebbleUiController() {
+		   return mPebbleUi;
 	   }
 	   
-	   public Route getRoute(){
-		   return route;
+	   public Route getRoute() {
+		   return mRoute;
 	   }
 	}
