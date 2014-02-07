@@ -29,7 +29,7 @@ void alarm_get_off() {
 }
 
 int main(void) {
-	init();
-	app_event_loop();
-	deinit();
+  init();
+  app_event_loop();
+  deinit();
 }
