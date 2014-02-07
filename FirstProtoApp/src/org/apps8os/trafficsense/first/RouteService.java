@@ -51,6 +51,8 @@ public class RouteService extends Service{
 		PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
 		AlarmManager am = (AlarmManager) getBaseContext().getSystemService(ALARM_SERVICE);
 		am.set(AlarmManager.RTC_WAKEUP,  timeToNextWaypoint, o);
+		Segment currentSegment = container.getRoute().getCurrentSegment();
+		container.getPebbleUiController().initializeList(currentSegment);
 	}
 	
 	public void onDestroy(){
@@ -97,8 +99,10 @@ public class RouteService extends Service{
 				toast.show();
 				
 				nextWaypoint=nextSegment.getCurrentWaypoint();
+				container.getPebbleUiController().initializeList(nextSegment);
 				
 			}
+			
 			//set the alarm for the next waypoint
 			long timeToNextWaypoint=timeStringToDate(container.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();
 			Intent i = new Intent(getApplicationContext(),RouteService.class);
