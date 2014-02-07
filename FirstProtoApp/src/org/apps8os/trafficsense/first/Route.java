@@ -94,6 +94,10 @@ public class Route {
 		return segmentList;
 	}
 	
+	public Segment getSegment(int index) {
+		return segmentList.get(index);
+	}
+	
 	
 	public void FillRoute (JSONObject json){
 		try {
