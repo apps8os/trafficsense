@@ -17,6 +17,7 @@ public class TrafficsenseContainer {
 	   }
 	   
 	   public void setPebbleUiController(PebbleUiController pebbleUi){
+		   System.out.println("DBG setting the pebbleui to " + pebbleUi);
 		   this.pebbleUi=pebbleUi;
 	   }
 	   

@@ -41,7 +41,6 @@ public class MainActivity extends Activity {
 	String mJourneyText;
 	PebbleUiController mPebbleui;
 	JourneyParser mJourneyParser;
-	PebbleUiController mPebbleUi;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
 	MyReceiver mRecv;
@@ -190,9 +189,8 @@ public class MainActivity extends Activity {
     	
     	mRoute.setRoute(mJourneyParser.getJsonObj());
     	mPebbleui = new PebbleUiController(getApplicationContext(), mRoute);
-    	
     	TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
-    	tsContainer.setPebbleUiController(mPebbleUi);
+    	tsContainer.setPebbleUiController(mPebbleui);
     	tsContainer.setRoute(mRoute);
     	
     	Intent rsIntent = new Intent(this, RouteService.class);

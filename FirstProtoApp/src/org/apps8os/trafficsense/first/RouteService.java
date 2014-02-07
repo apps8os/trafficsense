@@ -81,7 +81,7 @@ public class RouteService extends Service{
 		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 		//am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
 		// TODO testing use
-		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+2500, pi);
+		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+5000, pi);
 	}
 	
 	private Date timeStringToDate(String timeStr){
@@ -125,8 +125,11 @@ public class RouteService extends Service{
 				toast.show();
 				
 				nextWaypoint=nextSegment.getCurrentWaypoint();
-				//container.getPebbleUiController().initializeList(nextSegment);
+				if (mContainer.getPebbleUiController() == null)
+					System.out.println("DBG uicontroller is null");
+				mContainer.getPebbleUiController().initializeList();
 			}
+			mContainer.getPebbleUiController().updateList();
 			System.out.println("DBG NextWaypointReceiver.onReceive cp1");
 			//set the alarm for the next waypoint
 			long timeToNextWaypoint=timeStringToDate(mContainer.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();

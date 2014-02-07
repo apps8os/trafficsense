@@ -25,20 +25,26 @@ public class PebbleUiController {
 	 * the list of stops shown in Pebble screen to show the 1st, 2nd
 	 * and the last stop of the segment.
 	 */
-	public void initializeList(Segment newSegment) {
+	public void initializeList() {
+		Segment newSegment = mRoute.getCurrentSegment();
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		// Add the waypoints from the segment to the list
-		for (int i = 0; i < PebbleCommunication.NUM_STOPS - 1; i++) {
+		int maxIndex = Math.min(newSegment.getWaypointList().size() - 1, PebbleCommunication.NUM_STOPS - 1 );
+		for (int i = 0; i < maxIndex; i++) {
+			if (newSegment.getWaypoint(i) == null)
+				System.out.println("DBG waypoint at index " + i + " was null");
 			waypoints.add(newSegment.getWaypoint(i));
 		}
 		waypoints.add(newSegment.getLastWaypoint());
+		if (newSegment.getLastWaypoint() == null)
+			System.out.println("DBG last waypoint was null");
 		// Send the waypoints to Pebble
-		for (int i = 0; i < PebbleCommunication.NUM_STOPS; i++) {
+		for (int i = 0; i < maxIndex + 1; i++) {
 			mPblCom.sendWaypoint(waypoints.get(i), i);
 		}
 	}
 	
-	public void updateList(Waypoint w) {
+	public void updateList() {
 		System.out.println("updatelist s " + mRoute.getCurrentIndex());
 		System.out.println("updatelist w " + mRoute.getCurrentSegment().getCurrentIndex());
 		if (mRoute.getCurrentSegment().getCurrentIndex() == 0) {
