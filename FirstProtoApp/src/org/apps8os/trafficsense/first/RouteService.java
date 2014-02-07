@@ -6,9 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import com.example.timerwithnotification.AlertActivity;
-import com.example.timerwithnotification.ConfigActivity;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
