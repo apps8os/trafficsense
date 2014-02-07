@@ -43,8 +43,9 @@ public class MainActivity extends Activity {
 	PebbleUiController mPebbleUi;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
-	MyReceiver mRecv;
+	//MyReceiver mRecv;
 	
+	/*
 	private class MyReceiver extends BroadcastReceiver {
 
 		@Override
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
 			vibrator.vibrate(250);
 		}
 		
-	}
+	}*/
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +67,7 @@ public class MainActivity extends Activity {
 		mRes = getResources();
 		mJourneyText = new String("");
 		mJourneyParser = new JourneyParser();
-		mRecv = new MyReceiver();
+		//mRecv = new MyReceiver();
 		mRoute = new Route();
 
 		// Start ContextLogger3
@@ -84,12 +85,12 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		IntentFilter filter = new IntentFilter("myaction");
-		registerReceiver(mRecv, filter);
+		//registerReceiver(mRecv, filter);
 	}
 	
 	@Override
 	protected void onPause() {
-		unregisterReceiver(mRecv);
+		//unregisterReceiver(mRecv);
 		super.onPause();
 	}
 	@Override
@@ -188,6 +189,7 @@ public class MainActivity extends Activity {
     	mRoute.setRoute(mJourneyParser.getJsonObj());
     	mPebbleui = new PebbleUiController(mPebbleCommunication, mRoute);
     	
+    	/*
     	String input = mRoute.getDepartureTime();
 	    Date date = new Date();
 		try {
@@ -196,6 +198,7 @@ public class MainActivity extends Activity {
 			System.out.println("DBG parse date: "+e.getMessage());
 		}
 		System.out.println("date:" + date);
+		*/
 	  
     	TextView view = (TextView) findViewById(R.id.textView3);
     	
