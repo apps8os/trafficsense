@@ -2,9 +2,9 @@ package org.apps8os.trafficsense.first;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 
 public class Route {
 	private String date;
@@ -99,38 +99,25 @@ public class Route {
 	}
 	
 	
-	public void FillRoute (JSONObject json){
-		try {
-			setDate(json.getString("date"));
-			setStart(json.getString("start"));
-			setDestination(json.getString("dest"));
-	    	setArrivalTime(json.getString("arrivalTime"));
+	public void setRoute (JsonObject journey){
+		setDate(journey.get("date").getAsString());
+		setStart(journey.get("start").getAsString());
+		setDestination(journey.get("dest").getAsString());
+	    setArrivalTime(journey.get("arrivalTime").getAsString());
 	    	
-	    	JSONArray jsonArr = json.getJSONArray("segments");
-	    	for (int i = 0; i < jsonArr.length(); i++) {
-				Segment segment = new Segment();
-				segment.FillSegment(json.getJSONArray("segments").getJSONObject(i));
-				segmentList.add(i, segment);
-			}
-	    	segmentList.trimToSize();
-	    	
-	    	setDepartureTime(json);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    JsonArray segmentJs = journey.getAsJsonArray("segments");
+	    for (int i = 0; i < segmentJs.size(); i++) {
+			Segment segment = new Segment();
+			segment.setSegment(segmentJs.get(i).getAsJsonObject());
+			segmentList.add(i, segment);
 		}
-    	
-    	
+	    segmentList.trimToSize();
+	    setDepartureTime(segmentJs.get(0).getAsJsonObject());
 	}
 
 	
-	public String setDepartureTime (JSONObject json){
-		try {
-			departure = json.getJSONArray("segments").getJSONObject(0).getString("startTime");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public String setDepartureTime (JsonObject firstSegment){
+		departure = firstSegment.get("startTime").getAsString();
 		departure = date + " " + departure;
 		return departure;
 	}

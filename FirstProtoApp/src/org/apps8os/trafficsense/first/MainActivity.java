@@ -17,8 +17,8 @@ import android.widget.TextView;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.first.GmailReader.EmailException;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
 	
 	Resources mRes;
 	String emailContent;
-	Route objectRoute = new Route();
+	Route mRoute;
 	String mJourneyText;
 	PebbleUiController mPebbleui;
 	JourneyParser mJourneyParser;
@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
 		mJourneyText = new String("");
 		mJourneyParser = new JourneyParser();
 		mRecv = new MyReceiver();
+		mRoute = new Route();
 
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
@@ -76,7 +77,7 @@ public class MainActivity extends Activity {
 		mfAgent.start(this);
 		mPebbleCommunication = new PebbleCommunication(getApplicationContext());
 		mPebbleCommunication.startAppOnPebble();
-		mPebbleUi = new PebbleUiController(mPebbleCommunication, objectRoute);
+		// mPebbleUi is initialized in onClick_activate()
 	}
 	
 	@Override
@@ -183,26 +184,25 @@ public class MainActivity extends Activity {
 
     public void onClick_activate(View v) {
     	System.out.println("DBG onClick_activate");
-    	JSONconverter();
     	
-    	String input = objectRoute.getDepartureTime();
+    	mRoute.setRoute(mJourneyParser.getJsonObj());
+    	mPebbleui = new PebbleUiController(mPebbleCommunication, mRoute);
     	
-    	
-    	mPebbleui = new PebbleUiController(mPebbleCommunication, objectRoute);
-    	
-    	
-    	
+    	String input = mRoute.getDepartureTime();
 	    Date date = new Date();
 		try {
 			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(input);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("DBG parse date: "+e.getMessage());
 		}
 		System.out.println("date:" + date);
 	  
     	TextView view = (TextView) findViewById(R.id.textView3);
-
+    	
+    	// TODO : for debug: dump mRoute object
+    	Gson gson = new Gson();
+    	view.setText(gson.toJson(mRoute));
+    	/*
     	view.setText("waiting for alarm");
     	// sets an alarm which expires x seconds later.
     	int x = 5;
@@ -218,6 +218,7 @@ public class MainActivity extends Activity {
    		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
    		alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
    				+ (x * 1000), pendingIntent);
+   	    */	
     }
     
     public void onClick_send(View v) {
@@ -230,36 +231,6 @@ public class MainActivity extends Activity {
     	mPebbleCommunication.sendWaypoint("Alva", "E1235", "13:41", 1);
     	mPebbleCommunication.sendWaypoint("Konemies", "E1236", "13:42", 2);
     	*/
-	}
-    
-    
-    
-    public void JSONconverter(){
-		String jsonstring = null;
-		JSONObject json =  null;
-	    try {
-	        InputStream is = getAssets().open("sample.js");
-	        int size = is.available();
-	        byte[] buffer = new byte[size];
-	        is.read(buffer);
-	        is.close();
-	        jsonstring = new String(buffer, "UTF-8");
-	    } 
-	    catch (IOException ex) {
-	        ex.printStackTrace();
-	    }
-	    
-	    try {
-			json =  new JSONObject(jsonstring);
-		} 
-	    catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-	    objectRoute.FillRoute(json);
-	    
-	    	    
 	}
 
 }

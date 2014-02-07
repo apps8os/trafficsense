@@ -2,8 +2,8 @@ package org.apps8os.trafficsense.first;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class Segment {
 		private String startTime;
@@ -82,15 +82,15 @@ public class Segment {
 			return waypointList.get(index);
 		}
 		
-		public void FillSegment(JSONObject json){
-			setSegmentStartTime(json.optString("startTime"));
-			setSegmentStartPoint(json.optString("startPoint"));
-			setSegmentMode(json.optString("mode"));
+		public void setSegment(JsonObject segment){
+			setSegmentStartTime(segment.get("startTime").getAsString());
+			setSegmentStartPoint(segment.get("startPoint").getAsString());
+			setSegmentMode(segment.get("mode").getAsString());
 			
-			JSONArray jsonArr = json.optJSONArray("waypoints");
-			for (int i = 0; i < jsonArr.length(); i++) {
+			JsonArray waypoints = segment.get("waypoints").getAsJsonArray();
+			for (int i = 0; i < waypoints.size(); i++) {
 				Waypoint waypoint = new Waypoint();
-				waypoint.FillWaypoint(json.optJSONArray("waypoints").optJSONObject(i));
+				waypoint.setWaypoint(waypoints.get(i).getAsJsonObject());
 				waypointList.add(i, waypoint);
 			}
 			waypointList.trimToSize();

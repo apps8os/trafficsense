@@ -1,6 +1,6 @@
 package org.apps8os.trafficsense.first;
 
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
 
 public class Waypoint {
 	
@@ -35,9 +35,13 @@ public class Waypoint {
 		return stopCode;
 	}
 	
-	public void FillWaypoint (JSONObject json){
-		setWaypointTime (json.optString("time"));
-		setWaypointName (json.optString("name"));
-		setWaypointStopCode(json.optString("stopCode"));
+	public void setWaypoint (JsonObject waypoint){
+		setWaypointTime (waypoint.get("time").getAsString());
+		setWaypointName (waypoint.get("name").getAsString());
+		if (waypoint.has("stopCode")) {
+			setWaypointStopCode(waypoint.get("stopCode").getAsString());
+		} else { // TODO: what should this be if there is no stopCode ???
+			setWaypointStopCode("0000");
+		}
 	}
 }
