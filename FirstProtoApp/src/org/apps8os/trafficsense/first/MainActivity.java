@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
@@ -43,9 +44,9 @@ public class MainActivity extends Activity {
 	PebbleUiController mPebbleUi;
 	// TODO: change this to the format agreed by Javier & Atte
 	String mStatusMessage;
-	//MyReceiver mRecv;
+	MyReceiver mRecv;
 	
-	/*
+	
 	private class MyReceiver extends BroadcastReceiver {
 
 		@Override
@@ -57,7 +58,7 @@ public class MainActivity extends Activity {
 			vibrator.vibrate(250);
 		}
 		
-	}*/
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class MainActivity extends Activity {
 		mRes = getResources();
 		mJourneyText = new String("");
 		mJourneyParser = new JourneyParser();
-		//mRecv = new MyReceiver();
+		mRecv = new MyReceiver();
 		mRoute = new Route();
 
 		// Start ContextLogger3
@@ -85,12 +86,12 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		IntentFilter filter = new IntentFilter("myaction");
-		//registerReceiver(mRecv, filter);
+		registerReceiver(mRecv, filter);
 	}
 	
 	@Override
 	protected void onPause() {
-		//unregisterReceiver(mRecv);
+		unregisterReceiver(mRecv);
 		super.onPause();
 	}
 	@Override
@@ -158,15 +159,16 @@ public class MainActivity extends Activity {
     public void onClick_parse(View v) {
     	System.out.println("DBG onClick_parse");
     	TextView view = (TextView) findViewById(R.id.textView2);
-    	/**
+    	
     	// TODO
     	// read journey text from assets/ line-by-line and put them into a long
     	// string with line breaks and then parse them line-by-line (done in parseString() )
     	// kind of redundant work. but, for the moment...
+    	/*
     	StringBuilder buf = new StringBuilder();
     	try {
     		InputStream journeyFile =
-    				getAssets().open(mRes.getString(R.string.hard_coded_json));
+    				getAssets().open(mRes.getString(R.string.hard_coded_journey));
     		BufferedReader rd = new BufferedReader(new InputStreamReader(journeyFile));
     		String str;
     		while ((str = rd.readLine()) != null) {
@@ -176,9 +178,9 @@ public class MainActivity extends Activity {
     	} catch (IOException ex) {
     		Log.d(getLocalClassName(), "IOEx", ex);
     	}
-    	
     	mJourneyParser.parseString(buf.toString());
-    	**/
+    	*/
+    	
     	mJourneyParser.parseString(mJourneyText);
     	view.setText(mJourneyParser.getJsonText());
 	}
@@ -188,6 +190,13 @@ public class MainActivity extends Activity {
     	
     	mRoute.setRoute(mJourneyParser.getJsonObj());
     	mPebbleui = new PebbleUiController(mPebbleCommunication, mRoute);
+    	
+    	TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
+    	tsContainer.setPebbleUiController(mPebbleUi);
+    	tsContainer.setRoute(mRoute);
+    	
+    	Intent rsIntent = new Intent(this, RouteService.class);
+    	startService(rsIntent);
     	
     	/*
     	String input = mRoute.getDepartureTime();

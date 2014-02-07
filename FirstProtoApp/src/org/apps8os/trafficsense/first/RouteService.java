@@ -21,50 +21,69 @@ import android.widget.Toast;
 //service that follows our route by always scheduling the nextwaypoint with the alarm manager. 
 public class RouteService extends Service{
 	
-	NextWaypointReceiver receiver;
-	Context context;
-	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	final static String ACTION_NEXT_WAYPOINT = "trafficsense.NextWaypointAlarm";
+	TrafficsenseContainer mContainer;
+	Route mRoute;
+	NextWaypointReceiver mReceiver;
+	Context mContext;
 	
 	public void onCreate(){
 		super.onCreate();
-		context=this;
-		TrafficsenseContainer container=TrafficsenseContainer.getInstance();
-		Route route = container.getRoute();
-		PebbleUiController pebbleUi = container.getPebbleUiController();
+		System.out.println("DBG RouteService.onCreate");
+		mContext=this;
+		mContainer=TrafficsenseContainer.getInstance();
+		mRoute = mContainer.getRoute();
+		mReceiver=new NextWaypointReceiver();
+		
+		if (mRoute == null) {
+			System.out.println("DBG route = null");
+			this.stopSelf();
+		}
+		//PebbleUiController pebbleUi = container.getPebbleUiController();
 		//gets the time of the first waypoint
-		long timeToNextWaypoint = timeStringToDate(route.getDate() + " "+ route.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
+
+		// TODO do not check this at the moment
+		/*
+		long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
 		if(timeToNextWaypoint<System.currentTimeMillis()){
+			System.out.println("DBG next waypoint in the past");
 			Toast toast = Toast.makeText(context, "Error:next waypoint is in the past", 5);
 			toast.show();
 			this.stopSelf();
 		}
-		
-		//register our broadcast receiver
-		receiver=new NextWaypointReceiver();
-		registerReceiver(receiver, new IntentFilter("traffisense.NextWaypointAlarm"));
-		
-		//set the timer for first waypoint
-		Intent i = new Intent(getApplicationContext(),RouteService.class);
-		i.setAction("trafficsense.NextWaypointAlarm");
-		PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
-		AlarmManager am = (AlarmManager) getBaseContext().getSystemService(ALARM_SERVICE);
-		am.set(AlarmManager.RTC_WAKEUP,  timeToNextWaypoint, o);
-		Segment currentSegment = container.getRoute().getCurrentSegment();
-		container.getPebbleUiController().initializeList(currentSegment);
+		*/
+	}
+	
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		registerReceiver(mReceiver, new IntentFilter(ACTION_NEXT_WAYPOINT));
+
+		long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
+		scheduleNextAlarm(timeToNextWaypoint);
+
+		//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
+		//container.getPebbleUiController().initializeList(currentSegment);
+		System.out.println("DBG RouteService.onStartCommand cp");
+	    // We want this service to continue running until it is explicitly
+	    // stopped, so return sticky.
+	    return START_STICKY;
 	}
 	
 	public void onDestroy(){
-		try{
-			unregisterReceiver(receiver);
-		}catch(Exception e){
-			
-		}
+		System.out.println("DBG RouteService.onDestroy");
+		unregisterReceiver(mReceiver);
 	}
 
+	private void scheduleNextAlarm(long atMillis) {
+		Intent i = new Intent();
+		i.setAction(ACTION_NEXT_WAYPOINT);
+		PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+		//am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
+		// TODO testing use
+		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+2500, pi);
+	}
+	
 	private Date timeStringToDate(String timeStr){
 		Date date = null;
 		try {
@@ -86,37 +105,44 @@ public class RouteService extends Service{
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			TrafficsenseContainer container=TrafficsenseContainer.getInstance();
+			// vibrate the phone
+			Intent vi = new Intent();
+			vi.setAction("myaction");
+			sendBroadcast(vi);
+			
+			System.out.println("DBG NextWaypointReceiver.onReceive");
 			//get the next waypoint
-			Waypoint nextWaypoint = container.getRoute().getCurrentSegment().setNextWaypoint();
+			Waypoint nextWaypoint = mContainer.getRoute().getCurrentSegment().setNextWaypoint();
 			//if waypoint is null then get the next segment
 			if(nextWaypoint==null){
-				Segment nextSegment = container.getRoute().setNextSegment();
+				Segment nextSegment = mContainer.getRoute().setNextSegment();
 				//if the nextSegment is null then we have reached the end of the route
 				if(nextSegment == null){
 					return;
 				}
 				
-				Toast toast = Toast.makeText(context, "Segment ended", 5);
+				Toast toast = Toast.makeText(mContext, "Segment ended", Toast.LENGTH_SHORT);
 				toast.show();
 				
 				nextWaypoint=nextSegment.getCurrentWaypoint();
-				container.getPebbleUiController().initializeList(nextSegment);
-				
+				//container.getPebbleUiController().initializeList(nextSegment);
 			}
-			
+			System.out.println("DBG NextWaypointReceiver.onReceive cp1");
 			//set the alarm for the next waypoint
-			long timeToNextWaypoint=timeStringToDate(container.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();
-			Intent i = new Intent(getApplicationContext(),RouteService.class);
-			i.setAction("trafficsense.NextWaypointAlarm");
-			PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
-			//set the alarm manager
-			AlarmManager am = (AlarmManager) getBaseContext().getSystemService(ALARM_SERVICE);
-			am.set(AlarmManager.RTC_WAKEUP,  timeToNextWaypoint, o);
+			long timeToNextWaypoint=timeStringToDate(mContainer.getRoute().getDate() + " "+nextWaypoint.getWaypointTime()).getTime();
+			scheduleNextAlarm(timeToNextWaypoint);
+			System.out.println("DBG NextWaypointReceiver.onReceive cp2");
 			
-			Toast toast = Toast.makeText(context, "Next waypoint is: "+nextWaypoint.getWaypointName(), 5);
+			Toast toast = Toast.makeText(mContext, "Next waypoint is: "+nextWaypoint.getWaypointName(), Toast.LENGTH_SHORT);
 			toast.show();
+			
 		}	
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	
