@@ -225,9 +225,11 @@ public class MainActivity extends Activity {
     	TextView view = (TextView) findViewById(R.id.textView4);
     	// TODO: Send the actual stops received from email (Atte)
     	// Now: send stops with dummy data
-    	mPebbleCommunication.sendStop("Kemisti", "E1234", "13:40", 0);
-    	mPebbleCommunication.sendStop("Alva", "E1235", "13:41", 1);
-    	mPebbleCommunication.sendStop("Konemies", "E1236", "13:42", 2);
+    	/*
+    	mPebbleCommunication.sendWaypoint("Kemisti", "E1234", "13:40", 0);
+    	mPebbleCommunication.sendWaypoint("Alva", "E1235", "13:41", 1);
+    	mPebbleCommunication.sendWaypoint("Konemies", "E1236", "13:42", 2);
+    	*/
 	}
     
     

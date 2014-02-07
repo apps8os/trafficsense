@@ -29,6 +29,7 @@ public class PebbleCommunication {
 	private static final int KEY_STOP_CODE = 3;
 	private static final int KEY_STOP_TIME = 4;
 	private static final int MAX_DICT_SIZE = 124;
+	public static final int NUM_STOPS = 3;
 	
 	private Context mContext;
 	private final MessageManager messageManager;
@@ -68,19 +69,22 @@ public class PebbleCommunication {
         mContext.sendBroadcast(i);
 	}
 	
-    public void sendStop(String stopName, String stopCode, String time, int stopNum) {
+    public void sendWaypoint(Waypoint waypoint, int listIndex) {
+    	String name = waypoint.getWaypointName();
+    	String time = waypoint.getWaypointTime();
+    	String code = waypoint.getWaypointStopCode();
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
-    	int charLimit = Math.min(stopName.length(), 20);
-    	stopName = stopName.substring(0, charLimit); //limit to charLimit characters
+    	int charLimit = Math.min(name.length(), 20);
+    	name = name.substring(0, charLimit); //limit to charLimit characters
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(KEY_COMMAND, (byte)COMMAND_GET_STOP);
-		dictionary.addUint8(KEY_STOP_NUM, (byte)stopNum);
-		dictionary.addString(KEY_STOP_NAME, stopName);
-		dictionary.addString(KEY_STOP_CODE, stopCode);
+		dictionary.addUint8(KEY_STOP_NUM, (byte)listIndex);
+		dictionary.addString(KEY_STOP_NAME, name);
+		dictionary.addString(KEY_STOP_CODE, code);
 		dictionary.addString(KEY_STOP_TIME, time);
 		// Offer the message to messageManager, which will handle queuing and finally sending the message
 		messageManager.offer(dictionary);
-		Log.i("Pebble", "Stop passed to messageManager with name" + stopName);
+		Log.i("Pebble", "Stop passed to messageManager with name" + name);
     }
 	
 	/** 

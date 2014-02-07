@@ -78,6 +78,10 @@ public class Segment {
 			return waypointList;
 		}		
 		
+		public Waypoint getWaypoint(int index) {
+			return waypointList.get(index);
+		}
+		
 		public void FillSegment(JSONObject json){
 			setSegmentStartTime(json.optString("startTime"));
 			setSegmentStartPoint(json.optString("startPoint"));
