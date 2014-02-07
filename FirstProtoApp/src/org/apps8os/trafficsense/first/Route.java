@@ -54,6 +54,10 @@ public class Route {
 		return(segmentList.get(currentSegment));
 	}
 	
+	public int getCurrentIndex() {
+		return currentSegment;
+	}
+	
 	public String getDate() {	
 		return date;
 	}
@@ -97,7 +101,6 @@ public class Route {
 	public Segment getSegment(int index) {
 		return segmentList.get(index);
 	}
-	
 	
 	public void setRoute (JsonObject journey){
 		setDate(journey.get("date").getAsString());

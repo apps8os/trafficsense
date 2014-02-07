@@ -185,6 +185,7 @@ public class MainActivity extends Activity {
     	
     	mRoute.setRoute(mJourneyParser.getJsonObj());
     	mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
+
     	
     	TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
     	tsContainer.setPebbleUiController(mPebbleUi);

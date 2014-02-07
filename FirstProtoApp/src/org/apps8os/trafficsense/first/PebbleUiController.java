@@ -5,6 +5,8 @@ package org.apps8os.trafficsense.first;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+
 
 /**
  * Controls the Pebble UI
@@ -13,8 +15,8 @@ import java.util.ArrayList;
 public class PebbleUiController {
 	PebbleCommunication mPblCom;
 	Route mRoute;
-	public PebbleUiController(PebbleCommunication pebbleCommunication, Route route) {
-		mPblCom = pebbleCommunication;
+	public PebbleUiController(Context appContext, Route route) {
+		mPblCom = new PebbleCommunication(appContext);
 		mRoute = route;
 	}
 	
@@ -37,7 +39,19 @@ public class PebbleUiController {
 	}
 	
 	public void updateList(Waypoint w) {
-		mPblCom.updateList(w);
+		System.out.println("updatelist s " + mRoute.getCurrentIndex());
+		System.out.println("updatelist w " + mRoute.getCurrentSegment().getCurrentIndex());
+		if (mRoute.getCurrentSegment().getCurrentIndex() == 0) {
+			return;
+		}
+		int newWaypoint = mRoute.getCurrentSegment().getCurrentIndex() + PebbleCommunication.NUM_STOPS - 2;
+		Waypoint waypoint;
+		if (newWaypoint > mRoute.getCurrentSegment().getWaypointList().size() - 1) {
+			waypoint = null;
+		} else {
+			waypoint = mRoute.getCurrentSegment().getWaypoint(newWaypoint);
+		}
+		mPblCom.updateList(waypoint);
 	}
 	
 	public void alarmGetOff() {

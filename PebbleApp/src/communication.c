@@ -13,28 +13,41 @@ void send_cmd(uint8_t cmd) {
 }
 
 void message_received(DictionaryIterator *iterator) {
-	//Automatically called when a message is received from the phone.
-	Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
-	if (commandTuple) {
-	  uint8_t command = commandTuple->value->data[0];
-	    if (command == COMMAND_GET_STOP) {
-	        uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
-		char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
-	        char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
-	        char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
-		strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
-	        strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
-	        strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
-	    } else if (command == COMMAND_ALARM) {
-                uint8_t alarmType = dict_find(iterator, KEY_ALARM)->value->data[0];
-	        if (alarmType == ALARM_GET_OFF) {
-                    alarm_get_off();
-                }
-            }
-	}
-	// Update the menu, otherwise the new stop will not be shown before it's selected
-	// Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen
-	layer_mark_dirty(menu_layer_get_layer(menu_layer));
+  //Automatically called when a message is received from the phone.
+  Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
+  if (commandTuple) {
+    uint8_t command = commandTuple->value->data[0];
+      if (command == COMMAND_GET_STOP) {
+        uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
+	char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
+        char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
+        char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
+	strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
+        strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
+        strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
+      }
+      else if (command == COMMAND_UPDATELIST) {
+        for (int i = 1; i < NUM_STOPS - 1; i++) {
+          stopArray[i-1] = stopArray[i];
+        }
+        int newPos = NUM_STOPS - 2;
+        char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
+        char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
+        char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
+        strncpy(stopArray[newPos].name, name, STOP_NAME_LENGTH);
+        strncpy(stopArray[newPos].code, code, STOP_CODE_LENGTH);
+        strncpy(stopArray[newPos].time, time, TIME_STR_LENGTH);
+      }
+      else if (command == COMMAND_ALARM) {
+        uint8_t alarmType = dict_find(iterator, KEY_ALARM)->value->data[0];
+        if (alarmType == ALARM_GET_OFF) {
+          alarm_get_off();
+      }
+    }
+  }
+  // Update the menu, otherwise the new stop will not be shown before it's selected
+  // Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen
+  layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
 void message_dropped(DictionaryIterator *iterator) {
