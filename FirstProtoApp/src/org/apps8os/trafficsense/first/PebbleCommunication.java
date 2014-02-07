@@ -71,9 +71,12 @@ public class PebbleCommunication {
 	}
 	
     public void sendWaypoint(Waypoint waypoint, int listIndex) {
-    	String name = waypoint.getWaypointName();
-    	String time = waypoint.getWaypointTime();
-    	String code = waypoint.getWaypointStopCode();
+    	String name = ""; String time = ""; String code = "";
+    	if (waypoint != null) {
+			name = waypoint.getWaypointName();
+			time = waypoint.getWaypointTime();
+			code = waypoint.getWaypointStopCode();
+    	}
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(name.length(), 20);
     	name = name.substring(0, charLimit); //limit to charLimit characters
@@ -89,9 +92,12 @@ public class PebbleCommunication {
     }
     
     public void updateList(Waypoint waypoint) {
-    	String name = waypoint.getWaypointName();
-    	String time = waypoint.getWaypointTime();
-    	String code = waypoint.getWaypointStopCode();
+    	String name = ""; String time = ""; String code = "";
+    	if (waypoint != null) {
+			name = waypoint.getWaypointName();
+			time = waypoint.getWaypointTime();
+			code = waypoint.getWaypointStopCode();
+    	}
     	// Sends a single stop to Pebble to a place of the list defined by stopNum
     	int charLimit = Math.min(name.length(), 20);
     	name = name.substring(0, charLimit); //limit to charLimit characters
