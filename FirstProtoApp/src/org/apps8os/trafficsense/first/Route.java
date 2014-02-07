@@ -45,8 +45,13 @@ public class Route {
 
 	}
 	
+	//gets the last segment on the route
 	public Segment getLastSegment(){
 		return segmentList.get(segmentList.size()-1);
+	}
+	
+	public Segment getCurrentSegment(){
+		return(segmentList.get(currentSegment));
 	}
 	
 	public String getDate() {	
