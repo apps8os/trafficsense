@@ -20,7 +20,8 @@ import android.widget.Toast;
 
 //service that follows our route by always scheduling the nextwaypoint with the alarm manager. 
 public class RouteService extends Service{
-
+	
+	NextWaypointReceiver receiver;
 	Context context;
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -43,7 +44,8 @@ public class RouteService extends Service{
 		}
 		
 		//register our broadcast receiver
-		registerReceiver(new NextWaypointReceiver(), new IntentFilter("traffisense.NextWaypointAlarm"));
+		receiver=new NextWaypointReceiver();
+		registerReceiver(receiver, new IntentFilter("traffisense.NextWaypointAlarm"));
 		
 		//set the timer for first waypoint
 		Intent i = new Intent(getApplicationContext(),RouteService.class);
@@ -57,7 +59,7 @@ public class RouteService extends Service{
 	
 	public void onDestroy(){
 		try{
-			unregisterReceiver(new NextWaypointReceiver());
+			unregisterReceiver(receiver);
 		}catch(Exception e){
 			
 		}
