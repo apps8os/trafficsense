@@ -31,7 +31,7 @@ public class RouteService extends Service{
 	public void onCreate(){
 		super.onCreate();
 		context=this;
-		ServiceSingleton container=ServiceSingleton.getInstance();
+		TrafficsenseContainer container=TrafficsenseContainer.getInstance();
 		Route route = container.getRoute();
 		PebbleUiController pebbleUi = container.getPebbleUiController();
 		//gets the time of the first waypoint
@@ -82,7 +82,7 @@ public class RouteService extends Service{
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			ServiceSingleton container=ServiceSingleton.getInstance();
+			TrafficsenseContainer container=TrafficsenseContainer.getInstance();
 			//get the next waypoint
 			Waypoint nextWaypoint = container.getRoute().getCurrentSegment().setNextWaypoint();
 			//if waypoint is null then get the next segment
