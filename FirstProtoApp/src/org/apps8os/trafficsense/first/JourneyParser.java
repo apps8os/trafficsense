@@ -207,7 +207,7 @@ public class JourneyParser {
 	}
 	
 	private void parseOneLine(String line) {
-		System.out.println("Line: "+line);
+		//System.out.println("Line: "+line);
     	this.setTxtLine(line);
     	this.incrementLine(); // will increment a read line on txt file, counter starts 0
     	this.organizeJson(line);
