@@ -6,9 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import com.example.timerwithnotification.AlertActivity;
-import com.example.timerwithnotification.ConfigActivity;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -55,7 +52,8 @@ public class RouteService extends Service{
 	
 	/**
 	 * Broadcast receiver that receives intents indicating that next stop has been reached.
-	 *If it is the last waypoint in a segmenet it does nothing. Otherwise it gets the next waypoint
+	 *If it is the last waypoint it set the next segment as the current segment and set the timer
+	 *for it. In any case it gets the next waypoint
 	 *in the segment and sets the alarm to indicate when we are there. 
 	 */
 	class NextWaypointReceiver extends BroadcastReceiver{
@@ -65,12 +63,30 @@ public class RouteService extends Service{
 			ServiceSingleton container=ServiceSingleton.getInstance();
 			//get the next waypoint
 			Waypoint nextWaypoint = container.getRoute().getCurrentSegment().setNextWaypoint();
+			//if waypoint is null then get the next segment
 			if(nextWaypoint==null){
-				return;
+				Segment nextSegment = container.getRoute().setNextSegment();
+				//if the nextSegment is null then we have reached the end of the route
+				if(nextSegment == null){
+					/**
+					 * Set end of route code here
+					 */
+	
+					return;
+				}
+				// since we are in a new segment we need to set the alarm that indicates its end
+				long timeToNextSegment = timeStringToDate(nextSegment.getLastWaypoint().getWaypointTime()).getTime();
+				Intent i = new Intent(getApplicationContext(),RouteService.class);
+				i.setAction("trafficsense.NextSegmentAlarm");
+				PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
+				//set the alarm manager the new segment
+				AlarmManager am = (AlarmManager) getBaseContext().getSystemService(ALARM_SERVICE);
+				am.set(AlarmManager.RTC_WAKEUP,  timeToNextSegment, o);
+				nextWaypoint=nextSegment.getCurrentWaypoint();
+				
 			}
+			//set the alarm for the next waypoint
 			long timeToNextWaypoint=timeStringToDate(nextWaypoint.getWaypointTime()).getTime();
-			
-			//make the intent that is sent to this service once alarm expires
 			Intent i = new Intent(getApplicationContext(),RouteService.class);
 			i.setAction("trafficsense.NextWaypointAlarm");
 			PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -81,30 +97,15 @@ public class RouteService extends Service{
 	}
 	/**
 	 * Broadcast receiver for receiving timer updates that indicate current segment has ended.
-	 * It sets the next segment along with timers to indicate when it ends.
 	 *
 	 */
 	class NextSegmentReceiver extends BroadcastReceiver{
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			ServiceSingleton container=ServiceSingleton.getInstance();
-			//get the next segment
-			Segment nextSegment = container.getRoute().setNextSegment();
-			//return if there is no next segment
-			if(nextSegment==null){
-				return;		
-			}
-			//get the time the next segment ends
-			long timeToNextSegment = timeStringToDate(nextSegment.getLastWaypoint().getWaypointTime()).getTime();
-			Intent i = new Intent(getApplicationContext(),RouteService.class);
-			i.setAction("trafficsense.NextSegmentAlarm");
-			PendingIntent o = PendingIntent.getActivity(getBaseContext(), 0, i, Intent.FLAG_ACTIVITY_NEW_TASK);
-			//set the alarm manager
-			AlarmManager am = (AlarmManager) getBaseContext().getSystemService(ALARM_SERVICE);
-			am.set(AlarmManager.RTC_WAKEUP,  timeToNextSegment, o);
-		}
+			// do something
 		
+		}
 	}
 
 }
