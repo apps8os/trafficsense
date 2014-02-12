@@ -98,6 +98,8 @@ public class MainActivity extends Activity {
 		// Stop Monitoring Framework
 		mfAgent.stop(this);
 		
+		// TODO Pebble ?!
+		
 		super.onDestroy();
 	}
 
@@ -200,7 +202,7 @@ public class MainActivity extends Activity {
     }
     
     public void onClick_send(View v) {
-    	System.out.println("DBG onClick_send");
+    	//System.out.println("DBG onClick_send");
     	// not in use
 	}
 

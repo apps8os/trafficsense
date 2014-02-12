@@ -30,6 +30,7 @@ public class RouteService extends Service{
 	NextWaypointReceiver mNextWaypointReceiver;
 	VibrateAndMakeNotificationReceiver mMakeAlertReceiver;
 	Context mContext;
+	AlarmManager mAM;
 	
 	public void onCreate(){
 		super.onCreate();
@@ -37,58 +38,77 @@ public class RouteService extends Service{
 		mContext=this;
 		mContainer=TrafficsenseContainer.getInstance();
 		mRoute = mContainer.getRoute();
-		mNextWaypointReceiver=new NextWaypointReceiver();
+		mNextWaypointReceiver= new NextWaypointReceiver();
 		mMakeAlertReceiver = new VibrateAndMakeNotificationReceiver();
-		
-		if (mRoute == null) {
-			System.out.println("DBG route = null");
-			this.stopSelf();
-		}
-		//PebbleUiController pebbleUi = container.getPebbleUiController();
-		//gets the time of the first waypoint
-
-		// TODO do not check this at the moment
-		/*
-		long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
-		if(timeToNextWaypoint<System.currentTimeMillis()){
-			System.out.println("DBG next waypoint in the past");
-			Toast toast = Toast.makeText(context, "Error:next waypoint is in the past", 5);
-			toast.show();
-			this.stopSelf();
-		}
-		*/
+		mAM = (AlarmManager) getSystemService(ALARM_SERVICE);
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		boolean errorOnStart = false;
+
 		registerReceiver(mNextWaypointReceiver, new IntentFilter(ACTION_NEXT_WAYPOINT));
 		registerReceiver(mMakeAlertReceiver, new IntentFilter(ACTION_MAKE_ALERT));
-		
-		long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
-		scheduleNextAlarm(timeToNextWaypoint);
 
+		if (mRoute == null) {
+			System.out.println("DBG route = null");
+			errorOnStart = true;
+		} else {
+			//gets the time of the first waypoint
+			long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
+			
+			// TODO do not check this at the moment
+			/*
+			if(timeToNextWaypoint < System.currentTimeMillis()){
+				System.out.println("DBG next waypoint in the past");
+				Toast toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
+				toast.show();
+				errorOnStart = true;
+			} else {
+			*/
+				scheduleNextAlarm(timeToNextWaypoint);
+			//}
+		}
+
+
+		// TODO do we still need these?
 		//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
 		//mContainer.getPebbleUiController().initializeList(currentSegment);
 		
 		System.out.println("DBG RouteService.onStartCommand cp");
 	    // We want this service to continue running until it is explicitly
 	    // stopped, so return sticky.
+		
+		if (errorOnStart) {
+			this.stopSelf();
+			return START_NOT_STICKY;
+		}
 	    return START_STICKY;
 	}
 	
-	public void onDestr2500oy(){
+	public void onDestroy(){
+		PendingIntent pi;
+		
 		System.out.println("DBG RouteService.onDestroy");
+		Intent i = new Intent();
+		i.setAction(ACTION_NEXT_WAYPOINT);
+		pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		mAM.cancel(pi);
+		i.setAction(ACTION_MAKE_ALERT);
+		sendBroadcast(i);
+		pi = PendingIntent.getBroadcast(mContext, 1, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		mAM.cancel(pi);
 		unregisterReceiver(mNextWaypointReceiver);
+		unregisterReceiver(mMakeAlertReceiver);
 	}
 
 	private void scheduleNextAlarm(long atMillis) {
 		Intent i = new Intent();
 		i.setAction(ACTION_NEXT_WAYPOINT);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		//am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
+		//mAM.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
 		// TODO testing use
-		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+TEST_TIME, pi);
+		mAM.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+TEST_TIME, pi);
 	}
 	
 	private void scheduleGetOffAlarm(long atMillis) {
@@ -96,8 +116,7 @@ public class RouteService extends Service{
 		i.setAction(ACTION_MAKE_ALERT);
 		sendBroadcast(i);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, PendingIntent.FLAG_CANCEL_CURRENT);
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
+		mAM.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
 		System.out.println("DBG scheduled getOffAlarm with intent" + pi);
 	}
 	

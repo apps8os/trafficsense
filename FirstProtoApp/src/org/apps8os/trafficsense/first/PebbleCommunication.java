@@ -19,6 +19,8 @@ import android.util.Log;
 
 /**
 Handles all communication between Android and Pebble
+
+TODO there is no .Stop() which stops the Pebble thread and unregister receivers!!
  */
 public class PebbleCommunication {
 	private static final UUID APP_UUID = UUID.fromString("83eef382-21a4-473a-a189-ceffa42f86b1");
