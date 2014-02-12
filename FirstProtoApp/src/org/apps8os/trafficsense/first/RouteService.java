@@ -85,6 +85,10 @@ public class RouteService extends Service{
 		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+5000, pi);
 	}
 	
+	private void scheduleGetOffAlarm(long atMillis) {
+		
+	}
+	
 	private Date timeStringToDate(String timeStr){
 		Date date = null;
 		try {
