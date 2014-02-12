@@ -23,9 +23,12 @@ import android.widget.Toast;
 public class RouteService extends Service{
 	
 	final static String ACTION_NEXT_WAYPOINT = "trafficsense.NextWaypointAlarm";
+	final static String ACTION_MAKE_ALERT = "trafficsense.MakeAlert";
+	final static long TEST_TIME = 5000;
 	TrafficsenseContainer mContainer;
 	Route mRoute;
-	NextWaypointReceiver mReceiver;
+	NextWaypointReceiver mNextWaypointReceiver;
+	VibrateAndMakeNotificationReceiver mMakeAlertReceiver;
 	Context mContext;
 	
 	public void onCreate(){
@@ -34,7 +37,8 @@ public class RouteService extends Service{
 		mContext=this;
 		mContainer=TrafficsenseContainer.getInstance();
 		mRoute = mContainer.getRoute();
-		mReceiver=new NextWaypointReceiver();
+		mNextWaypointReceiver=new NextWaypointReceiver();
+		mMakeAlertReceiver = new VibrateAndMakeNotificationReceiver();
 		
 		if (mRoute == null) {
 			System.out.println("DBG route = null");
@@ -57,8 +61,9 @@ public class RouteService extends Service{
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		registerReceiver(mReceiver, new IntentFilter(ACTION_NEXT_WAYPOINT));
-
+		registerReceiver(mNextWaypointReceiver, new IntentFilter(ACTION_NEXT_WAYPOINT));
+		registerReceiver(mMakeAlertReceiver, new IntentFilter(ACTION_MAKE_ALERT));
+		
 		long timeToNextWaypoint = timeStringToDate(mRoute.getDate() + " "+ mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()).getTime();
 		scheduleNextAlarm(timeToNextWaypoint);
 
@@ -73,7 +78,7 @@ public class RouteService extends Service{
 	
 	public void onDestr2500oy(){
 		System.out.println("DBG RouteService.onDestroy");
-		unregisterReceiver(mReceiver);
+		unregisterReceiver(mNextWaypointReceiver);
 	}
 
 	private void scheduleNextAlarm(long atMillis) {
@@ -83,11 +88,17 @@ public class RouteService extends Service{
 		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
 		//am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
 		// TODO testing use
-		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+5000, pi);
+		am.set(AlarmManager.RTC_WAKEUP,  System.currentTimeMillis()+TEST_TIME, pi);
 	}
 	
 	private void scheduleGetOffAlarm(long atMillis) {
-		
+		Intent i = new Intent();
+		i.setAction(ACTION_MAKE_ALERT);
+		sendBroadcast(i);
+		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+		am.set(AlarmManager.RTC_WAKEUP,  atMillis, pi);
+		System.out.println("DBG scheduled getOffAlarm with intent" + pi);
 	}
 	
 	private Date timeStringToDate(String timeStr){
@@ -110,10 +121,10 @@ public class RouteService extends Service{
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			System.out.println("DBG NextWaypointReceiver.onReceive");
+			System.out.println("DBG NextWaypointReceiver.onReceive" + arg1.getAction());
 			String message = "ERROR: No message set in onReceive()";
 			
-			//get the next waypoint
+			//get the next waypointindex
 			Waypoint nextWaypoint = mContainer.getRoute().getCurrentSegment().setNextWaypoint();
 			//if waypoint is null then get the next segment
 			if(nextWaypoint==null) {
@@ -127,6 +138,13 @@ public class RouteService extends Service{
 					if (mContainer.getPebbleUiController() == null)
 						System.out.println("DBG uicontroller is null");
 					mContainer.getPebbleUiController().initializeList();
+					int secondLastWpIndex = nextSegment.getWaypointList().size() - 2;
+					// TODO: Test with real time
+					//long timeToAlarm = timeStringToDate(mContainer.getRoute().getDate() + " "+nextSegment.getWaypointList().get(secondLastWpIndex).getWaypointTime()).getTime();
+					long timeToAlarm = (secondLastWpIndex + 1) * TEST_TIME + System.currentTimeMillis();
+					System.out.println("DBG scheduling getOffAlarm");
+					scheduleGetOffAlarm(timeToAlarm);
+					
 				}
 			}
 			
@@ -147,21 +165,20 @@ public class RouteService extends Service{
 			sendBroadcast(vi);
 						
 			Toast toast = Toast.makeText(mContext, message, Toast.LENGTH_SHORT);
-			toast.show();			
+			toast.show();
 		}
 		
 	}
 	
 	//causes the phone to vibrate. 
-	class vibrateAndMakeNotification extends BroadcastReceiver{
+	class VibrateAndMakeNotificationReceiver extends BroadcastReceiver{
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			
+			System.out.println("DBG received getoffalarm");
+			mContainer.getPebbleUiController().alarmGetOff();
 			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			vibrator.vibrate(250);
-			
-			//make notification needs to be implemented here
 			
 		}
 		
