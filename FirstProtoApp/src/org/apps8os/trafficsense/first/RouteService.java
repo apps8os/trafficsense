@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.widget.Toast;
 
 
@@ -147,8 +148,25 @@ public class RouteService extends Service{
 						
 			Toast toast = Toast.makeText(mContext, message, Toast.LENGTH_SHORT);
 			toast.show();			
-		}	
+		}
+		
 	}
+	
+	//causes the phone to vibrate. 
+	class vibrateAndMakeNotification extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			
+			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			vibrator.vibrate(250);
+			
+			//make notification needs to be implemented here
+			
+		}
+		
+	}
+	
 
 	@Override
 	public IBinder onBind(Intent intent) {
