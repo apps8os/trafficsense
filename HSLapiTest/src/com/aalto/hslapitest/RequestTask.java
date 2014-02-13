@@ -18,9 +18,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
-class RequestTask extends AsyncTask<String, String, String>{
+class RequestTask extends AsyncTask <String, String, String> {
+	
 	String responseString = null;
 	private Context mContext;
+	HttpResponse response;
+	HttpClient httpclient = new DefaultHttpClient();
 	
     public RequestTask (Context context){
          mContext = context;
@@ -28,15 +31,53 @@ class RequestTask extends AsyncTask<String, String, String>{
 	
     @Override
     protected String doInBackground(String... uri) {
-    	GeocodingRequest geo = new GeocodingRequest();
     	
-    	geo.setContext(mContext);
-    	geo.getRequest();
-    	
-    	System.out.println("doing stuff");
-    	responseString = geo.getRequest();
-    	return responseString;
-    	
+    	try {
+        	System.out.println("Doing getRequest");
+            response = httpclient.execute(new HttpGet(uri[0]));
+            StatusLine statusLine = response.getStatusLine();
+           
+            if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                response.getEntity().writeTo(out);
+                out.close();
+                responseString = out.toString();
+             } 
+            else{
+            	System.out.println("Something failed.");
+                //Closes the connection.
+                response.getEntity().getContent().close();
+                throw new IOException(statusLine.getReasonPhrase());
+            }
+        } catch (ClientProtocolException e) {
+            e.getStackTrace();
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+      
+        //saveToFile();
+    	System.out.println(responseString);
+        return responseString;
+    }
+        
+       public void setContext (Context x){
+    	 mContext = x;
+       }
+       
+       
+       public void saveToFile(){
+    	   try {
+    	    	File file = new File(mContext.getFilesDir().getAbsolutePath());
+    	    	System.out.println("path: " + file.getAbsolutePath().toString());
+    	    	file.createNewFile();
+    	    	FileWriter writer = new FileWriter(file.getAbsolutePath()+File.separator+"myFile2.json");
+    	    	writer.write(responseString);
+    	    	writer.close();
+    	    	System.out.println(responseString);
+    	    }
+    	     catch(Exception e) {
+    	    	 e.printStackTrace();
+    	     }  
     }
     	
 

@@ -44,11 +44,16 @@ public class MainActivity extends Activity {
             	
             	key = key.replace(" ", "_");
             	System.out.println(key);
-            	RequestTask task = new RequestTask(getBaseContext()); 
-            	task.execute();
-				//task.execute("http://api.reittiopas.fi/hsl/prod/?request=geocode&user=trafficsenseuser&pass=trafficsense&format=txt&key="+key+"&epsg_out=4326");
-				Toast toast = Toast.makeText(getApplicationContext(), "Searching...", Toast.LENGTH_SHORT);
-				toast.show();*/
+            	String har = null;
+            	Request Geo = new Request();
+            	Geo.getGeocoding("","",key);
+            	//String uri = null;
+            	//Geo.sendRequest(uri);
+            	//RequestTask task = new RequestTask(getBaseContext()); 
+            	//task.execute();
+				//task.execute("http://api.reittiopas.fi/hsl/prod/?request=geocode&user=trafficsenseuser&pass=trafficsense&format=txt&key="+key+"&epsg_out=4326"+"&p=");
+				//Toast toast = Toast.makeText(getApplicationContext(), "Searching...", Toast.LENGTH_SHORT);
+				//toast.show();*/
 				
             }
        });
