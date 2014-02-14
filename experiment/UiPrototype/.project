@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PebbleTest</name>
+	<name>UiPrototype</name>
 	<comment></comment>
 	<projects>
-		<project>google-play-services_lib</project>
-		<project>PEBBLE_KIT</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
