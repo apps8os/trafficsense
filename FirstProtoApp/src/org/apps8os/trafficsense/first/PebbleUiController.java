@@ -29,17 +29,19 @@ public class PebbleUiController {
 		Segment newSegment = mRoute.getCurrentSegment();
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		// Add the waypoints from the segment to the list
-		int maxIndex = Math.min(newSegment.getWaypointList().size() - 1, PebbleCommunication.NUM_STOPS - 1 );
-		for (int i = 0; i < maxIndex; i++) {
-			if (newSegment.getWaypoint(i) == null)
-				System.out.println("DBG waypoint at index " + i + " was null");
-			waypoints.add(newSegment.getWaypoint(i));
+		//int maxIndex = Math.min(newSegment.getWaypointList().size() - 1, PebbleCommunication.NUM_STOPS - 1 );
+		for (int i = 0; i < PebbleCommunication.NUM_STOPS - 1; i++) {
+			if (newSegment.getWaypoint(i) == null) {
+				waypoints.add(null);
+			} else {
+				waypoints.add(newSegment.getWaypoint(i));
+			}
 		}
 		waypoints.add(newSegment.getLastWaypoint());
 		if (newSegment.getLastWaypoint() == null)
 			System.out.println("DBG last waypoint was null");
 		// Send the waypoints to Pebble
-		for (int i = 0; i < maxIndex + 1; i++) {
+		for (int i = 0; i < PebbleCommunication.NUM_STOPS; i++) {
 			mPblCom.sendWaypoint(waypoints.get(i), i);
 		}
 	}

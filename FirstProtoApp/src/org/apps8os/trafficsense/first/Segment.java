@@ -83,7 +83,11 @@ public class Segment {
 		}		
 		
 		public Waypoint getWaypoint(int index) {
-			return waypointList.get(index);
+			if (index > waypointList.size() - 1) {
+				return null;
+			} else {
+				return waypointList.get(index);
+			}
 		}
 		
 		public void setSegment(JsonObject segment){

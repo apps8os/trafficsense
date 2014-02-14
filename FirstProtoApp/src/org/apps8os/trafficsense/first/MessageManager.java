@@ -105,4 +105,8 @@ public class MessageManager implements Runnable {
 
         return success;
     }
+    
+    public void stop() {
+    	Looper.myLooper().quitSafely();
+    }
 }
