@@ -49,8 +49,8 @@ public class MainActivity extends Activity {
             	Request Geo = new Request();
             	//Geo.getStopInfo("", "E2209");
             	JSONObject json = null;
-            	json = Geo.getGeocoding("00000010", "", "Ylästön_ramppi" , "street");
-            	System.out.println(json.toString());
+            	json = Geo.getGeocoding("", "", "Ylästön_ramppi" , "street");
+            	//System.out.println(json.toString());
             	//System.out.println("E2209");
             	//String uri = null;
             	//Geo.sendRequest(uri);

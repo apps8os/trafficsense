@@ -1,4 +1,4 @@
-package org.apps8os.trafficsense.first;
+package com.aalto.hslapitest; 
 
 import com.google.gson.JsonObject;
 
