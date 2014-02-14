@@ -7,8 +7,6 @@ public class Waypoint {
 	private String time;
 	private String name;
 	private String stopCode;
-	private String xCord;
-	private String yCord;
 	
 	public String getWaypointTime(){
 		return time;
@@ -40,15 +38,12 @@ public class Waypoint {
 	public void setWaypoint (JsonObject waypoint){
 		setWaypointTime (waypoint.get("time").getAsString());
 		setWaypointName (waypoint.get("name").getAsString());
-		Request req = new Request();
 		if (waypoint.has("stopCode")) {
 			setWaypointStopCode(waypoint.get("stopCode").getAsString());		
-			req.getStopInfo("", stopCode);		
 		} 
-			else { 
+		else { 
 				// TODO: what should this be if there is no stopCode ???
 				setWaypointStopCode("0000");
-				req.getGeocoding("00000010", "", name, "street");
 		}
 		
 	}
