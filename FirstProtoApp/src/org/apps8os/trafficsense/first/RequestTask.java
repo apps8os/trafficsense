@@ -1,4 +1,4 @@
-package com.aalto.hslapitest;
+package org.apps8os.trafficsense.first;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,10 +25,13 @@ class RequestTask extends AsyncTask <String, String, String> {
 	HttpResponse response;
 	HttpClient httpclient = new DefaultHttpClient();
 	
-   
+    public RequestTask (Context context){
+         mContext = context;
+    }
 	
     @Override
     protected String doInBackground(String... uri) {
+    	
     	try {
         	System.out.println("Doing getRequest");
             response = httpclient.execute(new HttpGet(uri[0]));
@@ -53,6 +56,7 @@ class RequestTask extends AsyncTask <String, String, String> {
         }
       
         //saveToFile();
+    	System.out.println(responseString);
         return responseString;
     }
         
@@ -60,10 +64,10 @@ class RequestTask extends AsyncTask <String, String, String> {
     	 mContext = x;
        }
        
-       /*
+       
        public void saveToFile(){
     	   try {
-    	    	File file = new File(Context.getFilesDir().getAbsolutePath());
+    	    	File file = new File(mContext.getFilesDir().getAbsolutePath());
     	    	System.out.println("path: " + file.getAbsolutePath().toString());
     	    	file.createNewFile();
     	    	FileWriter writer = new FileWriter(file.getAbsolutePath()+File.separator+"myFile2.json");
@@ -74,7 +78,7 @@ class RequestTask extends AsyncTask <String, String, String> {
     	     catch(Exception e) {
     	    	 e.printStackTrace();
     	     }  
-    }*/
+    }
     	
 
     @Override

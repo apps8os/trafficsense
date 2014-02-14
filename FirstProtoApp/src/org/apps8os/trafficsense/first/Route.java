@@ -30,7 +30,7 @@ public class Route {
 		
 	}
 
-	//sets the current segement to the next segment
+	//sets the current segment to the next segment
 	//and returns the next segment.
 	//returns null if on last segment.
 	public Segment setNextSegment(){
