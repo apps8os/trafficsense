@@ -73,7 +73,7 @@ public class RouteService extends Service{
 
 		// TODO do we still need these?
 		//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
-		//mContainer.getPebbleUiController().initializeList(currentSegment);
+		mContainer.getPebbleUiController().initializeList();
 		
 		System.out.println("DBG RouteService.onStartCommand cp");
 	    // We want this service to continue running until it is explicitly

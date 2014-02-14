@@ -35,6 +35,7 @@ public class PebbleCommunication {
 	public static final int NUM_STOPS = 3;
 	
 	private Context mContext;
+	private Thread mMessageManagerThread;
 	private final MessageManager messageManager;
 	private PebbleKit.PebbleAckReceiver ackReceiver;
     private PebbleKit.PebbleNackReceiver nackReceiver;
@@ -43,7 +44,8 @@ public class PebbleCommunication {
 		mContext = applicationContext;
 		messageManager = new MessageManager(mContext, APP_UUID);
 		// Start a new thread for MessageManager
-		new Thread(messageManager).start();
+		mMessageManagerThread = new Thread(messageManager);
+		mMessageManagerThread.start();
 		registerReceivers();
 	}
 
@@ -76,6 +78,7 @@ public class PebbleCommunication {
     	String name = ""; String time = ""; String code = "";
     	if (waypoint != null) {
 			name = waypoint.getWaypointName();
+			System.out.println("DBG " + name);
 			time = waypoint.getWaypointTime();
 			code = waypoint.getWaypointStopCode();
     	}
@@ -138,10 +141,15 @@ public class PebbleCommunication {
         PebbleKit.registerReceivedNackHandler(mContext, nackReceiver);
 	}
 	
-	/** 
-	 * Should be called whenever there is no need to receive acks/nacks or messages
-	 * from Pebble anymore.
+	
+	/**
+	 * Should be called when there  is no need to communicate with Pebble anymore
 	 */
+	public void stop() {
+		unRegisterReceivers();
+		messageManager.stop();
+	}
+	
 	private void unRegisterReceivers() {
         if (ackReceiver != null) {
             mContext.unregisterReceiver(ackReceiver);
