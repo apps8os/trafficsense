@@ -2,6 +2,8 @@ package com.aalto.hslapitest;
 
 import java.util.Calendar;
 
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -44,9 +46,12 @@ public class MainActivity extends Activity {
             	
             	key = key.replace(" ", "_");
             	System.out.println(key);
-            	String har = null;
             	Request Geo = new Request();
-            	Geo.getGeocoding("","",key);
+            	//Geo.getStopInfo("", "E2209");
+            	JSONObject json = null;
+            	json = Geo.getGeocoding("00000010", "", "Ylästön_ramppi" , "street");
+            	System.out.println(json.toString());
+            	//System.out.println("E2209");
             	//String uri = null;
             	//Geo.sendRequest(uri);
             	//RequestTask task = new RequestTask(getBaseContext()); 
