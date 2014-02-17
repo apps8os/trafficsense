@@ -103,7 +103,10 @@ public class JourneyParser {
 		
 		
 		
-		if(! getTextArray().get(1).equals("Arrival"|| "Perillä" || "Ankomst")){
+		if(! (  getTextArray().get(1).equals("Arrival" ) || 
+				getTextArray().get(1).equals("Perillä")|| 
+				getTextArray().get(1).equals("Ankomst")
+			)){
 		
 			JsonObject SegmentsObj = new JsonObject();
 			SegmentsObj.addProperty("startTime", str_split[0]);
@@ -123,9 +126,10 @@ public class JourneyParser {
 				waypointObj.addProperty("name",str_split[1]);
 				
 				
-				if(! (getTextArray().get(1).contains("Walking") || getTextArray().get(1).contains("Kävelyä") || getTextArray().get(1).contains("Gång")) ){
+				if(!getTextArray().get(1).contains("Walking") || 
+					getTextArray().get(1).contains("Kävelyä") || 
+					getTextArray().get(1).contains("Gång") ){
 					// If the user is not walking will have a stopCode for each point
-				;
 					String stopCode ;
 					int start,end;
 					start = str_split[1].indexOf( "(" )+1;
@@ -182,7 +186,11 @@ public class JourneyParser {
 				this.addTextArray(line);
 			}
 			
-			if( this.getTxtLine().equals("Arrival") || this.getTxtLine().equals("Perillä") || this.getTxtLine().equals("Ankomst")) {
+			if( this.getTxtLine().equals("Arrival") || 
+				this.getTxtLine().equals("Perillä") || 
+				this.getTxtLine().equals("Ankomst")) 
+			{
+				
 				this.addJsonObject();
 				this.flushTextArray();
 			}
@@ -219,7 +227,10 @@ public class JourneyParser {
 		while (scanner.hasNextLine()) {
 			String line=scanner.nextLine();
 			parseOneLine(line);
-			if(line.equals("Arrival") || line.equals("Perillä") || line.equals("Ankomst")){
+			if(	line.equals("Arrival") || 
+				line.equals("Perillä") || 
+				line.equals("Ankomst"))
+			{
 				break;
 			}
 		}
@@ -236,7 +247,10 @@ public class JourneyParser {
             BufferedReader bufferedReader =  new BufferedReader(new FileReader(fileName));
             while((line = bufferedReader.readLine()) != null) {
             	parseOneLine(line);
-            	if(getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä") || getTxtLine().equals("Ankomst") ){
+            	if(	getTxtLine().equals("Arrival") || 
+            		getTxtLine().equals("Perillä") ||
+            		getTxtLine().equals("Ankomst") )
+            	{
             		// Document it was already all parsed 
             		break;
             	}
@@ -251,4 +265,12 @@ public class JourneyParser {
             // ex.printStackTrace();   
         }
 	}
+	
+	public static void main(String[] args) {
+		
+		JSON file = new JSON();
+		file.parsingFile("/Users/catarinamoura/Desktop/trafficsense/experiment/json/sample.txt") ;	
+
+	}
+
 }
