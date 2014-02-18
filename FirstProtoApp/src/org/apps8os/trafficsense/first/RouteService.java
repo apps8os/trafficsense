@@ -123,6 +123,7 @@ public class RouteService extends Service{
 	private Date timeStringToDate(String timeStr){
 		Date date = null;
 		try {
+			// TODO: Locale problem
 			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH).parse(timeStr);
 		} catch (ParseException e) {
 			System.out.println("DBG timeStringToDate error: "+e.getMessage());
