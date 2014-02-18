@@ -41,7 +41,7 @@
             </intent-filter>
         </activity>
         
-        <service android:name="org.apps8os.trafficsense.first.RouteService" />
+        <service android:name="org.apps8os.trafficsense.android.TimeOnlyService" />
         
         <!-- ContextLogger3 related services -->
         <!-- framework core -->
