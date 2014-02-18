@@ -1,4 +1,5 @@
-package org.apps8os.trafficsense.first;
+package org.apps8os.trafficsense.core;
+
 
 import com.google.gson.JsonObject;
 
