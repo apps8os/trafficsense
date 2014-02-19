@@ -26,8 +26,7 @@ import android.os.RemoteException;
 public class LocationService extends Service implements 
 		ConnectionCallbacks,
 		OnConnectionFailedListener,
-		OnAddGeofencesResultListener,
-		OnRemoveGeofencesResultListener{
+		OnAddGeofencesResultListener{
 
 	//container that contains route information and else-
 	private TrafficsenseContainer mContainer; 
@@ -44,7 +43,6 @@ public class LocationService extends Service implements
 	private Context mContext;
 	//callbacks by geofence will be made to these classes
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
-	private LocationClient.OnRemoveGeofencesResultListener mOnRemoveGeofencesListener;
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
 	
 	//messenger used to communicate between client and service
@@ -116,7 +114,6 @@ public class LocationService extends Service implements
 		mContext=this;
 		//this class implements the onAddGeofenceListener
 		mOnAddGeofencesListener=this;
-		mOnRemoveGeofencesListener=this;
 		registerReceiver(mEnteredWaypointAlertReceiver, new IntentFilter(ACTION_NEXT_GEOFENCE_REACHED));
 		//TODO: need to check that google play service are available
 
@@ -199,19 +196,7 @@ public class LocationService extends Service implements
 		
 	}
 
-	@Override
-	public void onRemoveGeofencesByPendingIntentResult(int statusCode,
-			PendingIntent pendingIntent) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void onRemoveGeofencesByRequestIdsResult(int statusCode,
-			String[] geofenceRequestIds) {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	@Override
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
