@@ -39,28 +39,8 @@ public class Request {
 		String url = "http://api.reittiopas.fi/hsl/prod/?request=geocode"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 				"&key="+ key +"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit + "&cities=" + cities + "&lang=" + LANG[defLang] + "&loc_types=" + locType;
 		RequestTask task = new RequestTask(); 				
-			String myString=null;
-			JSONObject json = null;
-			JSONArray jArray = null;
-			try {
-				myString = task.execute(url).get();
-				System.out.println(myString);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				
-				jArray = new JSONArray(myString);
-				json = jArray.toJSONObject(jArray);	
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return json;
+			task.execute(url);	
+			return null;
 	}
 	
    

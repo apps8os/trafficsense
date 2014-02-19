@@ -12,13 +12,15 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
-class RequestTask extends AsyncTask <String, String, String> {
+class RequestTask extends AsyncTask <String, String, JSONObject> {
 	
 	String responseString = null;
 	private Context mContext;
@@ -28,17 +30,21 @@ class RequestTask extends AsyncTask <String, String, String> {
    
 	
     @Override
-    protected String doInBackground(String... uri) {
+    protected JSONObject doInBackground(String... uri) {
+    	JSONObject json = new JSONObject();
     	try {
         	System.out.println("Doing getRequest");
             response = httpclient.execute(new HttpGet(uri[0]));
             StatusLine statusLine = response.getStatusLine();
            
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+            	
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 response.getEntity().writeTo(out);
                 out.close();
                 responseString = out.toString();
+                
+                System.out.println("result: " + json.toString());
              } 
             else{
             	System.out.println("Something failed.");
@@ -53,7 +59,7 @@ class RequestTask extends AsyncTask <String, String, String> {
         }
       
         //saveToFile();
-        return responseString;
+        return json;
     }
         
        public void setContext (Context x){
@@ -78,12 +84,13 @@ class RequestTask extends AsyncTask <String, String, String> {
     	
 
     @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        
+    protected void onPostExecute(JSONObject json) {
+        super.onPostExecute(json);
+     
         
         
     }
+   
     
     protected void onProgressUpdate(){
     	
