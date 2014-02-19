@@ -46,7 +46,6 @@ public class MainActivity extends Activity {
 
 
 	private class RouteServiceEventReceiver extends BroadcastReceiver {
-
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG RouteServiceEventReceiver onReceive");
