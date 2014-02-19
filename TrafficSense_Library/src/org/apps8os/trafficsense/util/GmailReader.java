@@ -1,4 +1,4 @@
-package org.apps8os.trafficsense.first;
+package org.apps8os.trafficsense.util;
 
 
 import java.util.Properties;
