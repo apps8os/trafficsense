@@ -1,9 +1,11 @@
-/**
- * 
- */
-package org.apps8os.trafficsense.first;
+package org.apps8os.trafficsense.pebble;
+
 
 import java.util.ArrayList;
+
+import org.apps8os.trafficsense.core.Route;
+import org.apps8os.trafficsense.core.Segment;
+import org.apps8os.trafficsense.core.Waypoint;
 
 import android.content.Context;
 

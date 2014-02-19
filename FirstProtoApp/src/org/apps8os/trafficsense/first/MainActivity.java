@@ -15,7 +15,16 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
-import org.apps8os.trafficsense.first.GmailReader.EmailException;
+import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.android.TimeOnlyService;
+import org.apps8os.trafficsense.core.Route;
+import org.apps8os.trafficsense.core.TrafficsenseContainer;
+import org.apps8os.trafficsense.pebble.PebbleCommunication;
+import org.apps8os.trafficsense.pebble.PebbleUiController;
+import org.apps8os.trafficsense.util.Email;
+import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.GmailReader.EmailException;
+import org.apps8os.trafficsense.util.JourneyParser;
 
 import com.google.gson.Gson;
 
@@ -27,9 +36,6 @@ import java.io.InputStreamReader;
 
 public class MainActivity extends Activity {
 
-	final public static String ACTION_ROUTE_EVENT = "trafficsense.RouteEventUpdateUi";
-	final public static String ACTION_ROUTE_EVENT_EXTRA_MESSAGE = "trafficsense.RouteEventUpdateUi.Extras.Message";
-	
 	private PebbleCommunication mPebbleCommunication;
 	private Route mRoute;
 	private String mJourneyText;
@@ -37,8 +43,8 @@ public class MainActivity extends Activity {
 	private JourneyParser mJourneyParser;
 	private PebbleUiController mPebbleUi;
 	private RouteServiceEventReceiver mRecv;
-	
-	
+
+
 	private class RouteServiceEventReceiver extends BroadcastReceiver {
 
 		@Override
@@ -46,18 +52,18 @@ public class MainActivity extends Activity {
 			System.out.println("DBG RouteServiceEventReceiver onReceive");
 			// TODO update UI here
 			TextView view = (TextView) findViewById(R.id.textView4);
-			if (intent.hasExtra(ACTION_ROUTE_EVENT_EXTRA_MESSAGE)) {
-				view.setText(intent.getStringExtra(ACTION_ROUTE_EVENT_EXTRA_MESSAGE));
+			if (intent.hasExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE)) {
+				view.setText(intent.getStringExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE));
 			}
 		}
-		
+
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		mRes = getResources();
 		mJourneyText = new String("");
 		mJourneyParser = new JourneyParser();
@@ -74,14 +80,14 @@ public class MainActivity extends Activity {
 		mPebbleCommunication.startAppOnPebble();
 		// mPebbleUi is initialized in onClick_activate()
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		IntentFilter filter = new IntentFilter(ACTION_ROUTE_EVENT);
+		IntentFilter filter = new IntentFilter(Constants.ACTION_ROUTE_EVENT);
 		registerReceiver(mRecv, filter);
 	}
-	
+
 	@Override
 	protected void onPause() {
 		unregisterReceiver(mRecv);
@@ -89,15 +95,15 @@ public class MainActivity extends Activity {
 	}
 	@Override
 	protected void onDestroy() {
-		
+
 		// Stop ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
 		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
 		// Stop Monitoring Framework
 		mfAgent.stop(this);
-		
+
 		// TODO Pebble ?!
-		
+
 		super.onDestroy();
 	}
 
@@ -107,7 +113,7 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
 	//called by button that fetches emails.
 	//email address and password are hardcoded and the last received email is always gotten
 	public void onClick_fetch(View v) {
@@ -147,19 +153,19 @@ public class MainActivity extends Activity {
 				});
 			}
 		}).start();
-		
-		
+
+
 	}
-	
-    public void onClick_parse(View v) {
-    	System.out.println("DBG onClick_parse");
-    	TextView view = (TextView) findViewById(R.id.textView2);
-    	
-    	// TODO
-    	// read journey text from assets/ line-by-line and put them into a long
-    	// string with line breaks and then parse them line-by-line (done in parseString() )
-    	// kind of redundant work. but, for the moment...
-    	/*
+
+	public void onClick_parse(View v) {
+		System.out.println("DBG onClick_parse");
+		TextView view = (TextView) findViewById(R.id.textView2);
+
+		// TODO
+		// read journey text from assets/ line-by-line and put them into a long
+		// string with line breaks and then parse them line-by-line (done in parseString() )
+		// kind of redundant work. but, for the moment...
+		/*
     	StringBuilder buf = new StringBuilder();
     	try {
     		InputStream journeyFile =
@@ -174,34 +180,34 @@ public class MainActivity extends Activity {
     		Log.d(getLocalClassName(), "IOEx", ex);
     	}
     	mJourneyParser.parseString(buf.toString());
-    	*/
-    	
-    	mJourneyParser.parseString(mJourneyText);
-    	view.setText(mJourneyParser.getJsonText());
+		 */
+
+		mJourneyParser.parseString(mJourneyText);
+		view.setText(mJourneyParser.getJsonText());
 	}
 
-    public void onClick_activate(View v) {
-    	System.out.println("DBG onClick_activate");
-    	
-    	mRoute.setRoute(mJourneyParser.getJsonObj());
-    	mPebbleUi = new PebbleUiController(getApplicationContext(), mRoute);
+	public void onClick_activate(View v) {
+		System.out.println("DBG onClick_activate");
 
-    	TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
-    	tsContainer.setPebbleUiController(mPebbleUi);
-    	tsContainer.setRoute(mRoute);
-    	
-    	Intent rsIntent = new Intent(this, RouteService.class);
-    	startService(rsIntent);
-	  
-    	TextView view = (TextView) findViewById(R.id.textView3);
-    	// TODO : for debug: dump mRoute object
-    	Gson gson = new Gson();
-    	view.setText(gson.toJson(mRoute));
-    }
-    
-    public void onClick_send(View v) {
-    	//System.out.println("DBG onClick_send");
-    	// not in use
+		mRoute.setRoute(mJourneyParser.getJsonObj());
+		mPebbleUi = new PebbleUiController(getApplicationContext(), mRoute);
+
+		TrafficsenseContainer tsContainer = TrafficsenseContainer.getInstance();
+		tsContainer.setPebbleUiController(mPebbleUi);
+		tsContainer.setRoute(mRoute);
+
+		Intent rsIntent = new Intent(this, TimeOnlyService.class);
+		startService(rsIntent);
+
+		TextView view = (TextView) findViewById(R.id.textView3);
+		// TODO : for debug: dump mRoute object
+		Gson gson = new Gson();
+		view.setText(gson.toJson(mRoute));
+	}
+
+	public void onClick_send(View v) {
+		//System.out.println("DBG onClick_send");
+		// not in use
 	}
 
 }
