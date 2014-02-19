@@ -49,8 +49,6 @@ public class MainActivity extends Activity {
 			if (intent.hasExtra(ACTION_ROUTE_EVENT_EXTRA_MESSAGE)) {
 				view.setText(intent.getStringExtra(ACTION_ROUTE_EVENT_EXTRA_MESSAGE));
 			}
-			//Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			//vibrator.vibrate(250);
 		}
 		
 	}
