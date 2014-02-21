@@ -108,6 +108,7 @@ public class MessageManager implements Runnable {
     }
     
     public void stop() {
+    	// TODO: java.lang.NoSuchMethodError: android.os.Looper.quitSafely
     	Looper.myLooper().quitSafely();
     }
 }
