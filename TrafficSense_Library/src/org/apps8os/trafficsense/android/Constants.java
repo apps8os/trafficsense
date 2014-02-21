@@ -9,4 +9,6 @@ public class Constants {
 	final public static String ACTION_ROUTE_EVENT = "trafficsense.RouteEventUpdateUi";
 	final public static String ACTION_ROUTE_EVENT_EXTRA_MESSAGE = "trafficsense.RouteEventUpdateUi.Extras.Message";
 	final public static long TEST_TIME = 5000;
+	final public static int SERVICE_TIME_ONLY = 1;
+	final public static int SERVICE_LOCATION_ONLY = 2;
 }

@@ -11,6 +11,7 @@
     <string name="fetch">fetch</string>
     <string name="parse">parse</string>
     <string name="activate">activate</string>
+    <string name="automatic">automatic</string>
     
     <string name="hard_coded_json">
 {
