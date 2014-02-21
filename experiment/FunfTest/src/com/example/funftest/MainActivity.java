@@ -1,4 +1,4 @@
-package com.example.funftest;
+	package com.example.funftest;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -11,6 +11,7 @@ import edu.mit.media.funf.probe.Probe.DataListener;
 import edu.mit.media.funf.probe.builtin.SimpleLocationProbe;
 import edu.mit.media.funf.probe.builtin.WifiProbe;
 import edu.mit.media.funf.storage.NameValueDatabaseHelper;
+import edu.mit.media.funf.util.StringUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -20,6 +21,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -129,6 +131,7 @@ protected void onCreate(Bundle savedInstanceState) {
     scanNowButton.setOnClickListener(new OnClickListener() {
         @Override
         public void onClick(View v) {
+        	System.out.println("DBG scanNowButton click");
             if (pipeline.isEnabled()) {
                 // Manually register the pipeline
                 wifiProbe.registerListener(pipeline);
@@ -157,6 +160,7 @@ public void onDataCompleted(IJsonObject probeConfig, JsonElement checkpoint) {
     // Re-register to keep listening after probe completes.
     wifiProbe.registerPassiveListener(this);
     locationProbe.registerPassiveListener(this);
+    System.out.println("DBG: onDataCompleted");
 }
 
 @Override
@@ -172,7 +176,8 @@ private static final String TOTAL_COUNT_SQL = "SELECT count(*) FROM " + NameValu
 */
 private void updateScanCount() {
     // Query the pipeline db for the count of rows in the data table
-    SQLiteDatabase db = pipeline.getDb();
+	SQLiteOpenHelper dbHelper = new NameValueDatabaseHelper(funfManager, StringUtil.simpleFilesafe(pipeline.getName()), pipeline.getVersion());
+    SQLiteDatabase db = dbHelper.getReadableDatabase();
     Cursor mcursor = db.rawQuery(TOTAL_COUNT_SQL, null);
     mcursor.moveToFirst();
     final int count = mcursor.getInt(0);
