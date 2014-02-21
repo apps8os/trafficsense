@@ -1,19 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">FirstPrototype</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">hello world</string>
-    
-    <string name="email_content">e-mail content</string>
-    <string name="parsed_json">parsed JSON</string>
-    <string name="message_to_pebble">message to Pebble</string>
-    <string name="fetch">fetch</string>
-    <string name="parse">parse</string>
-    <string name="activate">activate</string>
-    <string name="automatic">automatic</string>
-    
-    <string name="hard_coded_json">
 {
  "date": "Sunday 22.12.2013",
  "start": "Konemies, Espoo",
@@ -40,6 +24,21 @@
      "time": "15:14",
      "name": "Konemies",
      "stopCode": "E2213"
+    },
+    {
+     "time": "15:20",
+     "name": "Kemisti",
+     "stopCode": "E2220"
+    },
+    {
+     "time": "15:22",
+     "name": "Kemisti2",
+     "stopCode": "E2221"
+    },
+    {
+     "time": "15:24",
+     "name": "Kemisti3",
+     "stopCode": "E2222"
     },
     {
      "time": "15:30",
@@ -125,8 +124,4 @@
   }
  ]
 }
-    </string>
-    
-    <string name="hard_coded_journey">hard_coded_journey.txt</string>
 
-</resources>
