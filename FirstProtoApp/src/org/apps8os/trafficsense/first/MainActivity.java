@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
 		mRecv = new RouteServiceEventReceiver();
 		mContainer = TrafficsenseContainer.getInstance();
 
-		mContainer.start(getApplicationContext());
+		mContainer.init(getApplicationContext());
 	}
 
 	@Override

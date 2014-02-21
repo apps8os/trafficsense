@@ -45,7 +45,7 @@ public class TrafficsenseContainer {
 		return instance;
 	}
 
-	public void start(Context ctx) {
+	public void init(Context ctx) {
 		if (mContext != null) {
 			System.out.println("DBG multiple application trying to start TrafficSense container");
 			return;
