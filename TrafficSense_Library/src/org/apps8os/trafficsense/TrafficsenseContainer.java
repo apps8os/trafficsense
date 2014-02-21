@@ -78,6 +78,10 @@ public class TrafficsenseContainer {
 		mIsServiceRunning = false;
 	}
 	
+	public void retrieveJourney(final String account, final String password) {
+		retrieveJourney(account, password, null, null);
+	}
+	
 	public void retrieveJourney(final String account, final String password,
 			final View update, final Runnable after) {
 		// start new thread because network activities cant run on main ui
@@ -104,7 +108,7 @@ public class TrafficsenseContainer {
 				// TODO: filter out trailing HTML text
 				mJourneyText = email.getContent();
 				
-				if (update != null) {
+				if (update != null && after != null) {
 					update.post(after);
 				}
 			}
