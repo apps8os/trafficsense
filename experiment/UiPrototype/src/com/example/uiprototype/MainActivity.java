@@ -1,10 +1,17 @@
 package com.example.uiprototype;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
+import org.apps8os.trafficsense.util.JourneyParser;
+
+import com.google.gson.JsonObject;
 
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -13,6 +20,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.graphics.drawable.*;
 import android.app.Activity;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.util.Log;
 import android.view.Menu;
 import android.view.ViewGroup.LayoutParams;
 
@@ -23,6 +33,8 @@ public class MainActivity extends Activity {
 	private LinearLayout mLl;
 	private ImageView mImage;
 	private Drawable mDrawable;
+	private Resources mRes;
+	private JourneyParser mJourneyParser;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
