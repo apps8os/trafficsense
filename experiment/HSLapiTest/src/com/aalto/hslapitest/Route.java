@@ -116,6 +116,7 @@ public class Route {
 		}
 	    segmentList.trimToSize();
 	    setDepartureTime(segmentJs.get(0).getAsJsonObject());
+	    
 	}
 
 	
@@ -127,5 +128,15 @@ public class Route {
 	
 	public String getDepartureTime (){
 		return departure;
+	}
+	
+	public ArrayList<String> getAllStopCode(){
+		ArrayList <String> stopList = new ArrayList<String>();
+			for (int i = 0; i < segmentList.size(); i++) {
+				for (int j = 0; j < segmentList.get(i).getWaypointList().size(); j++) {
+					stopList.add(segmentList.get(i).getWaypointList().get(j).getWaypointStopCode());
+				}
+			}
+		return stopList;
 	}
 }

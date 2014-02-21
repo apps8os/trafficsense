@@ -20,21 +20,25 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
-class RequestTask extends AsyncTask <String, String, JSONObject> {
+public class RequestTask extends AsyncTask <String, String, String> {
 	
 	String responseString = null;
 	private Context mContext;
 	HttpResponse response;
 	HttpClient httpclient = new DefaultHttpClient();
-	
-   
+	private AsyncResponse listener;
+
+	public RequestTask(AsyncResponse listener){
+        this.listener=listener;
+    }
 	
     @Override
-    protected JSONObject doInBackground(String... uri) {
-    	JSONObject json = new JSONObject();
+    protected String doInBackground(String...params) {
+    	String uri = (String) params [0];
+    	
     	try {
         	System.out.println("Doing getRequest");
-            response = httpclient.execute(new HttpGet(uri[0]));
+            response = httpclient.execute(new HttpGet(uri));
             StatusLine statusLine = response.getStatusLine();
            
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
@@ -44,7 +48,7 @@ class RequestTask extends AsyncTask <String, String, JSONObject> {
                 out.close();
                 responseString = out.toString();
                 
-                System.out.println("result: " + json.toString());
+                System.out.println("result: " + responseString);
              } 
             else{
             	System.out.println("Something failed.");
@@ -59,7 +63,7 @@ class RequestTask extends AsyncTask <String, String, JSONObject> {
         }
       
         //saveToFile();
-        return json;
+        return responseString;
     }
         
        public void setContext (Context x){
@@ -84,8 +88,8 @@ class RequestTask extends AsyncTask <String, String, JSONObject> {
     	
 
     @Override
-    protected void onPostExecute(JSONObject json) {
-        super.onPostExecute(json);
+    protected void onPostExecute(String data) {
+       listener.returnInfo(data);
      
         
         

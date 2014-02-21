@@ -1,14 +1,23 @@
 package com.aalto.hslapitest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.Calendar;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.util.JsonReader;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -46,19 +55,35 @@ public class MainActivity extends Activity {
             	
             	key = key.replace(" ", "_");
             	System.out.println(key);
-            	Request Geo = new Request();
-            	//Geo.getStopInfo("", "E2209");
-            	JSONObject json = null;
-            	json = Geo.getGeocoding("", "", "Ylästön_ramppi" , "street");
-            	//System.out.println(json.toString());
-            	//System.out.println("E2209");
-            	//String uri = null;
-            	//Geo.sendRequest(uri);
-            	//RequestTask task = new RequestTask(getBaseContext()); 
-            	//task.execute();
-				//task.execute("http://api.reittiopas.fi/hsl/prod/?request=geocode&user=trafficsenseuser&pass=trafficsense&format=txt&key="+key+"&epsg_out=4326"+"&p=");
-				//Toast toast = Toast.makeText(getApplicationContext(), "Searching...", Toast.LENGTH_SHORT);
-				//toast.show();*/
+            	
+            	String myString = null;
+                try {
+
+                    InputStream is = getAssets().open("sample.js");
+
+                    int size = is.available();
+
+                    byte[] buffer = new byte[size];
+
+                    is.read(buffer);
+
+                    is.close();
+
+                    myString = new String(buffer, "UTF-8");
+
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+               
+                Route route = new Route();
+				Gson gson = new Gson();
+				System.out.println(myString);
+				JsonParser parser = new JsonParser();
+				JsonObject json = (JsonObject) parser.parse(myString);
+				System.out.println(json.toString());
+				route.setRoute(json);
+				System.out.println(gson.toJson(route));
 				
             }
        });

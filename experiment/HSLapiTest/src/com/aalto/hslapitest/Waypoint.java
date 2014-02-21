@@ -1,8 +1,12 @@
 package com.aalto.hslapitest; 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.gson.JsonObject;
 
-public class Waypoint {
+public class Waypoint implements AsyncResponse{
 	
 	private String time;
 	private String name;
@@ -43,13 +47,27 @@ public class Waypoint {
 		Request req = new Request();
 		if (waypoint.has("stopCode")) {
 			setWaypointStopCode(waypoint.get("stopCode").getAsString());		
-			req.getStopInfo("", stopCode);		
+			req.getStopInfo("00000001", stopCode);		
 		} 
 			else { 
 				// TODO: what should this be if there is no stopCode ???
 				setWaypointStopCode("0000");
-				req.getGeocoding("00000010", "", name, "street");
 		}
+		
+	}
+
+	@Override
+	public void returnInfo(String info) {
+		JSONArray jarray = null;
+		try {
+			jarray = new JSONArray(info);
+			xCord = jarray.getString(0);
+			yCord = jarray.getString(1);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		
 	}
 }
