@@ -26,6 +26,7 @@ public class TrafficsenseContainer {
 	private String mJourneyText;
 	private JourneyParser mJourneyParser;
 	private boolean mIsServiceRunning;
+	private Intent mRunningService;
 
 	/*
 	 * This is a singleton, only one instance allowed.
@@ -59,6 +60,7 @@ public class TrafficsenseContainer {
 		mRoute = new Route();
 		
 		mIsServiceRunning = false;
+		mRunningService = null;
 	}
 	
 	public void stop() {
@@ -73,9 +75,13 @@ public class TrafficsenseContainer {
 		mJourneyText = null;
 		mJourneyParser = null;
 		mRoute = null;
-		mContext = null;
 		
+		if (mIsServiceRunning == true) {
+			mContext.stopService(mRunningService);
+		}
 		mIsServiceRunning = false;
+		
+		mContext = null;
 	}
 	
 	public void retrieveJourney(final String account, final String password) {
@@ -141,11 +147,14 @@ public class TrafficsenseContainer {
 		}
 		mRoute.setRoute(getJourneyObject());
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
-		Intent rsIntent = new Intent(mContext, TimeOnlyService.class);
-		mContext.startService(rsIntent);
+		mRunningService = new Intent(mContext, TimeOnlyService.class);
+		mContext.startService(mRunningService);
 		mIsServiceRunning = true;
 	}
 
+	public void startLocationOnlyService() {
+	}
+	
 	public void setPebbleUiController(PebbleUiController pebbleUi) {
 		mPebbleUi = pebbleUi;
 	}

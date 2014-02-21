@@ -9,6 +9,7 @@ import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -20,6 +21,7 @@ public class MessageManager implements Runnable {
     private Boolean isMessagePending = Boolean.valueOf(false);
     private Context mContext;
     private UUID mUUID;
+    private Looper threadLooper;
     
     public MessageManager(Context context, UUID uuid) {
     	mContext = context;
@@ -29,6 +31,7 @@ public class MessageManager implements Runnable {
     @Override
     public void run() {
         Looper.prepare();
+        threadLooper = Looper.myLooper();
         messageHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -108,7 +111,10 @@ public class MessageManager implements Runnable {
     }
     
     public void stop() {
-    	// TODO: java.lang.NoSuchMethodError: android.os.Looper.quitSafely
-    	Looper.myLooper().quitSafely();
+    	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 ) {
+    		threadLooper.quitSafely();
+    	} else {
+    		threadLooper.quit();
+    	}
     }
 }
