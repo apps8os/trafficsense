@@ -1,11 +1,14 @@
 package org.apps8os.trafficsense;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
+import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.android.LocationOnlyService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
 import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
+import org.apps8os.trafficsense.util.EmailCredential;
 import org.apps8os.trafficsense.util.GmailReader;
 import org.apps8os.trafficsense.util.JourneyParser;
 import org.apps8os.trafficsense.util.GmailReader.EmailException;
@@ -14,12 +17,14 @@ import com.google.gson.JsonObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.view.View;
 
 
 public class TrafficsenseContainer {
 	private static TrafficsenseContainer instance = null;
 	private Context mContext;
+	MonitoringFrameworkAgent mfAgent;
 	private PebbleCommunication mPebbleCommunication;
 	private PebbleUiController mPebbleUi;
 	private Route mRoute;
@@ -49,7 +54,7 @@ public class TrafficsenseContainer {
 		
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
-		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
+		mfAgent = MonitoringFrameworkAgent.getInstance();
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(mContext);
 
@@ -64,11 +69,9 @@ public class TrafficsenseContainer {
 	}
 	
 	public void stop() {
-		// Stop ContextLogger3
-		// Get instance of MonitoringFrameworkAgent
-		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
-		// Stop Monitoring Framework
+		// Stop ContextLogger3: stop Monitoring Framework
 		mfAgent.stop(mContext);
+		mfAgent = null;
 		
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
@@ -84,6 +87,65 @@ public class TrafficsenseContainer {
 		mContext = null;
 	}
 	
+	public boolean startJourneyTracker(final int serviceType, EmailCredential credential) {
+		final class ReadMailTask extends AsyncTask<EmailCredential, Integer, String> {
+			protected String doInBackground(EmailCredential... creds) {
+				return retrieveJourneyBlockingPart(creds[0]);
+			}
+			
+			protected void onPostExecute(String journeyText) {
+				if (journeyText != null) {
+					mJourneyText = journeyText;
+					parseJourney();
+					switch (serviceType) {
+					case Constants.SERVICE_TIME_ONLY:
+						startTimeOnlyService();
+						break;
+					case Constants.SERVICE_LOCATION_ONLY:
+						startLocationOnlyService();
+						break;
+					default:
+						System.out.println("DBG invalid serviceType");
+						break;
+					}
+				}
+			}
+		}
+		
+		new ReadMailTask().execute(credential);
+		
+		if (mIsServiceRunning == true) {
+			return true;
+		}
+		return false;
+	}
+
+	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
+		// make email and gmailreader object. email is datacontainer and
+		// gmailreader
+		// the email from the account
+		String journeyText = null;
+		Email email = null;
+		GmailReader reader = new GmailReader();
+
+		try {
+			// initialize the mailbox that gmail reader reads by
+			// giving it the email address and password
+			reader.initMailbox(credential.getAddress(), credential.getPassword());
+			// get the next email. This is first time called so it gets
+			// the latest email
+			email = reader.getNextEmail();
+		} catch (EmailException e) {
+			System.out.println("DBG EmailException: " + e.getMessage());
+		} finally {
+			if (email != null) {
+				journeyText = email.getContent();
+				// TODO: filter out trailing HTML text
+			}
+		}
+		return journeyText;
+	}
+	
 	public void retrieveJourney(final String account, final String password) {
 		retrieveJourney(account, password, null, null);
 	}
@@ -94,25 +156,9 @@ public class TrafficsenseContainer {
 		// thread
 		new Thread(new Runnable() {
 			public void run() {
-				// make email and gmailreader object. email is datacontainer and
-				// gmailreader
-				// the email from the account
-				Email email = new Email();
-				GmailReader reader = new GmailReader();
-
-				try {
-					// initialize the mailbox that gmail reader reads by
-					// giving it the email address and password
-					reader.initMailbox(account, password);
-					// get the next email. This is first time called so it gets
-					// the latest email
-					email = reader.getNextEmail();
-				} catch (EmailException e) {
-					mJourneyText = null;
-				}
-				// get the email content
-				// TODO: filter out trailing HTML text
-				mJourneyText = email.getContent();
+				EmailCredential credential = new EmailCredential(account, password);
+				mJourneyText =
+						TrafficsenseContainer.retrieveJourneyBlockingPart(credential);
 				
 				if (update != null && after != null) {
 					update.post(after);
@@ -134,6 +180,7 @@ public class TrafficsenseContainer {
 			return;
 		}
 		mJourneyParser.parseString(mJourneyText);
+		mRoute.setRoute(getJourneyObject());
 	}
 	
 	public JsonObject getJourneyObject() {
@@ -145,7 +192,6 @@ public class TrafficsenseContainer {
 			System.out.println("DBG TimeOnly: trying to start multiple services?");
 			return;
 		}
-		mRoute.setRoute(getJourneyObject());
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
 		mRunningService = new Intent(mContext, TimeOnlyService.class);
 		mContext.startService(mRunningService);
@@ -153,6 +199,14 @@ public class TrafficsenseContainer {
 	}
 
 	public void startLocationOnlyService() {
+		if (mIsServiceRunning != false) {
+			System.out.println("DBG TimeOnly: trying to start multiple services?");
+			return;
+		}
+		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		mRunningService = new Intent(mContext, LocationOnlyService.class);
+		mContext.startService(mRunningService);
+		mIsServiceRunning = true;
 	}
 	
 	public void setPebbleUiController(PebbleUiController pebbleUi) {

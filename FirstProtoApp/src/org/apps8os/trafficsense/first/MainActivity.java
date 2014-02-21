@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.util.EmailCredential;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -81,6 +82,7 @@ public class MainActivity extends Activity {
 	// always gotten
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
+		
 		final TextView textview = (TextView) findViewById(R.id.textView1);
 
 		Runnable after = new Runnable() {
@@ -130,6 +132,12 @@ public class MainActivity extends Activity {
 	public void onClick_activate(View v) {
 		System.out.println("DBG onClick_activate");
 		mContainer.startTimeOnlyService();
+	}
+	
+	public void onClick_automatic(View v) {
+		System.out.println("DBG onClick_automatic");
+		EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
+		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, cred);
 	}
 
 }

@@ -9,9 +9,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
         
-    <RelativeLayout 
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="306dp" >
 
         <TextView
             android:id="@+id/textLabel1"
@@ -98,5 +98,16 @@
             android:layout_alignTop="@+id/textLabel3"
             android:onClick="onClick_activate"
             android:text="@string/activate" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textLabel3"
+            android:layout_below="@+id/button3"
+            android:layout_marginTop="16dp"
+            android:onClick="onClick_automatic"
+            android:text="@string/automatic" />
+
     </RelativeLayout>
 </ScrollView>
