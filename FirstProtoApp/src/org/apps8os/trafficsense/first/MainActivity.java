@@ -95,51 +95,27 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	
 	// called by button that fetches emails.
 	// email address and password are hardcoded and the last received email is
 	// always gotten
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
 		final TextView textview = (TextView) findViewById(R.id.textView1);
-		// start new thread because network activities cant run on main ui
-		// thread
-		new Thread(new Runnable() {
-			public void run() {
-				// make email and gmailreader object. email is datacontainer and
-				// gmailreader
-				// the email from the account
-				Email email = new Email();
-				GmailReader reader = new GmailReader();
 
-				try {
-					// initialize the mailbox that gmail reader reads by
-					// giving it the email address and password
-					reader.initMailbox("trafficsense.aalto@gmail.com",
-							"ag47)h(58P");
-					// get the next email. This is first time called so it gets
-					// the latest email
-					email = reader.getNextEmail();
-				} catch (EmailException e) {
-					textview.setText(e.getMessage());
-					mJourneyText = "";
+		Runnable after = new Runnable() {
+			public void run() {
+				if (mContainer.getJourneyText() != null) {
+					textview.setText(mContainer.getJourneyText());
+					mJourneyText = mContainer.getJourneyText();
+				} else {
+					textview.setText("Unable to retrieve journey text");
 				}
-				// get the email content
-				mJourneyText = email.getContent();
-				// cant manipulate ui from the thread this part of the code is
-				// running
-				// so have to use the way shown below.
-				textview.post(new Runnable() {
-					public void run() {
-						if (mJourneyText != null) {
-							textview.setText(mJourneyText);
-						} else {
-							textview.setText("Unable to retrieve journey text");
-						}
-					}
-				});
 			}
-		}).start();
+		};
+
+		mContainer.retrieveJourney("trafficsense.aalto@gmail.com",
+				"ag47)h(58P", textview, after);
 
 	}
 
