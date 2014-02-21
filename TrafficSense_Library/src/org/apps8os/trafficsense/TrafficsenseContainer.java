@@ -24,6 +24,7 @@ import android.view.View;
 public class TrafficsenseContainer {
 	private static TrafficsenseContainer instance = null;
 	private Context mContext;
+	MonitoringFrameworkAgent mfAgent;
 	private PebbleCommunication mPebbleCommunication;
 	private PebbleUiController mPebbleUi;
 	private Route mRoute;
@@ -53,7 +54,7 @@ public class TrafficsenseContainer {
 		
 		// Start ContextLogger3
 		// Get instance of MonitoringFrameworkAgent
-		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
+		mfAgent = MonitoringFrameworkAgent.getInstance();
 		// Start Monitoring Framework using an instance of android.content.Context
 		mfAgent.start(mContext);
 
@@ -68,11 +69,9 @@ public class TrafficsenseContainer {
 	}
 	
 	public void stop() {
-		// Stop ContextLogger3
-		// Get instance of MonitoringFrameworkAgent
-		MonitoringFrameworkAgent mfAgent = MonitoringFrameworkAgent.getInstance();
-		// Stop Monitoring Framework
+		// Stop ContextLogger3: stop Monitoring Framework
 		mfAgent.stop(mContext);
+		mfAgent = null;
 		
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
