@@ -2,9 +2,12 @@ package com.example.uiprototype;
 
 import java.util.ArrayList;
 
+import org.apps8os.trafficsense.TrafficsenseContainer;
+import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
+import org.apps8os.trafficsense.util.EmailCredential;
 import org.apps8os.trafficsense.util.JourneyParser;
 
 import com.google.android.gms.maps.*;
@@ -28,6 +31,7 @@ public class MapActivity extends Activity implements OnLocationChangedListener {
 	private Route mRoute;
 	private GoogleMap mMap;
 	private GroundOverlay mPointerOverlay;
+	private TrafficsenseContainer mContainer;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +49,10 @@ public class MapActivity extends Activity implements OnLocationChangedListener {
                 .add(new LatLng(37.423, -122.091))  // Mountain View
         );
         mMap.setMyLocationEnabled(true);
+        mContainer = TrafficsenseContainer.getInstance();
+        mContainer.init(getApplicationContext());
+        EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
+		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, cred);
         /*/mPointerOverlay = mMap.addGroundOverlay(new GroundOverlayOptions()
 	    	.image(BitmapDescriptorFactory.defaultMarker())
 	    	.positionFromBounds(new LatLngBounds(new LatLng(0.0, 0.0), new LatLng(0.0, 0.0)))

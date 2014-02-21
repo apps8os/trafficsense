@@ -6,7 +6,22 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
+    <!-- Permissions required by ContextLogger3 -->
+    <!-- Launching -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <!-- All probes -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Storage -->
+    <!-- Config downloading/Data uploading -->
+    <!-- WifiProbe -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- CellProbe -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    
+    <!-- Alarm test -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -41,6 +56,17 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBaj4ulWshoLduXGDhQc2oVuGCSxni85-Q"/>
+        <service android:name="org.apps8os.trafficsense.android.TimeOnlyService" />
+        <!-- ContextLogger3 related services -->
+        <!-- framework core -->
+        <service android:name="org.apps8os.contextlogger.android.io.MainPipeline"/>
+        <service android:name="edu.mit.media.funf.storage.HttpUploadService"/>
+        <service android:name="edu.mit.media.funf.storage.NameValueDatabaseService"/>
+        <!-- Probes -->
+        <service android:name="edu.mit.media.funf.probe.builtin.CellProbe" />
+        <service android:name="edu.mit.media.funf.probe.builtin.WifiProbe" />
+        <!-- Please ignore the warning saying use '$' instead of '.', it breaks stuff. -->
+        <service android:name="org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe" />
     </application>
 
 </manifest>
