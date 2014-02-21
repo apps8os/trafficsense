@@ -7,12 +7,10 @@
     
     <string name="email_content">e-mail content</string>
     <string name="parsed_json">parsed JSON</string>
-    <string name="latest_alarm">latest alarm</string>
     <string name="message_to_pebble">message to Pebble</string>
     <string name="fetch">fetch</string>
     <string name="parse">parse</string>
     <string name="activate">activate</string>
-    <string name="send">send</string>
     
     <string name="hard_coded_json">
 {

@@ -77,7 +77,7 @@
             android:layout_alignLeft="@+id/textLabel1"
             android:layout_below="@+id/textView2"
             android:layout_marginBottom="16dp"
-            android:text="@string/latest_alarm" />
+            android:text="@string/message_to_pebble" />
         
         <TextView
             android:id="@+id/textView3"
@@ -98,33 +98,5 @@
             android:layout_alignTop="@+id/textLabel3"
             android:onClick="onClick_activate"
             android:text="@string/activate" />
-        
-        <TextView
-            android:id="@+id/textLabel4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/textLabel1"
-            android:layout_below="@+id/textView3"
-            android:layout_marginBottom="16dp"
-            android:text="@string/message_to_pebble" />
-            
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/textLabel1"
-            android:layout_below="@+id/textLabel4"
-            android:background="@drawable/textview1border"
-            android:maxWidth="168dp"
-            android:text="@string/hello_world" />
-    
-        <Button
-            android:id="@+id/button4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/button1"
-            android:layout_alignTop="@+id/textLabel4"
-            android:onClick="onClick_send"
-            android:text="@string/send" />
     </RelativeLayout>
 </ScrollView>

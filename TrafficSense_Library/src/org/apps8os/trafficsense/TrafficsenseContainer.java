@@ -1,14 +1,19 @@
 package org.apps8os.trafficsense;
 
 import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
+import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
 import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.JourneyParser;
 import org.apps8os.trafficsense.util.GmailReader.EmailException;
 
+import com.google.gson.JsonObject;
+
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 
 
@@ -19,6 +24,8 @@ public class TrafficsenseContainer {
 	private PebbleUiController mPebbleUi;
 	private Route mRoute;
 	private String mJourneyText;
+	private JourneyParser mJourneyParser;
+	private boolean mIsServiceRunning;
 
 	/*
 	 * This is a singleton, only one instance allowed.
@@ -47,6 +54,11 @@ public class TrafficsenseContainer {
 
 		mPebbleCommunication = new PebbleCommunication(mContext);
 		mPebbleCommunication.startAppOnPebble();
+		
+		mJourneyParser = new JourneyParser();
+		mRoute = new Route();
+		
+		mIsServiceRunning = false;
 	}
 	
 	public void stop() {
@@ -59,7 +71,11 @@ public class TrafficsenseContainer {
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
 		mJourneyText = null;
+		mJourneyParser = null;
+		mRoute = null;
 		mContext = null;
+		
+		mIsServiceRunning = false;
 	}
 	
 	public void retrieveJourney(final String account, final String password,
@@ -99,6 +115,33 @@ public class TrafficsenseContainer {
 		return mJourneyText;
 	}
 	
+	public void setJourneyText(String journey) {
+		mJourneyText = journey;
+	}
+	
+	public void parseJourney() {
+		if (mJourneyText == null) {
+			return;
+		}
+		mJourneyParser.parseString(mJourneyText);
+	}
+	
+	public JsonObject getJourneyObject() {
+		return mJourneyParser.getJsonObj();
+	}
+	
+	public void startTimeOnlyService() {
+		if (mIsServiceRunning != false) {
+			System.out.println("DBG TimeOnly: trying to start multiple services?");
+			return;
+		}
+		mRoute.setRoute(getJourneyObject());
+		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		Intent rsIntent = new Intent(mContext, TimeOnlyService.class);
+		mContext.startService(rsIntent);
+		mIsServiceRunning = true;
+	}
+
 	public void setPebbleUiController(PebbleUiController pebbleUi) {
 		mPebbleUi = pebbleUi;
 	}
