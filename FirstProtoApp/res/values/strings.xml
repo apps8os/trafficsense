@@ -7,12 +7,33 @@
     
     <string name="email_content">e-mail content</string>
     <string name="parsed_json">parsed JSON</string>
-    <string name="latest_alarm">latest alarm</string>
     <string name="message_to_pebble">message to Pebble</string>
     <string name="fetch">fetch</string>
     <string name="parse">parse</string>
     <string name="activate">activate</string>
-    <string name="send">send</string>
+    <string name="automatic">automatic</string>
+    
+    <string name="default_pipeline">       
+        {"@type":"org.apps8os.contextlogger3.android.pipeline.MainPipeline",
+        "name":"default",
+        "archive": {
+                "@schedule": {"interval": 500},
+                "@password": "justdoit"
+        },
+        "version":1,
+        "data":[
+        	"org.apps8os.contextlogger3.android.probe.AppProbe",
+        	"org.apps8os.contextlogger3.android.probe.GoogleLocationProbe",
+           {"@type": edu.mit.media.funf.probe.builtin.WifiProbe",
+           	"@schedule": {"interval": 500, "duration": 10, "strict": true}
+           },
+           {"@type": "edu.mit.media.funf.probe.builtin.AccelerometerSensorProbe",
+            "@schedule": {"interval": 500, "duration": 5, "strict": true}
+           },
+           "edu.mit.media.funf.probe.builtin.LocationProbe"
+        ]
+       }
+     </string>
     
     <string name="hard_coded_json">
 {

@@ -12,33 +12,43 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.TextView;
 
-class RequestTask extends AsyncTask <String, String, String> {
+public class RequestTask extends AsyncTask <String, String, String> {
 	
 	String responseString = null;
 	private Context mContext;
 	HttpResponse response;
 	HttpClient httpclient = new DefaultHttpClient();
-	
-   
+	private AsyncResponse listener;
+
+	public RequestTask(AsyncResponse listener){
+        this.listener=listener;
+    }
 	
     @Override
-    protected String doInBackground(String... uri) {
+    protected String doInBackground(String...params) {
+    	String uri = (String) params [0];
+    	
     	try {
         	System.out.println("Doing getRequest");
-            response = httpclient.execute(new HttpGet(uri[0]));
+            response = httpclient.execute(new HttpGet(uri));
             StatusLine statusLine = response.getStatusLine();
            
             if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+            	
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 response.getEntity().writeTo(out);
                 out.close();
                 responseString = out.toString();
+                
+                System.out.println("result: " + responseString);
              } 
             else{
             	System.out.println("Something failed.");
@@ -78,12 +88,13 @@ class RequestTask extends AsyncTask <String, String, String> {
     	
 
     @Override
-    protected void onPostExecute(String result) {
-        super.onPostExecute(result);
-        
+    protected void onPostExecute(String data) {
+       listener.returnInfo(data);
+     
         
         
     }
+   
     
     protected void onProgressUpdate(){
     	

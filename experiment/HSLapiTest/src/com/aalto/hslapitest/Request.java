@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 
-public class Request {
+public class Request implements AsyncResponse{
 	
 	private Context mContext;
 	private final String URI ="http://api.reittiopas.fi/hsl/prod/?";
@@ -24,6 +24,10 @@ public class Request {
 	private final int defLang = 2;
 	private int disableErrorCorr = 0;
 	private int disableUniqStopNames =  0;
+	
+	JSONObject json = null;
+	JSONArray jarray = null;
+	
    
     
    
@@ -38,29 +42,9 @@ public class Request {
 	public JSONObject getGeocoding(String responseLimit, String cities , String key, String locType) {
 		String url = "http://api.reittiopas.fi/hsl/prod/?request=geocode"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 				"&key="+ key +"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit + "&cities=" + cities + "&lang=" + LANG[defLang] + "&loc_types=" + locType;
-		RequestTask task = new RequestTask(); 				
-			String myString=null;
-			JSONObject json = null;
-			JSONArray jArray = null;
-			try {
-				myString = task.execute(url).get();
-				System.out.println(myString);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				
-				jArray = new JSONArray(myString);
-				json = jArray.toJSONObject(jArray);	
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return json;
+		RequestTask task = new RequestTask(this); 				
+			task.execute(url);	
+			return null;
 	}
 	
    
@@ -68,20 +52,25 @@ public class Request {
 	public void getReverseGeocoding (String responseLimit, String x, String y){
 			String url = "http://api.reittiopas.fi/hsl/prod/?request=reverse_geocode"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 					"&key="+ "&coordinate=" + x +","+ y +"&epsg_in=" + EPSG_IN + "&epsg_out=" + EPSG_OUT + responseLimit;
-			RequestTask task = new RequestTask(); 
-			task.execute(url);
+			RequestTask task = new RequestTask(this); 
+			task.execute(url, x, y);
 		
 	}
 
 	public void getStopInfo (String responseLimit, String stopCode){
 			String url = "http://api.reittiopas.fi/hsl/prod/?request=stop"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
-					"&key="+ "&code=" + stopCode +"&epsg_out=" + EPSG_OUT + responseLimit;	
-			RequestTask task = new RequestTask(); 
+					"&key="+ "&code=" + stopCode +"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit;	
+			RequestTask task = new RequestTask(this); 
 			task.execute(url);
 		
 	}
 	
-	public void getLineInfo(String lineName){
+	public void getRoute (String lineName){
+		
+	}
+
+	@Override
+	public void returnInfo(String info) {	
 		
 	}
 

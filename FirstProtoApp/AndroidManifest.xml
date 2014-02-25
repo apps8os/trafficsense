@@ -16,8 +16,9 @@
     <!-- WifiProbe -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <!-- CellProbe -->
+    <!-- Location&CellProbe -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     
     <!-- Alarm test -->
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -41,20 +42,27 @@
             </intent-filter>
         </activity>
         
-        <service android:name="org.apps8os.trafficsense.first.RouteService" />
+        <!-- Time-based Journey Tracker -->
+        <service android:name="org.apps8os.trafficsense.android.TimeOnlyService" />
         
         <!-- ContextLogger3 related services -->
-        <!-- framework core -->
-        <service android:name="org.apps8os.contextlogger.android.io.MainPipeline"/>
-        <service android:name="edu.mit.media.funf.storage.HttpUploadService"/>
-        <service android:name="edu.mit.media.funf.storage.NameValueDatabaseService"/>
-        <!-- Probes -->
-        <service android:name="edu.mit.media.funf.probe.builtin.CellProbe" />
-        <service android:name="edu.mit.media.funf.probe.builtin.WifiProbe" />
-        <!-- Please ignore the warning saying use '$' instead of '.', it breaks stuff. -->
-        <service android:name="org.apps8os.contextlogger.android.CustomProbe.ApplicationProbe" />
+        <service android:name="edu.mit.media.funf.FunfManager" >
+            <meta-data
+                android:name="default"
+                android:value="@string/default_pipeline" />
+        </service>
+        <receiver
+            android:name="edu.mit.media.funf.Launcher"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.DOCK_EVENT" />
+                <action android:name="android.intent.action.ACTION_SCREEN_ON" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
         
-        <receiver android:name="AlarmBroadcastReceiver"></receiver>
     </application>
 
 </manifest>

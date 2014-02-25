@@ -9,24 +9,15 @@
     android:scrollbars="vertical|none"
     tools:context=".MainActivity" >
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="66dp"
-        android:layout_marginTop="118dp"
-        android:src="@drawable/uiprotoline" />
-
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/scrollLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="23dp"
-        android:layout_marginTop="52dp" >
-    </RelativeLayout>
+        android:layout_marginTop="52dp"
+        android:orientation="vertical" >
+    </LinearLayout>
 
 </RelativeLayout>

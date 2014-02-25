@@ -4,5 +4,28 @@
     <string name="app_name">UiPrototype</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_map">MapActivity</string>
 
+    <string name="default_pipeline">       
+        {"@type":"org.apps8os.contextlogger3.android.pipeline.MainPipeline",
+        "name":"default",
+        "archive": {
+                "@schedule": {"interval": 500},
+                "@password": "justdoit"
+        },
+        "version":1,
+        "data":[
+        	"org.apps8os.contextlogger3.android.probe.AppProbe",
+        	"org.apps8os.contextlogger3.android.probe.GoogleLocationProbe",
+           {"@type": edu.mit.media.funf.probe.builtin.WifiProbe",
+           	"@schedule": {"interval": 500, "duration": 10, "strict": true}
+           },
+           {"@type": "edu.mit.media.funf.probe.builtin.AccelerometerSensorProbe",
+            "@schedule": {"interval": 500, "duration": 5, "strict": true}
+           },
+           "edu.mit.media.funf.probe.builtin.LocationProbe"
+        ]
+       }
+     </string>
+     
 </resources>
