@@ -34,9 +34,10 @@ public class TimeOnlyService extends Service {
 	private PendingIntent mGetOffIntent;
 	boolean errorOnStart;
 
+	@Override
 	public void onCreate() {
 		super.onCreate();
-		System.out.println("DBG RouteService.onCreate");
+		System.out.println("DBG TimeOnlyService.onCreate");
 		mContext = this;
 		mContainer = TrafficsenseContainer.getInstance();
 		mRoute = mContainer.getRoute();
@@ -57,59 +58,57 @@ public class TimeOnlyService extends Service {
 	// the service is stopped when: 1) the journey ends 2) Android kills it 3) error on start
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		System.out.println("DBG TimeOnlyService.onStartCommand");
+		errorOnStart = false;
 		if (mContainer.serviceAttach(getApplicationContext()) == false) {
-			System.out.println("DBG TOS: unable to attach container");
+			System.out.println("DBG TimeOnlyService: unable to attach container");
+			errorOnStart = true;
+		} else if (mRoute == null) {
+			System.out.println("DBG TimeOnlyService: mRoute = null");
+			mContainer.serviceDetach();
 			errorOnStart = true;
 		} else {
-			// TODO do we still need these?
-			//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
+			System.out.println("DBG TimeOnlyService.onStartCommand cp1");
 			mContainer.getPebbleUiController().initializeList();
 
-			if (mRoute == null) {
-				System.out.println("DBG route = null");
-				errorOnStart = true;
+			registerReceiver(mNextWaypointReceiver, new IntentFilter(
+					Constants.ACTION_NEXT_WAYPOINT));
+			registerReceiver(mMakeAlertReceiver, new IntentFilter(
+					Constants.ACTION_GET_OFF));
+
+			// gets the time of the first waypoint
+			long timeToNextWaypoint = timeStringToDate(
+					mRoute.getDate() + " " +
+					mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()
+					).getTime();
+
+			// TODO do not check this at the moment
+			/*
+			if(timeToNextWaypoint < System.currentTimeMillis()) {
+				System.out.println("DBG next waypoint in the past"); Toast
+				toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
+				toast.show(); errorOnStart = true;
 			} else {
-				registerReceiver(mNextWaypointReceiver, new IntentFilter(
-						Constants.ACTION_NEXT_WAYPOINT));
-				registerReceiver(mMakeAlertReceiver, new IntentFilter(
-						Constants.ACTION_GET_OFF));
-
-				// gets the time of the first waypoint
-				long timeToNextWaypoint = timeStringToDate(
-						mRoute.getDate()
-								+ " "
-								+ mRoute.getSegmentList().get(0)
-										.getWaypointList().get(0)
-										.getWaypointTime()).getTime();
-
-				// TODO do not check this at the moment
-				/*
-				if(timeToNextWaypoint < System.currentTimeMillis()) {
-					System.out.println("DBG next waypoint in the past"); Toast
-					toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
-					toast.show(); errorOnStart = true;
-				} else {
-				*/
-					scheduleNextAlarm(timeToNextWaypoint);
-				//}
-			}
+			*/
+			scheduleNextAlarm(timeToNextWaypoint);
+			//}
 		}
 		
-		System.out.println("DBG RouteService.onStartCommand cp");
+		System.out.println("DBG TimeOnlyService.onStartCommand cp2");
 		
-		// We want this service to continue running until it is explicitly
-		// stopped, so return sticky.
 		if (errorOnStart) {
 			this.stopSelf();
-			return START_NOT_STICKY;
 		}
-		return START_STICKY;
+		// We are currently unable to resume operation, so do not re-create automatically
+		return START_NOT_STICKY;
 	}
 
+	// TODO: not always called when force-stop
+	@Override
 	public void onDestroy() {
 		super.onDestroy();
 
-		System.out.println("DBG RouteService.onDestroy");
+		System.out.println("DBG TimeOnlyService.onDestroy");
 		if (errorOnStart == false) {
 			mAM.cancel(mNextWaypointIntent);
 			mAM.cancel(mGetOffIntent);
@@ -128,7 +127,7 @@ public class TimeOnlyService extends Service {
 
 	private void scheduleGetOffAlarm(long atMillis) {
 		mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mGetOffIntent);
-		System.out.println("DBG scheduled GetOff alarm");
+		System.out.println("DBG TimeOnlyService scheduled GetOff alarm");
 	}
 
 	private Date timeStringToDate(String timeStr) {
@@ -137,7 +136,7 @@ public class TimeOnlyService extends Service {
 			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH)
 			.parse(timeStr);
 		} catch (ParseException e) {
-			System.out.println("DBG timeStringToDate error: " + e.getMessage());
+			System.out.println("DBG TimeOnlyService timeStringToDate error: " + e.getMessage());
 		}
 		return date;
 	}
@@ -153,7 +152,7 @@ public class TimeOnlyService extends Service {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
 			boolean fJourneyEnded = false;
-			System.out.println("DBG NextWaypointReceiver.onReceive"
+			System.out.println("DBG TimeOnlyService NextWaypointReceiver.onReceive"
 					+ arg1.getAction());
 			String message = "ERROR: No message set in onReceive()";
 
@@ -172,7 +171,7 @@ public class TimeOnlyService extends Service {
 					message = "Segment ended.";
 					nextWaypoint = nextSegment.getCurrentWaypoint();
 					if (mContainer.getPebbleUiController() == null)
-						System.out.println("DBG uicontroller is null");
+						System.out.println("DBG TimeOnlyService uicontroller is null");
 					mContainer.getPebbleUiController().initializeList();
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
@@ -182,7 +181,7 @@ public class TimeOnlyService extends Service {
 					// " "+nextSegment.getWaypointList().get(secondLastWpIndex).getWaypointTime()).getTime();
 					long timeToAlarm = (secondLastWpIndex + 1)
 							* Constants.TEST_TIME + System.currentTimeMillis();
-					System.out.println("DBG scheduling getOffAlarm");
+					System.out.println("DBG TimeOnlyService scheduling getOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
 				}
 			}
@@ -197,7 +196,7 @@ public class TimeOnlyService extends Service {
 				message = "Next waypoint is: " + nextWaypoint.getWaypointName();
 			}
 
-			System.out.println("DBG NextWaypointReceiver.onReceive cp");
+			System.out.println("DBG TimeOnlyService NextWaypointReceiver.onReceive cp");
 
 			// send an Intent to MainActivity
 			Intent vi = new Intent();
@@ -221,7 +220,7 @@ public class TimeOnlyService extends Service {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			System.out.println("DBG received getoffalarm");
+			System.out.println("DBG TimeOnlyService received getoffalarm");
 			mContainer.getPebbleUiController().alarmGetOff();
 			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			vibrator.vibrate(250);

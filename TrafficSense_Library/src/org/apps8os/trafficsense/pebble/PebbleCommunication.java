@@ -77,7 +77,7 @@ public class PebbleCommunication {
     	String name = ""; String time = ""; String code = "";
     	if (waypoint != null) {
 			name = waypoint.getWaypointName();
-			System.out.println("DBG " + name);
+			System.out.println("DBG sendWaypoint: " + name);
 			time = waypoint.getWaypointTime();
 			code = waypoint.getWaypointStopCode();
     	}

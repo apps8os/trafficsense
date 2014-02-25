@@ -1,6 +1,5 @@
 package org.apps8os.trafficsense;
 
-import org.apps8os.contextlogger.android.integration.MonitoringFrameworkAgent;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.android.LocationOnlyService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
@@ -15,16 +14,25 @@ import org.apps8os.trafficsense.util.GmailReader.EmailException;
 
 import com.google.gson.JsonObject;
 
+import edu.mit.media.funf.FunfManager;
+
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.IBinder;
 import android.view.View;
 
 
 public class TrafficsenseContainer {
+	final static String CTXLOG_PIPELINE_NAME = "default";
+	
 	private static TrafficsenseContainer instance = null;
 	private Context mContext;
-	private MonitoringFrameworkAgent mfAgent;
+	private ServiceConnection mCtxLogFunfManagerConn;
+	private FunfManager mCtxLogFunfManager;
 	private PebbleCommunication mPebbleCommunication;
 	private PebbleUiController mPebbleUi;
 	private Route mRoute;
@@ -36,7 +44,22 @@ public class TrafficsenseContainer {
 	/*
 	 * This is a singleton, only one instance allowed.
 	 */
-	protected TrafficsenseContainer() { }
+	protected TrafficsenseContainer() {
+		mCtxLogFunfManagerConn = new ServiceConnection () {
+
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				mCtxLogFunfManager = ((FunfManager.LocalBinder)service).getManager();
+				mCtxLogFunfManager.enablePipeline(CTXLOG_PIPELINE_NAME);
+			}
+
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				mCtxLogFunfManager = null;
+			}
+			
+		};
+	}
 
 	public static TrafficsenseContainer getInstance() {
 		if(instance == null) {
@@ -59,6 +82,7 @@ public class TrafficsenseContainer {
 		if (mRunningServices < 0 || mAttachedActivities < 0) {
 			System.out.println("DBG Containter: last: attached count below zero");
 		}
+		System.out.println("DBG Container: isLast: Ser:"+mRunningServices+"Act:"+mAttachedActivities);
 		if (mRunningServices == 0 && mAttachedActivities == 0) {
 			return true;
 		}
@@ -80,6 +104,7 @@ public class TrafficsenseContainer {
 	// An Activity should detach before it is destroyed.
 	public void activityDetach() {
 		boolean fIsLast = false;
+		System.out.println("DBG activityDetach");
 		synchronized (this) {
 			mAttachedActivities --;
 			fIsLast = isLast();
@@ -106,6 +131,7 @@ public class TrafficsenseContainer {
 	// A Service should detach before it is destroyed.
 	public void serviceDetach() {
 		boolean fIsLast = false;
+		System.out.println("DBG serviceDetach");
 		synchronized (this) {
 			mRunningServices --;
 			fIsLast = isLast();
@@ -117,13 +143,12 @@ public class TrafficsenseContainer {
 	
 	// initialize the container, start ContextLogger, set up Pebble connection
 	private void open(Context ctx) {
+		System.out.println("DBG Container open");
 		mContext = ctx;
 		
 		// Start ContextLogger3
-		// Get instance of MonitoringFrameworkAgent
-		mfAgent = MonitoringFrameworkAgent.getInstance();
-		// Start Monitoring Framework using an instance of android.content.Context
-		mfAgent.start(mContext);
+		Intent ctxlogIntent = new Intent(mContext, FunfManager.class);
+		mContext.bindService(ctxlogIntent, mCtxLogFunfManagerConn, Service.BIND_AUTO_CREATE);
 
 		mPebbleCommunication = new PebbleCommunication(mContext);
 		mPebbleCommunication.startAppOnPebble();
@@ -134,9 +159,10 @@ public class TrafficsenseContainer {
 	
 	// clean up the container, stop ContextLogger, close Pebble connection
 	private void close() {
-		// Stop ContextLogger3: stop Monitoring Framework
-		mfAgent.stop(mContext);
-		mfAgent = null;
+		System.out.println("DBG Container close");
+		// Stop ContextLogger3
+		mCtxLogFunfManager.disablePipeline(CTXLOG_PIPELINE_NAME);
+		mContext.unbindService(mCtxLogFunfManagerConn);
 		
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
