@@ -32,6 +32,7 @@ public class TimeOnlyService extends Service {
 	private AlarmManager mAM;
 	private PendingIntent mNextWaypointIntent;
 	private PendingIntent mGetOffIntent;
+	boolean errorOnStart;
 
 	public void onCreate() {
 		super.onCreate();
@@ -50,47 +51,54 @@ public class TimeOnlyService extends Service {
 		mGetOffIntent = PendingIntent.getBroadcast(mContext, 0, intentGetOff,
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		mAM = (AlarmManager) getSystemService(ALARM_SERVICE);
+		errorOnStart = false;
 	}
 
+	// the service is stopped when: 1) the journey ends 2) Android kills it 3) error on start
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		boolean errorOnStart = false;
-
-		registerReceiver(mNextWaypointReceiver, new IntentFilter(
-				Constants.ACTION_NEXT_WAYPOINT));
-		registerReceiver(mMakeAlertReceiver, new IntentFilter(
-				Constants.ACTION_GET_OFF));
-
-		if (mRoute == null) {
-			System.out.println("DBG route = null");
+		if (mContainer.serviceAttach(getApplicationContext()) == false) {
+			System.out.println("DBG TOS: unable to attach container");
 			errorOnStart = true;
 		} else {
-			// gets the time of the first waypoint
-			long timeToNextWaypoint = timeStringToDate(
-					mRoute.getDate()
-					+ " "
-					+ mRoute.getSegmentList().get(0).getWaypointList()
-					.get(0).getWaypointTime()).getTime();
+			// TODO do we still need these?
+			//Segment currentSegment = mContainer.getRoute().getCurrentSegment();
+			mContainer.getPebbleUiController().initializeList();
 
-			// TODO do not check this at the moment
-			/*
-			 * if(timeToNextWaypoint < System.currentTimeMillis()){
-			 * System.out.println("DBG next waypoint in the past"); Toast toast
-			 * = Toast.makeText(mContext, "Error:next waypoint is in the past",
-			 * Toast.LENGTH_SHORT); toast.show(); errorOnStart = true; } else {
-			 */
-			scheduleNextAlarm(timeToNextWaypoint);
-			// }
+			if (mRoute == null) {
+				System.out.println("DBG route = null");
+				errorOnStart = true;
+			} else {
+				registerReceiver(mNextWaypointReceiver, new IntentFilter(
+						Constants.ACTION_NEXT_WAYPOINT));
+				registerReceiver(mMakeAlertReceiver, new IntentFilter(
+						Constants.ACTION_GET_OFF));
+
+				// gets the time of the first waypoint
+				long timeToNextWaypoint = timeStringToDate(
+						mRoute.getDate()
+								+ " "
+								+ mRoute.getSegmentList().get(0)
+										.getWaypointList().get(0)
+										.getWaypointTime()).getTime();
+
+				// TODO do not check this at the moment
+				/*
+				if(timeToNextWaypoint < System.currentTimeMillis()) {
+					System.out.println("DBG next waypoint in the past"); Toast
+					toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
+					toast.show(); errorOnStart = true;
+				} else {
+				*/
+					scheduleNextAlarm(timeToNextWaypoint);
+				//}
+			}
 		}
-
-		// TODO do we still need these?
-		// Segment currentSegment = mContainer.getRoute().getCurrentSegment();
-		mContainer.getPebbleUiController().initializeList();
-
+		
 		System.out.println("DBG RouteService.onStartCommand cp");
+		
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.
-
 		if (errorOnStart) {
 			this.stopSelf();
 			return START_NOT_STICKY;
@@ -102,10 +110,13 @@ public class TimeOnlyService extends Service {
 		super.onDestroy();
 
 		System.out.println("DBG RouteService.onDestroy");
-		mAM.cancel(mNextWaypointIntent);
-		mAM.cancel(mGetOffIntent);
-		unregisterReceiver(mNextWaypointReceiver);
-		unregisterReceiver(mMakeAlertReceiver);
+		if (errorOnStart == false) {
+			mAM.cancel(mNextWaypointIntent);
+			mAM.cancel(mGetOffIntent);
+			unregisterReceiver(mNextWaypointReceiver);
+			unregisterReceiver(mMakeAlertReceiver);
+			mContainer.serviceDetach();
+		}
 	}
 
 	private void scheduleNextAlarm(long atMillis) {
@@ -141,6 +152,7 @@ public class TimeOnlyService extends Service {
 
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
+			boolean fJourneyEnded = false;
 			System.out.println("DBG NextWaypointReceiver.onReceive"
 					+ arg1.getAction());
 			String message = "ERROR: No message set in onReceive()";
@@ -155,6 +167,7 @@ public class TimeOnlyService extends Service {
 				// the route
 				if (nextSegment == null) {
 					message = "Journey ended.";
+					fJourneyEnded = true;
 				} else {
 					message = "Segment ended.";
 					nextWaypoint = nextSegment.getCurrentWaypoint();
@@ -171,7 +184,6 @@ public class TimeOnlyService extends Service {
 							* Constants.TEST_TIME + System.currentTimeMillis();
 					System.out.println("DBG scheduling getOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
-
 				}
 			}
 
@@ -195,6 +207,11 @@ public class TimeOnlyService extends Service {
 
 			Toast toast = Toast.makeText(mContext, message, Toast.LENGTH_SHORT);
 			toast.show();
+			
+			// stop the service when the journey ends
+			if (fJourneyEnded == true) {
+				((TimeOnlyService)mContext).stopSelf();
+			}
 		}
 
 	}

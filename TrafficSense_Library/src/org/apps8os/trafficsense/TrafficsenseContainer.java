@@ -24,14 +24,14 @@ import android.view.View;
 public class TrafficsenseContainer {
 	private static TrafficsenseContainer instance = null;
 	private Context mContext;
-	MonitoringFrameworkAgent mfAgent;
+	private MonitoringFrameworkAgent mfAgent;
 	private PebbleCommunication mPebbleCommunication;
 	private PebbleUiController mPebbleUi;
 	private Route mRoute;
 	private String mJourneyText;
 	private JourneyParser mJourneyParser;
-	private boolean mIsServiceRunning;
-	private Intent mRunningService;
+	private int mAttachedActivities = 0;
+	private int mRunningServices = 0;
 
 	/*
 	 * This is a singleton, only one instance allowed.
@@ -45,11 +45,78 @@ public class TrafficsenseContainer {
 		return instance;
 	}
 
-	public void init(Context ctx) {
-		if (mContext != null) {
-			System.out.println("DBG multiple application trying to start TrafficSense container");
-			return;
+	private boolean shouldInit() {
+		if (mRunningServices < 0 || mAttachedActivities < 0) {
+			System.out.println("DBG Containter: init: attached count below zero");
 		}
+		if (mRunningServices == 0 && mAttachedActivities == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isLast() {
+		if (mRunningServices < 0 || mAttachedActivities < 0) {
+			System.out.println("DBG Containter: last: attached count below zero");
+		}
+		if (mRunningServices == 0 && mAttachedActivities == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	// An Activity should attach to this container before any other operations
+	public void activityAttach(Context ctx) {
+		boolean fDoInit = false;
+		synchronized (this) {
+			fDoInit = shouldInit();
+			mAttachedActivities ++;
+		}
+		if (fDoInit == true) {
+			open(ctx);
+		}
+	}
+	
+	// An Activity should detach before it is destroyed.
+	public void activityDetach() {
+		boolean fIsLast = false;
+		synchronized (this) {
+			mAttachedActivities --;
+			fIsLast = isLast();
+		}
+		if (fIsLast == true) {
+			close();
+		}
+	}
+	
+	// A Service should attach at its start. If attach failed, the Service to stop immediately.
+	public boolean serviceAttach(Context ctx) {
+		if (shouldInit() == true) {
+			System.out.println("DBG serviceAttach no activity?");
+			return false;
+		}
+		if (mRunningServices != 0) {
+			System.out.println("DBG serviceAttach multiple services?");
+			return false;
+		}
+		mRunningServices ++;
+		return true;
+	}
+	
+	// A Service should detach before it is destroyed.
+	public void serviceDetach() {
+		boolean fIsLast = false;
+		synchronized (this) {
+			mRunningServices --;
+			fIsLast = isLast();
+		}
+		if (fIsLast == true) {
+			close();
+		}
+	}
+	
+	// initialize the container, start ContextLogger, set up Pebble connection
+	private void open(Context ctx) {
 		mContext = ctx;
 		
 		// Start ContextLogger3
@@ -63,12 +130,10 @@ public class TrafficsenseContainer {
 		
 		mJourneyParser = new JourneyParser();
 		mRoute = new Route();
-		
-		mIsServiceRunning = false;
-		mRunningService = null;
 	}
 	
-	public void stop() {
+	// clean up the container, stop ContextLogger, close Pebble connection
+	private void close() {
 		// Stop ContextLogger3: stop Monitoring Framework
 		mfAgent.stop(mContext);
 		mfAgent = null;
@@ -78,16 +143,16 @@ public class TrafficsenseContainer {
 		mJourneyText = null;
 		mJourneyParser = null;
 		mRoute = null;
-		
-		if (mIsServiceRunning == true) {
-			mContext.stopService(mRunningService);
-		}
-		mIsServiceRunning = false;
-		
 		mContext = null;
+		
+		if (isLast() != true) {
+			System.out.println("DBG Container: stop() but !isLast() ?!");
+			System.out.println("DBG Container: Act:"+mAttachedActivities+" Ser:"+mRunningServices);
+			// TODO: maybe throw an Exception and do a stack trace here
+		}
 	}
 	
-	public boolean startJourneyTracker(final int serviceType, EmailCredential credential) {
+	public void startJourneyTracker(final int serviceType, EmailCredential credential) {
 		final class ReadMailTask extends AsyncTask<EmailCredential, Integer, String> {
 			protected String doInBackground(EmailCredential... creds) {
 				return retrieveJourneyBlockingPart(creds[0]);
@@ -113,11 +178,6 @@ public class TrafficsenseContainer {
 		}
 		
 		new ReadMailTask().execute(credential);
-		
-		if (mIsServiceRunning == true) {
-			return true;
-		}
-		return false;
 	}
 
 	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
@@ -141,6 +201,7 @@ public class TrafficsenseContainer {
 			if (email != null) {
 				journeyText = email.getContent();
 				// TODO: filter out trailing HTML text
+				// TODO: check for other error / format ?
 			}
 		}
 		return journeyText;
@@ -188,25 +249,23 @@ public class TrafficsenseContainer {
 	}
 	
 	public void startTimeOnlyService() {
-		if (mIsServiceRunning != false) {
-			System.out.println("DBG TimeOnly: trying to start multiple services?");
+		if (mRunningServices != 0) {
+			System.out.println("DBG startTimeOnly: trying to start multiple services?");
 			return;
 		}
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
-		mRunningService = new Intent(mContext, TimeOnlyService.class);
-		mContext.startService(mRunningService);
-		mIsServiceRunning = true;
+		Intent tosIntent = new Intent(mContext, TimeOnlyService.class);
+		mContext.startService(tosIntent);
 	}
 
 	public void startLocationOnlyService() {
-		if (mIsServiceRunning != false) {
-			System.out.println("DBG TimeOnly: trying to start multiple services?");
+		if (mRunningServices != 0) {
+			System.out.println("DBG startLocationOnly: trying to start multiple services?");
 			return;
 		}
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
-		mRunningService = new Intent(mContext, LocationOnlyService.class);
-		mContext.startService(mRunningService);
-		mIsServiceRunning = true;
+		Intent losIntent = new Intent(mContext, LocationOnlyService.class);
+		mContext.startService(losIntent);
 	}
 	
 	public void setPebbleUiController(PebbleUiController pebbleUi) {

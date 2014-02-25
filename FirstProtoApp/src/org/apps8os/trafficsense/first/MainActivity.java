@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
 		mRecv = new RouteServiceEventReceiver();
 		mContainer = TrafficsenseContainer.getInstance();
 
-		mContainer.init(getApplicationContext());
+		mContainer.activityAttach(getApplicationContext());
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		mContainer.stop();
+		mContainer.activityDetach();
 	}
 
 	@Override
