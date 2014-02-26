@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.view.View;
 
@@ -178,34 +177,34 @@ public class TrafficsenseContainer {
 		}
 	}
 	
-	public void startJourneyTracker(final int serviceType, EmailCredential credential) {
-		final class ReadMailTask extends AsyncTask<EmailCredential, Integer, String> {
-			protected String doInBackground(EmailCredential... creds) {
-				return retrieveJourneyBlockingPart(creds[0]);
+	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
+		new Thread(new Runnable() {
+			public void run() {
+				// The UI may become invisible once this method is called
+				// Do this to retain the container
+				activityAttach(mContext.getApplicationContext());
+				mJourneyText = retrieveJourneyBlockingPart(credential);
+				parseJourney();
+				startTrackerService(serviceType);
+				activityDetach();
 			}
-			
-			protected void onPostExecute(String journeyText) {
-				if (journeyText != null) {
-					mJourneyText = journeyText;
-					parseJourney();
-					switch (serviceType) {
-					case Constants.SERVICE_TIME_ONLY:
-						startTimeOnlyService();
-						break;
-					case Constants.SERVICE_LOCATION_ONLY:
-						startLocationOnlyService();
-						break;
-					default:
-						System.out.println("DBG invalid serviceType");
-						break;
-					}
-				}
-			}
-		}
-		
-		new ReadMailTask().execute(credential);
+		}).start();
 	}
 
+	private void startTrackerService(int serviceType) {
+		switch (serviceType) {
+		case Constants.SERVICE_TIME_ONLY:
+			startTimeOnlyService();
+			break;
+		case Constants.SERVICE_LOCATION_ONLY:
+			startLocationOnlyService();
+			break;
+		default:
+			System.out.println("DBG invalid serviceType");
+			break;
+		}
+	}
+	
 	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
 		// make email and gmailreader object. email is datacontainer and
 		// gmailreader
@@ -237,6 +236,7 @@ public class TrafficsenseContainer {
 		retrieveJourney(account, password, null, null);
 	}
 	
+	// Assumption: UI will not be hidden.
 	public void retrieveJourney(final String account, final String password,
 			final View update, final Runnable after) {
 		// start new thread because network activities cant run on main ui
