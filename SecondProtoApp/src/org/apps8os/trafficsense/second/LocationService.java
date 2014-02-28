@@ -2,6 +2,11 @@ package org.apps8os.trafficsense.second;
 
 import java.util.ArrayList;
 
+import org.apps8os.trafficsense.*;
+import org.apps8os.trafficsense.core.Route;
+import org.apps8os.trafficsense.core.Segment;
+import org.apps8os.trafficsense.core.Waypoint;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -22,6 +27,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+
 
 public class LocationService extends Service implements 
 		ConnectionCallbacks,
