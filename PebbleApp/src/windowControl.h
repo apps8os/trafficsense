@@ -2,10 +2,11 @@
 #define __WIN_CNTL_H__
 
 #include "menu.h"
+#include "main.h"
 
-#define NUM_WINDOWS		2
+#define NUM_WINDOWS			2
 #define WINDOW_BASIC		0
-#define WINDOW_3STOP		1 //TODO: set to 1 when window_basic is implemented
+#define WINDOW_3STOP		1
 
 #define NUM_VIEW_MODES		2
 #define VIEW_MODE_NAMES		0

@@ -6,9 +6,12 @@
 // Constants for receiving commands
 #define KEY_COMMAND		0	// The key of the command tuple (the value of this tuple is the command)
 // Constants related to the command for receiving a stop
-#define COMMAND_GET_STOP	0	// Command for receiving a stop to a defined place in the list
-#define COMMAND_UPDATELIST	1	// Command for receiving a stop, and updating the list to show the new stop
-					// and remove the old first stop. Uses the same keys as GET_STOP
+
+// Command for receiving a stop to a defined place in the list
+#define COMMAND_GET_STOP	0	
+/* Command for receiving a stop, and updating the list to show the new stop
+ and remove the old first stop. Uses the same keys as GET_STOP */
+#define COMMAND_UPDATELIST	1
 
 #define KEY_STOP_NUM		1	// The value of a tuple with this key defines where the stop is in the list	
 #define KEY_STOP_NAME		2
@@ -17,8 +20,18 @@
 
 // Receiving an alarm
 #define COMMAND_ALARM		2
-#define KEY_ALARM		1
+#define KEY_ALARM			1
 #define ALARM_GET_OFF		0
+
+// Segment initialization (waypoints are sent via COMMAND_GET_STOP one by one)
+/* Command for getting values such as public transport line number that need to
+be set when the segment has changed */
+#define COMMAND_INIT_SEGMENT	2
+// Key for the line number (e.g. 550, U etc.) of the next vehicle
+#define KEY_LINE_NUMBER			1
+#define KEY_START_TIME_HOUR		2
+#define KEY_START_TIME_MIN		3
+#define KEY_START_TIME_SEC		4
 
 // Initialize AppMessage
 void init_app_message();

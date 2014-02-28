@@ -18,15 +18,18 @@ void message_received(DictionaryIterator *iterator) {
   if (commandTuple) {
     uint8_t command = commandTuple->value->data[0];
       if (command == COMMAND_GET_STOP) {
+        // Get a single stop to a specified position of hte list
         uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
-	char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
+      	char* name = &dict_find(iterator, KEY_STOP_NAME)->value->cstring[0];
         char* code = &dict_find(iterator, KEY_STOP_CODE)->value->cstring[0];
         char* time = &dict_find(iterator, KEY_STOP_TIME)->value->cstring[0];
-	strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
+      	strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
         strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
         strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
       }
       else if (command == COMMAND_UPDATELIST) {
+        // Update the list with a single stop
+        // (move others up and push it to the boottom)
         for (int i = 1; i < NUM_STOPS - 1; i++) {
           stopArray[i-1] = stopArray[i];
         }
@@ -42,6 +45,14 @@ void message_received(DictionaryIterator *iterator) {
         uint8_t alarmType = dict_find(iterator, KEY_ALARM)->value->data[0];
         if (alarmType == ALARM_GET_OFF) {
           alarm_get_off();
+      }
+      else if (command == COMMAND_INIT_SEGMENT) {
+        char* lineCode = &dict_find(iterator, KEY_LINE_NUMBER)->value->cstring[0];
+        uint8_t hour = dict_find(iterator, KEY_START_TIME_HOUR)->value->data[0];
+        uint8_t min = dict_find(iterator, KEY_START_TIME_MIN)->value->data[0];
+        uint8_t sec = dict_find(iterator, KEY_START_TIME_SEC)->value->data[0];
+        startTime.hours = hour; startTime.minutes = min; startTime.seconds = sec;
+        strncpy(currentLineCode, lineCode, LINE_CODE_LENGTH);
       }
     }
   }
