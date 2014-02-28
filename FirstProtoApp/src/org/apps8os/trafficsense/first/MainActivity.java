@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
 
 	private RouteServiceEventReceiver mRecv;
 	private TrafficsenseContainer mContainer;
+	private EmailCredential mCred;
 
 	private class RouteServiceEventReceiver extends BroadcastReceiver {
 		@Override
@@ -47,6 +48,8 @@ public class MainActivity extends Activity {
 
 		mRecv = new RouteServiceEventReceiver();
 		mContainer = TrafficsenseContainer.getInstance();
+		// TODO: hard-coded
+		mCred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
 	}
 
 	@Override
@@ -94,8 +97,7 @@ public class MainActivity extends Activity {
 			}
 		};
 
-		mContainer.retrieveJourney("trafficsense.aalto@gmail.com",
-				"ag47)h(58P", textview, after);
+		mContainer.retrieveJourney(mCred, textview, after);
 
 	}
 
@@ -130,13 +132,12 @@ public class MainActivity extends Activity {
 
 	public void onClick_activate(View v) {
 		System.out.println("DBG onClick_activate");
-		mContainer.startTimeOnlyService();
+		mContainer.startTrackerService(Constants.SERVICE_TIME_ONLY);
 	}
 	
 	public void onClick_automatic(View v) {
 		System.out.println("DBG onClick_automatic");
-		EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
-		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, cred);
+		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, mCred);
 	}
 
 }
