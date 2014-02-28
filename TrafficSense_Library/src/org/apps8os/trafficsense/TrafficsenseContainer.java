@@ -28,7 +28,12 @@ import android.view.View;
 /**
  * The singleton object for TrafficSense journey tracker.
  * 
- * Life-cycle: constructor -> open -> close -> open -> close ... 
+ * Application using TrafficSense must first obtain an instance of this object
+ * by invoking {@link #getInstance()}. All entities such as Activity and Service
+ * interacting with the singleton must invoke {@link #activityAttach(Context)} or
+ * {@link #serviceAttach(Context)} before other operations. The entity must
+ * invoke {@link #activityDetach()} or {@link #serviceDetach()} after it finishes
+ * its work with the singleton. 
  */
 public class TrafficsenseContainer {
 	final static String CTXLOG_PIPELINE_NAME = "default";
@@ -258,6 +263,7 @@ public class TrafficsenseContainer {
 	 * Route must have been set before invoking this method. (such as via
 	 * {@link #parseJourney()} or {@link #setRoute(Route)}.
 	 * Types currently supported are: SERVICE_TIME_ONLY and SERVICE_LOCATION_ONLY.
+	 * Pebble UI is initialized here.
 	 * @param serviceType type of journey tracker service to launch.
 	 * @see org.apps8os.trafficsense.android.Constants
 	 */
@@ -282,7 +288,12 @@ public class TrafficsenseContainer {
 		if (serviceIntent == null) {
 			return;
 		}
+		
+		/**
+		 * Populate Pebble UI.
+		 */
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		
 		mContext.startService(serviceIntent);
 	}
 
