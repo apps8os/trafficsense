@@ -258,6 +258,7 @@ public class TrafficsenseContainer {
 	 * Route must have been set before invoking this method. (such as via
 	 * {@link #parseJourney()} or {@link #setRoute(Route)}.
 	 * Types currently supported are: SERVICE_TIME_ONLY and SERVICE_LOCATION_ONLY.
+	 * Pebble UI is initialized here.
 	 * @param serviceType type of journey tracker service to launch.
 	 * @see org.apps8os.trafficsense.android.Constants
 	 */
@@ -282,7 +283,12 @@ public class TrafficsenseContainer {
 		if (serviceIntent == null) {
 			return;
 		}
+		
+		/**
+		 * Populate Pebble UI.
+		 */
 		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		
 		mContext.startService(serviceIntent);
 	}
 
