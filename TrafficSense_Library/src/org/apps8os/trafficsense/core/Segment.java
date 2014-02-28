@@ -39,6 +39,15 @@ public class Segment {
 			}
 
 		}
+		
+		public Waypoint setNextWaypoint(int nextWaypoint){
+			if(currentWaypoint+1 < waypointList.size()){
+				currentWaypoint=nextWaypoint;
+				return(getCurrentWaypoint());
+			}
+			else return(null);
+		}
+		
 		//returns the last waypoint
 		public Waypoint getLastWaypoint(){
 			return waypointList.get(waypointList.size()-1);

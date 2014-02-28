@@ -25,23 +25,72 @@ import android.os.IBinder;
 import android.view.View;
 
 
+/**
+ * Singleton for TrafficSense journey tracker.
+ * 
+ * Application using TrafficSense must first obtain an instance of this object
+ * by invoking {@link #getInstance()}. All entities such as Activity and Service
+ * interacting with the singleton must invoke {@link #activityAttach(Context)} or
+ * {@link #serviceAttach(Context)} before other operations. The entity must
+ * invoke {@link #activityDetach()} or {@link #serviceDetach()} after it finishes
+ * its work with the singleton. 
+ */
 public class TrafficsenseContainer {
+	/**
+	 * ContextLogger / Funf pipline name
+	 */
 	final static String CTXLOG_PIPELINE_NAME = "default";
-	
+	/**
+	 * The shared instance of this singleton.
+	 */
 	private static TrafficsenseContainer instance = null;
+	/**
+	 * The associated context.
+	 */
 	private Context mContext;
+	/**
+	 * Connection to the ContextLogger.
+	 */
 	private ServiceConnection mCtxLogFunfManagerConn;
+	/**
+	 * The underlying FunfManager (which is a Service) of ContextLogger.
+	 */
 	private FunfManager mCtxLogFunfManager;
+	/**
+	 * Communication handler of Pebble.
+	 */
 	private PebbleCommunication mPebbleCommunication;
+	/**
+	 * Pebble UI Controller.
+	 */
 	private PebbleUiController mPebbleUi;
+	/**
+	 * Current journey in internal data structure.
+	 */
 	private Route mRoute;
+	/**
+	 * Last set/retrieved plain text journey.
+	 */
 	private String mJourneyText;
+	/**
+	 * An instance of plain text to JSON parser.
+	 */
 	private JourneyParser mJourneyParser;
+	/**
+	 * Number of attached Activity.
+	 * @see #activityAttach(Context)
+	 * @see #activityDetach()
+	 */
 	private int mAttachedActivities = 0;
+	/**
+	 * Number of attached Service.
+	 * @see #serviceAttach(Context)
+	 * @see #serviceDetach()
+	 */
 	private int mRunningServices = 0;
 
-	/*
-	 * This is a singleton, only one instance allowed.
+	/**
+	 * Singleton class, invoke {@link #getInstance()} instead.
 	 */
 	protected TrafficsenseContainer() {
 		mCtxLogFunfManagerConn = new ServiceConnection () {
@@ -60,6 +109,12 @@ public class TrafficsenseContainer {
 		};
 	}
 
+	/**
+	 * Returns the shared instance of this singleton object.
+	 * Instantiates it on first invocation.
+	 * 
+	 * @return	the shared singleton instance.
+	 */
 	public static TrafficsenseContainer getInstance() {
 		if(instance == null) {
 			instance = new TrafficsenseContainer();
@@ -67,6 +122,12 @@ public class TrafficsenseContainer {
 		return instance;
 	}
 
+	/**
+	 * Check if the shared instance should be initialized.
+	 * The caller should invoke {@link #open(Context)} if this is the case.
+	 * 
+	 * @return true if it should be initialized.
+	 */
 	private boolean shouldInit() {
 		if (mRunningServices < 0 || mAttachedActivities < 0) {
 			System.out.println("DBG Containter: init: attached count below zero");
@@ -77,6 +138,12 @@ public class TrafficsenseContainer {
 		return false;
 	}
 	
+	/**
+	 * Check if we are the last to detach from the singleton.
+	 * The caller should call {@link #close()} if this is the case.
+	 * 
+	 * @return true if we are the last one.
+	 */
 	private boolean isLast() {
 		if (mRunningServices < 0 || mAttachedActivities < 0) {
 			System.out.println("DBG Containter: last: attached count below zero");
@@ -88,7 +155,14 @@ public class TrafficsenseContainer {
 		return false;
 	}
 	
-	// An Activity should attach to this container before any other operations
+	/**
+	 * Attach an Activity to the singleton.
+	 * Should generally be invoked from an Activity before any other operations.
+	 * If the singleton is uninitialized, it is initialized and the Context supplied is used
+	 * for all further operations. Otherwise, the Context is ignored.
+	 * 
+	 * @param ctx the Context to be associated.
+	 */
 	public void activityAttach(Context ctx) {
 		boolean fDoInit = false;
 		synchronized (this) {
@@ -100,7 +174,11 @@ public class TrafficsenseContainer {
 		}
 	}
 	
-	// An Activity should detach before it is destroyed.
+	/**
+	 * Detach an Activity from the singleton.
+	 * Should be invoked in onPause().
+	 * Release resources if there is no one else attached.
+	 */
 	public void activityDetach() {
 		boolean fIsLast = false;
 		System.out.println("DBG activityDetach");
@@ -113,7 +191,16 @@ public class TrafficsenseContainer {
 		}
 	}
 	
-	// A Service should attach at its start. If attach failed, the Service to stop immediately.
+	/**
+	 * Attach a Service and a Context to the singleton.
+	 * A Service should attach to the singleton before any other operations.
+	 * The singleton cannot be initialized by a Service since services can be restarted
+	 * automatically by Android. A Service receiving false from this method should
+	 * not perform any further operations with the singleton.
+	 * 
+	 * @param ctx (currently unused).
+	 * @return true if successfully attached.
+	 */
 	public boolean serviceAttach(Context ctx) {
 		if (shouldInit() == true) {
 			System.out.println("DBG serviceAttach no activity?");
@@ -127,7 +214,11 @@ public class TrafficsenseContainer {
 		return true;
 	}
 	
-	// A Service should detach before it is destroyed.
+	/**
+	 * Detach the Service from the singleton.
+	 * Should be invoked in onDestroy().
+	 * Release resources if there is no one else attached.
+	 */
 	public void serviceDetach() {
 		boolean fIsLast = false;
 		System.out.println("DBG serviceDetach");
@@ -140,7 +231,12 @@ public class TrafficsenseContainer {
 		}
 	}
 	
-	// initialize the container, start ContextLogger, set up Pebble connection
+	/**
+	 * Initialized the singleton.
+	 * Starts ContextLogger, Pebble communication and Pebble app.
+	 * 
+	 * @param ctx the Context for all further operations.
+	 */
 	private void open(Context ctx) {
 		System.out.println("DBG Container open");
 		mContext = ctx;
@@ -156,7 +252,10 @@ public class TrafficsenseContainer {
 		mRoute = new Route();
 	}
 	
-	// clean up the container, stop ContextLogger, close Pebble connection
+	/**
+	 * Release resources.
+	 * Stops ContextLogger, Pebble communication.
+	 */
 	private void close() {
 		System.out.println("DBG Container close");
 		// Stop ContextLogger3
@@ -177,11 +276,21 @@ public class TrafficsenseContainer {
 		}
 	}
 	
+	/**
+	 * Start the journey tracker.
+	 * This is expected to be invoked from an Activity.
+	 * 
+	 * @param serviceType type of journey tracker service desired.
+	 * @param credential account details for accessing mailbox.
+	 * @see #startTrackerService(int) for supported serviceTypes.
+	 */
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
 		new Thread(new Runnable() {
 			public void run() {
-				// The UI may become invisible once this method is called
-				// Do this to retain the container
+				/**
+				 * This keeps our work running in case the calling Activity becomes
+				 * invisible before the services is started.
+				 */
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
@@ -191,36 +300,67 @@ public class TrafficsenseContainer {
 		}).start();
 	}
 
-	private void startTrackerService(int serviceType) {
+	/**
+	 * Launch the journey tracker service selected.
+	 * Route must have been set before invoking this method. (such as via
+	 * {@link #parseJourney()} or {@link #setRoute(Route)}.
+	 * Types currently supported are: SERVICE_TIME_ONLY and SERVICE_LOCATION_ONLY.
+	 * Pebble UI is initialized here.
+	 * 
+	 * @param serviceType type of journey tracker service to launch.
+	 * @see org.apps8os.trafficsense.android.Constants
+	 */
+	public void startTrackerService(int serviceType) {
+		Intent serviceIntent = null;
+		
+		if (mRunningServices != 0) {
+			System.out.println("DBG startLocationOnly: trying to start multiple services?");
+			return;
+		}
 		switch (serviceType) {
 		case Constants.SERVICE_TIME_ONLY:
-			startTimeOnlyService();
+			serviceIntent = new Intent(mContext, TimeOnlyService.class);
 			break;
 		case Constants.SERVICE_LOCATION_ONLY:
-			startLocationOnlyService();
+			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
 			break;
 		}
+		if (serviceIntent == null) {
+			return;
+		}
+		
+		/**
+		 * Populate Pebble UI.
+		 */
+		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		
+		mContext.startService(serviceIntent);
 	}
-	
+
+	/**
+	 * Retrieve the journey text from the last message in the inbox of the given account.
+	 * This method perform possibly long network operations.
+	 * Should be run in an AsyncTask or a separate Thread.
+	 * 
+	 * @param credential the e-mail account to be accessed.
+	 * @return the journey text as a String.
+	 */
 	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
-		// make email and gmailreader object. email is datacontainer and
-		// gmailreader
-		// the email from the account
 		String journeyText = null;
 		Email email = null;
 		GmailReader reader = new GmailReader();
 
 		try {
-			// initialize the mailbox that gmail reader reads by
-			// giving it the email address and password
 			reader.initMailbox(credential.getAddress(), credential.getPassword());
-			// get the next email. This is first time called so it gets
-			// the latest email
+			/**
+			 * The first invocation gets the last (newest) message.
+			 */
 			email = reader.getNextEmail();
 		} catch (EmailException e) {
+			// TODO: do something here?
 			System.out.println("DBG EmailException: " + e.getMessage());
 		} finally {
 			if (email != null) {
@@ -232,18 +372,22 @@ public class TrafficsenseContainer {
 		return journeyText;
 	}
 	
-	public void retrieveJourney(final String account, final String password) {
-		retrieveJourney(account, password, null, null);
-	}
-	
-	// Assumption: UI will not be hidden.
-	public void retrieveJourney(final String account, final String password,
+
+	/**
+	 * Retrieves a journey in plain text from the given e-mail account.
+	 * The result is stored in {@link #mJourneyText}.
+	 * May optionally update an UI element after completion.
+	 *  
+	 * @param credential e-mail account to be accessed. 
+	 * @param update UI element to be updated. (optional)
+	 * @param after Runnable task to be posted to update. (optional)
+	 */
+	public void retrieveJourney(final EmailCredential credential,
 			final View update, final Runnable after) {
-		// start new thread because network activities cant run on main ui
-		// thread
+
 		new Thread(new Runnable() {
 			public void run() {
-				EmailCredential credential = new EmailCredential(account, password);
+				
 				mJourneyText =
 						TrafficsenseContainer.retrieveJourneyBlockingPart(credential);
 				
@@ -254,14 +398,28 @@ public class TrafficsenseContainer {
 		}).start();
 	}
 	
+	/**
+	 * Return the plain text journey.
+	 * 
+	 * @return journey in plain text.
+	 */
 	public String getJourneyText() {
 		return mJourneyText;
 	}
 	
+	/**
+	 * Assign a string as the plain text journey.
+	 * @param journey the journey in plain text with line breaks.
+	 * @see #mJourneyText
+	 */
 	public void setJourneyText(String journey) {
 		mJourneyText = journey;
 	}
 	
+	/**
+	 * Parse plain text journey and set up internal Route object.
+	 * Do nothing if the journey is empty.
+	 */
 	public void parseJourney() {
 		if (mJourneyText == null) {
 			return;
@@ -270,42 +428,66 @@ public class TrafficsenseContainer {
 		mRoute.setRoute(getJourneyObject());
 	}
 	
+	/**
+	 * Return current journey as a Gson JsonObject.
+	 * Must call {@link #parseJourney()} before this.
+	 * 
+	 * @return the journey.
+	 */
 	public JsonObject getJourneyObject() {
 		return mJourneyParser.getJsonObj();
 	}
 	
+	/**
+	 * (Debug Only) Launch time-based journey tracker.
+	 * @deprecated use {@link #startTrackerService(int)}
+	 */
 	public void startTimeOnlyService() {
-		if (mRunningServices != 0) {
-			System.out.println("DBG startTimeOnly: trying to start multiple services?");
-			return;
-		}
-		mPebbleUi = new PebbleUiController(mContext, mRoute);
-		Intent tosIntent = new Intent(mContext, TimeOnlyService.class);
-		mContext.startService(tosIntent);
+		startTrackerService(Constants.SERVICE_TIME_ONLY);
 	}
 
+	/**
+	 * (Debug Only) Launch location-based journey tracker.
+	 * @deprecated use {@link #startTrackerService(int)}
+	 */
 	public void startLocationOnlyService() {
-		if (mRunningServices != 0) {
-			System.out.println("DBG startLocationOnly: trying to start multiple services?");
-			return;
-		}
-		mPebbleUi = new PebbleUiController(mContext, mRoute);
-		Intent losIntent = new Intent(mContext, LocationOnlyService.class);
-		mContext.startService(losIntent);
+		startTrackerService(Constants.SERVICE_LOCATION_ONLY);
 	}
 	
+	/**
+	 * Assign a Pebble UI Controller object for use.
+	 * 
+	 * @param pebbleUi controller object to be used.
+	 */
 	public void setPebbleUiController(PebbleUiController pebbleUi) {
 		mPebbleUi = pebbleUi;
 	}
 
+	/**
+	 * Assign a Route object for use.
+	 * 
+	 * @param route object to be used.
+	 */
 	public void setRoute(Route route) {
 		mRoute = route;
 	}
 
+	/**
+	 * Return current Pebble UI Controller object.
+	 * 
+	 * @return current Pebble UI Controller object.
+	 * @see #setPebbleUiController(PebbleUiController)
+	 */
 	public PebbleUiController getPebbleUiController() {
 		return mPebbleUi;
 	}
 
+	/**
+	 * Return current Route object.
+	 * 
+	 * @return current Route object.
+	 * @see #setRoute(Route)
+	 */
 	public Route getRoute() {
 		return mRoute;
 	}

@@ -29,6 +29,14 @@ public class Route {
 		}
 		
 	}
+	
+	public Segment setNextSegment(int nextSegment){
+		if(currentSegment+1 < segmentList.size()){
+			currentSegment=nextSegment;
+			return(getCurrentSegment());
+		}
+		else return(null);
+	}
 
 	//sets the current segment to the next segment
 	//and returns the next segment.
