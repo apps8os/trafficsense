@@ -2,7 +2,7 @@ package org.apps8os.trafficsense.android;
 
 import java.util.ArrayList;
 
-import org.apps8os.trafficsense.*;
+import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
@@ -13,7 +13,6 @@ import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailed
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
-import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -115,7 +114,9 @@ public class LocationOnlyService extends Service implements
 	/**
 	 * Called when the service is created
 	 */
+	@Override
 	public void onCreate(){
+		super.onCreate();
 		mContainer=TrafficsenseContainer.getInstance();
 		
 		mLocationClient=new LocationClient(this, this, this);
@@ -133,17 +134,23 @@ public class LocationOnlyService extends Service implements
 	 * @param startId
 	 * @return
 	 */
-	public int onStartCommmand(Intent intent, int flags, int startId){
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
 		//successfully connecting to the client also adds all the geofences
-		mContainer.serviceAttach(mContext);
+		// TODO: should check return value!!
+		mContainer.serviceAttach(getApplicationContext());
 		mLocationClient.connect();
-		return START_STICKY;
+		// TODO: check that we can indeed handle service restart.
+		//return START_STICKY;
+		return START_NOT_STICKY;
 	}
 	
 	/**
 	 * called when the service is destroyed
 	 */
+	@Override
 	public void onDestroy(){
+		super.onDestroy();
 		//need to detach from container
 		mContainer.serviceDetach();
 		//need to unregister receivers
