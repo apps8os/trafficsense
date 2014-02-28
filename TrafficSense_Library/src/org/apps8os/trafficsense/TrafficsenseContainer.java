@@ -28,7 +28,12 @@ import android.view.View;
 /**
  * The singleton object for TrafficSense journey tracker.
  * 
- * Life-cycle: constructor -> open -> close -> open -> close ... 
+ * Application using TrafficSense must first obtain an instance of this object
+ * by invoking {@link #getInstance()}. All entities such as Activity and Service
+ * interacting with the singleton must invoke {@link #activityAttach(Context)} or
+ * {@link #serviceAttach(Context)} before other operations. The entity must
+ * invoke {@link #activityDetach()} or {@link #serviceDetach()} after it finishes
+ * its work with the singleton. 
  */
 public class TrafficsenseContainer {
 	final static String CTXLOG_PIPELINE_NAME = "default";
