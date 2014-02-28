@@ -8,6 +8,8 @@ public class Waypoint {
 	private String time;
 	private String name;
 	private String stopCode;
+	private float latitude=0;
+	private float longitude=0;
 	
 	public String getWaypointTime(){
 		return time;
@@ -16,6 +18,16 @@ public class Waypoint {
 	public String setWaypointTime(String nTime){
 		time=nTime;
 		return time;
+	}
+	
+	public float getLatitude(){
+		return latitude;
+
+	}
+	
+	public float getLongitude(){
+		return longitude;
+
 	}
 	
 	public String getWaypointName(){

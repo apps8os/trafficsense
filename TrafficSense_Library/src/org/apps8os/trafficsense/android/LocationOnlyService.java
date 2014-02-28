@@ -117,6 +117,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	public void onCreate(){
 		mContainer=TrafficsenseContainer.getInstance();
+		
 		mLocationClient=new LocationClient(this, this, this);
 		mContext=this;
 		//this class implements the onAddGeofenceListener
@@ -133,7 +134,8 @@ public class LocationOnlyService extends Service implements
 	 * @return
 	 */
 	public int onStartCommmand(Intent intent, int flags, int startId){
-		//successfully connecting to the client also adds the geofence for the next position
+		//successfully connecting to the client also adds all the geofences
+		mContainer.serviceAttach(mContext);
 		mLocationClient.connect();
 		return START_STICKY;
 	}
@@ -142,6 +144,8 @@ public class LocationOnlyService extends Service implements
 	 * called when the service is destroyed
 	 */
 	public void onDestroy(){
+		//need to detach from container
+		mContainer.serviceDetach();
 		//need to unregister receivers
 		unregisterReceiver(mEnteredWaypointAlertReceiver);
 	}
@@ -274,13 +278,28 @@ public class LocationOnlyService extends Service implements
 				return; //TODO: again figure out what happens on error
 			}
 			Geofence curGeofence = mLocationClient.getTriggeringGeofences(arg1).get(0);
-			//get the id of the geofence that triggered the alert
+			//get the id of the geofence that triggered the alert and increment it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
-			mRouteSegmentIndex=Integer.parseInt(parts[0]);
-			mSegmentWaypointIndex=Integer.parseInt(parts[1]);
+			mRouteSegmentIndex=Integer.parseInt(parts[0])+1;
+			mSegmentWaypointIndex=Integer.parseInt(parts[1])+1;
+			//if we are at the last waypoint set indexes to -1
+			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
+			if(currentSegment==null){
+				mRouteSegmentIndex=-1;
+				mSegmentWaypointIndex=-1;
+				sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
+				return; //the route has ended
+			}
+			Waypoint currentWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+			if(currentWaypoint==null){
+				System.out.println("Some weird error has happend");
+				return;
+			}
+			
 			//inform clients that the next waypoint has changed. 
-			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);	
+			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
+			
 		}	
 	}
 }
