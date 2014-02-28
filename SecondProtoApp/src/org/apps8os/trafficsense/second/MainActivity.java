@@ -3,6 +3,8 @@ package org.apps8os.trafficsense.second;
 
 import java.util.ArrayList;
 
+import org.apps8os.trafficsense.TrafficsenseContainer;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,11 +22,14 @@ import android.widget.ListView;
 
 public class MainActivity extends Activity {
 
+	TrafficsenseContainer mContainer;
 	GoogleMap map;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mContainer = TrafficsenseContainer.getInstance();
 		 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		 ListView listview = (ListView) findViewById(R.id.listview);
 		 
@@ -32,7 +37,17 @@ public class MainActivity extends Activity {
 		 
 	}
 	
-
+	@Override
+	public void onResume() {
+		super.onResume();
+		mContainer.activityAttach(getApplicationContext());
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		mContainer.activityDetach();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -42,6 +57,7 @@ public class MainActivity extends Activity {
 	    return super.onCreateOptionsMenu(menu);
 	}
 
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
