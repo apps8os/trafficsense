@@ -26,7 +26,7 @@ import android.view.View;
 
 
 /**
- * The singleton object for TrafficSense journey tracker.
+ * Singleton for TrafficSense journey tracker.
  * 
  * Application using TrafficSense must first obtain an instance of this object
  * by invoking {@link #getInstance()}. All entities such as Activity and Service
@@ -36,18 +36,57 @@ import android.view.View;
  * its work with the singleton. 
  */
 public class TrafficsenseContainer {
+	/**
+	 * ContextLogger / Funf pipline name
+	 */
 	final static String CTXLOG_PIPELINE_NAME = "default";
-	
+	/**
+	 * The shared instance of this singleton.
+	 */
 	private static TrafficsenseContainer instance = null;
+	/**
+	 * The associated context.
+	 */
 	private Context mContext;
+	/**
+	 * Connection to the ContextLogger.
+	 */
 	private ServiceConnection mCtxLogFunfManagerConn;
+	/**
+	 * The underlying FunfManager (which is a Service) of ContextLogger.
+	 */
 	private FunfManager mCtxLogFunfManager;
+	/**
+	 * Communication handler of Pebble.
+	 */
 	private PebbleCommunication mPebbleCommunication;
+	/**
+	 * Pebble UI Controller.
+	 */
 	private PebbleUiController mPebbleUi;
+	/**
+	 * Current journey in internal data structure.
+	 */
 	private Route mRoute;
+	/**
+	 * Last set/retrieved plain text journey.
+	 */
 	private String mJourneyText;
+	/**
+	 * An instance of plain text to JSON parser.
+	 */
 	private JourneyParser mJourneyParser;
+	/**
+	 * Number of attached Activity.
+	 * @see #activityAttach(Context)
+	 * @see #activityDetach()
+	 */
 	private int mAttachedActivities = 0;
+	/**
+	 * Number of attached Service.
+	 * @see #serviceAttach(Context)
+	 * @see #serviceDetach()
+	 */
 	private int mRunningServices = 0;
 
 	/**
@@ -86,6 +125,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Check if the shared instance should be initialized.
 	 * The caller should invoke {@link #open(Context)} if this is the case.
+	 * 
 	 * @return true if it should be initialized.
 	 */
 	private boolean shouldInit() {
@@ -101,6 +141,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Check if we are the last to detach from the singleton.
 	 * The caller should call {@link #close()} if this is the case.
+	 * 
 	 * @return true if we are the last one.
 	 */
 	private boolean isLast() {
@@ -193,6 +234,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Initialized the singleton.
 	 * Starts ContextLogger, Pebble communication and Pebble app.
+	 * 
 	 * @param ctx the Context for all further operations.
 	 */
 	private void open(Context ctx) {
@@ -264,6 +306,7 @@ public class TrafficsenseContainer {
 	 * {@link #parseJourney()} or {@link #setRoute(Route)}.
 	 * Types currently supported are: SERVICE_TIME_ONLY and SERVICE_LOCATION_ONLY.
 	 * Pebble UI is initialized here.
+	 * 
 	 * @param serviceType type of journey tracker service to launch.
 	 * @see org.apps8os.trafficsense.android.Constants
 	 */
@@ -301,6 +344,7 @@ public class TrafficsenseContainer {
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.
 	 * Should be run in an AsyncTask or a separate Thread.
+	 * 
 	 * @param credential the e-mail account to be accessed.
 	 * @return the journey text as a String.
 	 */
@@ -356,6 +400,7 @@ public class TrafficsenseContainer {
 	
 	/**
 	 * Return the plain text journey.
+	 * 
 	 * @return journey in plain text.
 	 */
 	public String getJourneyText() {
@@ -386,6 +431,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Return current journey as a Gson JsonObject.
 	 * Must call {@link #parseJourney()} before this.
+	 * 
 	 * @return the journey.
 	 */
 	public JsonObject getJourneyObject() {
@@ -410,6 +456,7 @@ public class TrafficsenseContainer {
 	
 	/**
 	 * Assign a Pebble UI Controller object for use.
+	 * 
 	 * @param pebbleUi controller object to be used.
 	 */
 	public void setPebbleUiController(PebbleUiController pebbleUi) {
@@ -418,6 +465,7 @@ public class TrafficsenseContainer {
 
 	/**
 	 * Assign a Route object for use.
+	 * 
 	 * @param route object to be used.
 	 */
 	public void setRoute(Route route) {
@@ -426,6 +474,7 @@ public class TrafficsenseContainer {
 
 	/**
 	 * Return current Pebble UI Controller object.
+	 * 
 	 * @return current Pebble UI Controller object.
 	 * @see #setPebbleUiController(PebbleUiController)
 	 */
@@ -435,6 +484,7 @@ public class TrafficsenseContainer {
 
 	/**
 	 * Return current Route object.
+	 * 
 	 * @return current Route object.
 	 * @see #setRoute(Route)
 	 */
