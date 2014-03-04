@@ -2,7 +2,7 @@
 
 Stop stopArray[NUM_STOPS];
 char currentLineCode[LINE_CODE_LENGTH];
-TimeOfDay startTime;
+TimeOfDay startTime = {23, 59, 59}; // 23:59:59 for testing purpose
 
 TimeOfDay getCurrentTime() {
   time_t now;

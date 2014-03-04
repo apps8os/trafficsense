@@ -12,6 +12,10 @@
 #define VIEW_MODE_NAMES		0
 #define VIEW_MODE_CODES		1
 
+#define NUM_TIME_UNITS		2
+
+static const char* timeUnitsStr[NUM_TIME_UNITS] = {"seconds", "minutes"};
+
 extern int viewMode;
 extern Window* windowArray[NUM_WINDOWS];
 

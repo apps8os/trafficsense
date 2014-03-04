@@ -51,8 +51,10 @@ void basic_window_loop() {
   uint32_t timeout_ms;
   TimeOfDay timeToStart = getTimeToStart();
   if (timeToStart.minutes < 1) {
+    text_layer_set_text(timeUnit, timeUnitsStr[0]);
     timeout_ms = 1000;
   } else {
+    text_layer_set_text(timeUnit, timeUnitsStr[1]);
     timeout_ms = 1000 * 60;
   }
   app_timer_register(timeout_ms, (AppTimerCallback)basic_window_loop, NULL);
@@ -60,19 +62,36 @@ void basic_window_loop() {
 }
 
 void init_basic_window() {
+  // Initialize the time units
+
   windowArray[WINDOW_BASIC] = window_create();
   window_stack_push(windowArray[WINDOW_BASIC], true);
   window_set_click_config_provider(windowArray[WINDOW_BASIC], (ClickConfigProvider)click_config_provider);
   Layer *window_layer = window_get_root_layer(windowArray[WINDOW_BASIC]);
   GRect bounds = layer_get_frame(window_layer);
-  alarmText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+
+  // Initialize the line code text layer
+  lineCode = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
   text_layer_set_text(lineCode, currentLineCode);
   layer_add_child(window_layer, text_layer_get_layer(lineCode));
+
+  // Initialize the text layer which shows the amount of time left
+  timeAmount = text_layer_create((GRect){ .origin = { 0, 60 }, .size = bounds.size });
+  char timeAmountStr[4]; // Max amount of numbers: 4 now
+  snprintf(timeAmountStr, 3, "%d", getTimeToStart().seconds);
+  text_layer_set_text(timeAmount, timeAmountStr);
+  layer_add_child(window_layer, text_layer_get_layer(timeAmount));
+  
+  // Initialize the text layer which shows the units for the shown time
+  timeUnit = text_layer_create((GRect){ .origin = { 30, 60 }, .size = bounds.size });
+  text_layer_set_text(timeUnit, timeUnitsStr[0]);
+  layer_add_child(window_layer, text_layer_get_layer(timeUnit));
+  
 }
 
 void init_windows() {
-  currentWindow = 1;
-  //init_basic_window();
+  currentWindow = WINDOW_BASIC;
+  init_basic_window();
 
   windowArray[WINDOW_3STOP] = window_create();
   //window_stack_push(windowArray[WINDOW_3STOP], true /* Animated */);
