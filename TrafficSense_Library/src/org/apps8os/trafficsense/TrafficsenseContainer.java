@@ -43,7 +43,7 @@ public class TrafficsenseContainer {
 	/**
 	 * The shared instance of this singleton.
 	 */
-	private static TrafficsenseContainer instance = null;
+	private static volatile TrafficsenseContainer instance = null;
 	/**
 	 * The associated context.
 	 */
