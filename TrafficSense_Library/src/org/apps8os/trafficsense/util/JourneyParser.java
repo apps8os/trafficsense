@@ -97,7 +97,7 @@ public class JourneyParser {
 	 */
 	private void flushTextArray() {
 
-		this.getTextArray().clear();
+		getTextArray().clear();
 	}
 
 	/**
@@ -140,6 +140,7 @@ public class JourneyParser {
 	}
 
 	/**
+	 * TODO: documentation
 	 * 
 	 * @return
 	 */
@@ -148,6 +149,7 @@ public class JourneyParser {
 	}
 
 	/**
+	 * TODO: documentation
 	 * 
 	 * @param value
 	 */
@@ -162,14 +164,14 @@ public class JourneyParser {
 	 */
 	private void addJsonObject() {
 
-		if (this.getLine() == 1) {
-			this.addProperty("date", this.getTxtLine());
+		if (getLine() == 1) {
+			addProperty("date", getTxtLine());
 			return;
 		}
 
 		if (this.getLine() == 3) {
-			String[] parts = this.getTxtLine().split(" ", 2);
-			this.addProperty("start", parts[1]);
+			String[] parts = getTxtLine().split(" ", 2);
+			addProperty("start", parts[1]);
 			return;
 		}
 
@@ -194,7 +196,7 @@ public class JourneyParser {
 			SegmentsObj.addProperty("startPoint", str_split[1]);
 			SegmentsObj.addProperty("mode", getTextArray().get(1));
 
-			this.setSegmentsArray(SegmentsObj);
+			setSegmentsArray(SegmentsObj);
 
 			JsonArray waypointsArray = new JsonArray();
 
@@ -232,28 +234,31 @@ public class JourneyParser {
 			// Last line of the file, "Arrival" line
 
 			// System.out.println("ARRAY " + this.getSegmentsArray());
-			this.addProperty("dest", str_split[1]);
-			this.addProperty("arrivalTime", str_split[0]);
-			this.addProperty("segments", this.getSegmentsArray());
+			addProperty("dest", str_split[1]);
+			addProperty("arrivalTime", str_split[0]);
+			addProperty("segments", this.getSegmentsArray());
 		}
 	}
 
 	/**
 	 * Augment journey object with a newly encountered journey text line.
+	 * The newly read encountered line should had been passed to
+	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should
+	 * be called before.
 	 * 
 	 * @param line journey text line encountered.
 	 * @see #addJsonObject()
 	 */
-	private void organizeJson(String line) {
+	private void organizeJson() {
 
-		switch (this.getLine()) {
+		switch (getLine()) {
 		case 1:
-			this.addJsonObject();
+			addJsonObject();
 			return; // Add to json object the key value "date"
 		case 2:
 			return; // "Departure" line
 		case 3:
-			this.addJsonObject(); // Add to json object the key value "start"
+			addJsonObject(); // Add to json object the key value "start"
 			break;
 		default:
 			// TODO: what to do here?
@@ -264,23 +269,23 @@ public class JourneyParser {
 		 * isNotBlank - Checks if a String is not empty (""), not null and not
 		 * whitespace only
 		 */
-		if (line.trim().equals("")) {
+		if (getTxtLine().trim().equals("")) {
 			// The line is blank
-			this.addJsonObject();
+			addJsonObject();
 			// System.out.println("ARRAY: " + text);
 			// System.out.println("FLUSH ********");
-			this.flushTextArray();
+			flushTextArray();
 			return;
 		} else {
-			this.addTextArray(line);
+			addTextArray(getTxtLine());
 		}
 
-		if (this.getTxtLine().equals("Arrival") ||
-			this.getTxtLine().equals("Perillä") ||
-			this.getTxtLine().equals("Ankomst")) {
+		if (getTxtLine().equals("Arrival") ||
+			getTxtLine().equals("Perillä") ||
+			getTxtLine().equals("Ankomst")) {
 
-			this.addJsonObject();
-			this.flushTextArray();
+			addJsonObject();
+			flushTextArray();
 		}
 
 	}
@@ -305,7 +310,7 @@ public class JourneyParser {
 		FileWriter file = null;
 		try {
 			file = new FileWriter(outFileName);
-			file.write(this.getJsonObj().toString());
+			file.write(getJsonObj().toString());
 			file.flush();
 			file.close();
 		} catch (IOException e) {
@@ -320,9 +325,9 @@ public class JourneyParser {
 	 */
 	private void parseOneLine(String line) {
 		System.out.println("Line: "+line);
-		this.setTxtLine(line);
-		this.incrementLine();
-		this.organizeJson(line);
+		setTxtLine(line);
+		incrementLine();
+		organizeJson();
 	}
 
 	/**
