@@ -66,6 +66,7 @@ public class TrafficsenseContainer {
 	private PebbleUiController mPebbleUi;
 	/**
 	 * Current journey in internal data structure.
+	 * @see #startTrackerService(int)
 	 */
 	private Route mRoute;
 	/**
@@ -476,6 +477,7 @@ public class TrafficsenseContainer {
 	 * Return current Pebble UI Controller object.
 	 * 
 	 * @return current Pebble UI Controller object.
+	 * @see #startTrackerService(int)
 	 * @see #setPebbleUiController(PebbleUiController)
 	 */
 	public PebbleUiController getPebbleUiController() {
