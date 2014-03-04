@@ -44,13 +44,13 @@ public class PebbleCommunication {
 		messageManager = new MessageManager(mContext, APP_UUID);
 		// Start a new thread for MessageManager
 		mMessageManagerThread = new Thread(messageManager);
-		mMessageManagerThread.start();
-		registerReceivers();
 	}
 
 
 	/** Starts the Pebble app */
 	public void startAppOnPebble() {
+		mMessageManagerThread.start();
+		registerReceivers();
 		PebbleKit.startAppOnPebble(mContext, APP_UUID);
 	}
 	
