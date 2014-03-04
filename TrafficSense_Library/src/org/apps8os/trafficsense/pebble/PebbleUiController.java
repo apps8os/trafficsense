@@ -7,8 +7,6 @@ import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 
-import android.content.Context;
-
 
 /**
  * Controls the Pebble UI
@@ -17,8 +15,8 @@ import android.content.Context;
 public class PebbleUiController {
 	PebbleCommunication mPblCom;
 	Route mRoute;
-	public PebbleUiController(Context appContext, Route route) {
-		mPblCom = new PebbleCommunication(appContext);
+	public PebbleUiController(PebbleCommunication comm, Route route) {
+		mPblCom = comm;
 		mRoute = route;
 	}
 	
