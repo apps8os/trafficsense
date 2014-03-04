@@ -177,7 +177,7 @@ public class GmailReader {
 	/**
 	 *A generic exception for possible errors that could happen in this class. 
 	 */
-	public class EmailException extends Exception {
+	static public class EmailException extends Exception {
 		private static final long serialVersionUID = 1L;
 		public EmailException() { super(); }
 		public EmailException(String message) { super(message); }
