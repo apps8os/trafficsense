@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.Vibrator;
 
 
 public class LocationOnlyService extends Service implements 
@@ -93,6 +94,8 @@ public class LocationOnlyService extends Service implements
             }
         }
     }
+	
+	
 	
 	/**
 	 * Send segment and waypoint index to clients. Meant to be used to
@@ -214,6 +217,7 @@ public class LocationOnlyService extends Service implements
 		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
 				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 		addGeofence(newFence);
+		sendNextWaypointIntent("");
 		
 	}
 
@@ -227,9 +231,10 @@ public class LocationOnlyService extends Service implements
 			if(currentSegment == null){
 				break;
 			}
-			//TODO: check if the segment is a walking segment and skip it if it is
+			//TODO: check if the segment is a walking segment and if it is only set the last waypoint in it 
 			
-			for(int waypointIndex=0;;waypointIndex++){
+			//skip the first waypoint because it it also the last one in the last segment
+			for(int waypointIndex=1;;waypointIndex++){
 				Waypoint nextWaypoint = currentSegment.getWaypoint(mSegmentWaypointIndex);
 				if(nextWaypoint==null){
 					break;
@@ -288,27 +293,49 @@ public class LocationOnlyService extends Service implements
 			//get the id of the geofence that triggered the alert and increment it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
-			mRouteSegmentIndex=Integer.parseInt(parts[0])+1;
+			mRouteSegmentIndex=Integer.parseInt(parts[0]);
 			mSegmentWaypointIndex=Integer.parseInt(parts[1])+1;
 			//if we are at the last waypoint set indexes to -1
+			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
-			if(currentSegment==null){
-				mRouteSegmentIndex=-1;
-				mSegmentWaypointIndex=-1;
-				sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
-				return; //the route has ended
+			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+			
+			if(nextWaypoint == null){
+				
+				currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
+				mRouteSegmentIndex++;
+				
+				if(currentSegment==null){
+					mRouteSegmentIndex=-1;
+					mSegmentWaypointIndex=-1;
+					//inform clients that waypoint has changed
+					sendNextWaypointIntent("");
+					sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
+
+					return; //the route has ended
+				}
+				mSegmentWaypointIndex=0;
+				nextWaypoint = currentSegment.setNextWaypoint(0);
 			}
-			Waypoint currentWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
-			if(currentWaypoint==null){
-				System.out.println("Some weird error has happend");
-				return;
-			}
+
 			
 			//inform clients that the next waypoint has changed. 
+			sendNextWaypointIntent("");
 			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
 			
 		}	
 	}
+	
+	protected void sendNextWaypointIntent(String message){
+		Intent vi = new Intent();
+		if(message == null){
+			message ="";
+		}
+		vi.putExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE, message);
+		vi.setAction(Constants.ACTION_ROUTE_EVENT);
+		sendBroadcast(vi);
+	}
+
 }
 
 

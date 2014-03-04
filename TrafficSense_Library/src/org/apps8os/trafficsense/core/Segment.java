@@ -11,6 +11,7 @@ public class Segment {
 		private String startPoint;
 		private String mode;
 		private int currentWaypoint;
+		private boolean isWalking = false;  //TODO: implement this. Method that adds route info should also add this
 		
 		private ArrayList<Waypoint> waypointList = new ArrayList<Waypoint>();
 		
@@ -53,6 +54,7 @@ public class Segment {
 			return waypointList.get(waypointList.size()-1);
 		}
 		
+		
 		public Waypoint getCurrentWaypoint(){
 			return waypointList.get(currentWaypoint);
 		}
@@ -79,6 +81,8 @@ public class Segment {
 			return startPoint;	
 		}
 		
+
+		
 		public String getSegmentMode (){
 			return mode;
 		}
@@ -91,6 +95,10 @@ public class Segment {
 		public ArrayList <Waypoint> getWaypointList (){
 			return waypointList;
 		}		
+		
+		public boolean isWalking(){
+			return isWalking;
+		}
 		
 		public Waypoint getWaypoint(int index) {
 			if (index > waypointList.size() - 1) {
