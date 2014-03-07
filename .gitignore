@@ -54,3 +54,6 @@ __pycache__/
 
 # Eclipse plugin metadata
 .metadata/
+
+# vim swap file
+*.swp
