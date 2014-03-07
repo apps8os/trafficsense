@@ -18,7 +18,7 @@ import android.util.Log;
 public class MessageManager implements Runnable {
     public Handler messageHandler;
     private final BlockingQueue<PebbleDictionary> messageQueue = new LinkedBlockingQueue<PebbleDictionary>();
-    private Boolean isMessagePending = Boolean.valueOf(false);
+    private volatile Boolean isMessagePending = Boolean.valueOf(false);
     private Context mContext;
     private UUID mUUID;
     private Looper threadLooper;

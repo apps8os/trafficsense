@@ -1,6 +1,10 @@
 package org.apps8os.trafficsense.core;
 
+/**
+ * TODO: move them somewhere else. 
+ */
 public class RouteConstants {
+	public static final int UNKNOWN = -1;
 	public static final int WALKING = 0;
 	public static final int HELS_INTERNAL_BUS_LINES = 1;
 	public static final int TRAMS = 2;

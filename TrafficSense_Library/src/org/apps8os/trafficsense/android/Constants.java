@@ -12,6 +12,10 @@ public class Constants {
 	final public static int SERVICE_TIME_ONLY = 1;
 	final public static int SERVICE_LOCATION_ONLY = 2;
 	/**
+	 * Magic stopCode for those stops without one.
+	 */
+	final public static String NO_STOP_CODE = "XXXX";
+	/**
 	 * The UUID of our Pebble smart watch application.
 	 * @see appinfo.json
 	 */

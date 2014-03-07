@@ -2,17 +2,15 @@ package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 
+/**
+ * TODO: Documentation.
+ */
 public class Route {
-	HttpResponse response;
-	HttpClient httpclient = new DefaultHttpClient();
-	
+
 	private String date;
 	private String start;
 	private String destination;
@@ -20,12 +18,6 @@ public class Route {
 	private String departure;
 	private int currentSegment=0;
 	
-	//private ArrayList <Coordinates> stopList = new ArrayList<Coordinates>();
-	
-	//private enum Coordinates{
-		//longitude,
-		//latitude
-	//}
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
 	
@@ -151,31 +143,5 @@ public class Route {
 	public String getDepartureTime (){
 		return departure;
 	}
-	
-	/*
-	public void setCompleteCoordList(){
-		for (int i = 0; i < segmentList.size(); i++) {
-			if (segmentList.get(i).getSegmentType() != 0){
-				for (int j = 0; j < segmentList.get(i).getWaypointList().get(j); j++) {
-					Coordinates.longitude = segmentList.get(i).getWaypointList().get(j).getLongitude();
-					Coordinates.latitude =  segmentList.get(i).getWaypointList().get(j).getLongitude();
-				}
-				
-			}
-			for (int j = 0; j < segmentList.get(i).getWaypointList().size(); j++) {
-				
-			}
-		}
-	}*/
-	
-	
-	/*public ArrayList <Coordinates> getCompleteCoordList(){
-		
-		
-		
-		return stopList;
-		
-	}*/
-	
-	
+
 }

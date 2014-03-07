@@ -1,7 +1,6 @@
 package org.apps8os.trafficsense.core; 
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.apps8os.trafficsense.android.Constants;
 
 import com.google.gson.JsonObject;
 
@@ -10,10 +9,8 @@ public class Waypoint{
 	private String time;
 	private String name;
 	private String stopCode;
-	private String longCord;
-	private String latCord;
-	private double mLatitude;
-	private double mLongitude;
+	private volatile double mLatitude;
+	private volatile double mLongitude;
 	
 	public String getWaypointTime(){
 		return time;
@@ -42,24 +39,29 @@ public class Waypoint{
 		return stopCode;
 	}
 	
+	/**
+	 * Fill-in data fields of this waypoint except GPS coordinates.
+	 * 
+	 * @param waypoint JsonObject of this waypoint.
+	 */
 	public void setWaypoint (JsonObject waypoint){
-		setWaypointTime (waypoint.get("time").getAsString());
-		setWaypointName (waypoint.get("name").getAsString());
+		setWaypointTime(waypoint.get("time").getAsString());
+		setWaypointName(waypoint.get("name").getAsString());
 		if (waypoint.has("stopCode")) {
 			setWaypointStopCode(waypoint.get("stopCode").getAsString());
-			//TODO leave this to the Container
-			//setWaypointCords(stopCode);
-		} 
-			else { 
-				// TODO: what should this be if there is no stopCode ???
-				setWaypointStopCode("0000");
+		} else {
+			setWaypointStopCode(Constants.NO_STOP_CODE);
 		}
 	}
 
 	/**
+	 * Set the GPS coordinate.
 	 * 
-	 * @param latitude
-	 * @param longitude
+	 * This is likely to be called from a worker thread, so all access
+	 * to GPS coordinate attributes shall be synchronized.
+	 * 
+	 * @param latitude latitude.
+	 * @param longitude longitude.
 	 */
 	public void setCoordinate(double latitude, double longitude) {
 		synchronized (this) {
@@ -69,45 +71,22 @@ public class Waypoint{
 	}
 
 	/**
-	 * TODO move these work to Container
-	 * @deprecated
-	 * @param stopCode
+	 * Return the longitude of the GPS coordinate.
+	 * @return longitude.
 	 */
-	public void setWaypointCords(String stopCode){
-		RequestThread r= new RequestThread ();
-		String returned = r.getStopInfo("000000001", stopCode);
-		System.out.println("DBG setWaypointCords returned:"+returned);
-		String coords ="";
-		try {
-			JSONArray json = new JSONArray(returned);
-			coords = json.getJSONObject(0).get("wgs_coords").toString();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public double getLongitude() {
+		synchronized (this) {
+			return mLongitude;
 		}
-		/*
-		System.out.println(coords);
-		System.out.println(coords.substring(0, 8));
-		System.out.println(coords.substring(9, 17));*/
-		longCord = coords.substring(9, 17);
-		latCord = coords.substring(0, 8);
 	}
 	
 	/**
-	 * TODO: return double version
-	 * @deprecated
-	 * @return
+	 * Return the latitude of the GPS coordinate.
+	 * @return latitude.
 	 */
-	public String getLongitude(){
-		return longCord;
-	}
-	
-	/**
-	 * TODO return double version
-	 * @deprecated
-	 * @return
-	 */
-	public String getLatitude(){
-		return latCord;
+	public double getLatitude() {
+		synchronized (this) {
+			return mLatitude;
+		}
 	}
 }

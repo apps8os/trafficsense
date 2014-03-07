@@ -9,6 +9,7 @@ import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.EmailCredential;
 import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.JourneyInfoResolver;
 import org.apps8os.trafficsense.util.JourneyParser;
 import org.apps8os.trafficsense.util.GmailReader.EmailException;
 
@@ -68,11 +69,11 @@ public class TrafficsenseContainer {
 	 * Current journey in internal data structure.
 	 * @see #startTrackerService(int)
 	 */
-	private Route mRoute;
+	private volatile Route mRoute;
 	/**
 	 * Last set/retrieved plain text journey.
 	 */
-	private String mJourneyText;
+	private volatile String mJourneyText;
 	/**
 	 * An instance of plain text to JSON parser.
 	 */
@@ -82,13 +83,13 @@ public class TrafficsenseContainer {
 	 * @see #activityAttach(Context)
 	 * @see #activityDetach()
 	 */
-	private int mAttachedActivities = 0;
+	private volatile int mAttachedActivities = 0;
 	/**
 	 * Number of attached Service.
 	 * @see #serviceAttach(Context)
 	 * @see #serviceDetach()
 	 */
-	private int mRunningServices = 0;
+	private volatile int mRunningServices = 0;
 
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
@@ -295,7 +296,9 @@ public class TrafficsenseContainer {
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
-				// TODO: call retrieveCoordinatesForStopsBlockingPart()
+				if (serviceType != Constants.SERVICE_TIME_ONLY) {
+					retrieveCoordinatesForStopsBlockingPart();
+				}
 				startTrackerService(serviceType);
 				activityDetach();
 			}
@@ -345,7 +348,8 @@ public class TrafficsenseContainer {
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.
-	 * Should be run in an AsyncTask or a separate Thread.
+	 * 
+	 * Must NOT invoke this from the main/UI thread.
 	 * 
 	 * @param credential the e-mail account to be accessed.
 	 * @return the journey text as a String.
@@ -401,11 +405,25 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * TODO
+	 * Retrieves GPS coordinates for all stops along the journey.
+	 * 
+	 * Must NOT invoke this from the main/UI thread.
 	 */
 	public void retrieveCoordinatesForStopsBlockingPart() {
-		// iterate through mRoute and for each Waypoint,
-		// access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available)
+		if (mRoute == null) {
+			// TODO error handling ?
+			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
+			return;
+		}
+		JourneyInfoResolver resolver = new JourneyInfoResolver();
+		/**
+		 * Access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available).
+		 */
+		if (resolver.retrieveCoordinatesFromHsl(mRoute) == false) {
+			// TODO: error handling.
+		}
+		
+		// TODO: what about those who do not have a stopCode (= NO_STOP_CODE) ?
 	}
 	
 	/**

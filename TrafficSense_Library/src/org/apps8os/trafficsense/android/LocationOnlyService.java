@@ -192,12 +192,10 @@ public class LocationOnlyService extends Service implements
 	 */
 	private Geofence createGeofence(Waypoint busStop,String id, float radius, 
 			long expiryDuration, int transition){
-		double latitude = Double.parseDouble(busStop.getLatitude());
-		double longitude = Double.parseDouble(busStop.getLongitude());
 		return new Geofence.Builder()
 			.setRequestId(id)
 			.setTransitionTypes(transition)
-			.setCircularRegion(latitude, longitude, radius)
+			.setCircularRegion(busStop.getLatitude(), busStop.getLongitude(), radius)
 			.setExpirationDuration(expiryDuration)
 			.build();
 	}
