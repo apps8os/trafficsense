@@ -1,15 +1,17 @@
-package org.apps8os.trafficsense.core;
+package org.apps8os.trafficsense.core; 
 
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.google.gson.JsonObject;
 
-public class Waypoint {
+public class Waypoint{
 	
 	private String time;
 	private String name;
 	private String stopCode;
-	private float latitude=0;
-	private float longitude=0;
+	private String longCord;
+	private String latCord;
 	
 	public String getWaypointTime(){
 		return time;
@@ -18,16 +20,6 @@ public class Waypoint {
 	public String setWaypointTime(String nTime){
 		time=nTime;
 		return time;
-	}
-	
-	public float getLatitude(){
-		return latitude;
-
-	}
-	
-	public float getLongitude(){
-		return longitude;
-
 	}
 	
 	public String getWaypointName(){
@@ -52,12 +44,40 @@ public class Waypoint {
 		setWaypointTime (waypoint.get("time").getAsString());
 		setWaypointName (waypoint.get("name").getAsString());
 		if (waypoint.has("stopCode")) {
-			setWaypointStopCode(waypoint.get("stopCode").getAsString());		
+			setWaypointStopCode(waypoint.get("stopCode").getAsString());
+			setWaypointCords(stopCode);
 		} 
-		else { 
+			else { 
 				// TODO: what should this be if there is no stopCode ???
 				setWaypointStopCode("0000");
 		}
-		
+	}
+
+	public void setWaypointCords(String stopCode){
+		RequestThread r= new RequestThread ();
+		String returned = r.getStopInfo("000000001", stopCode);
+		//System.out.println(returned);
+		String coords ="";
+		try {
+			JSONArray json = new JSONArray(returned);
+			coords = json.getJSONObject(0).get("wgs_coords").toString();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*
+		System.out.println(coords);
+		System.out.println(coords.substring(0, 8));
+		System.out.println(coords.substring(9, 17));*/
+		longCord = coords.substring(9, 17);
+		latCord = coords.substring(0, 8);
+	}
+	
+	public String getLongitude(){
+		return longCord;
+	}
+	
+	public String getLatitude(){
+		return latCord;
 	}
 }

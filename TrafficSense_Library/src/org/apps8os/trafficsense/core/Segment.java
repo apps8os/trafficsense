@@ -3,8 +3,13 @@ package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.org.hslapitest.RequestThread;
+import com.org.hslapitest.RouteConstants;
 
 public class Segment {
 		private String startTime;
@@ -12,7 +17,7 @@ public class Segment {
 		private String mode;
 		private int currentWaypoint;
 		private boolean isWalking = false;  //TODO: implement this. Method that adds route info should also add this
-		
+		private int transport_type;
 		private ArrayList<Waypoint> waypointList = new ArrayList<Waypoint>();
 		
 		//returns the next waypoint
@@ -120,7 +125,40 @@ public class Segment {
 				waypointList.add(i, waypoint);
 			}
 			waypointList.trimToSize();
+			setSegmentType();
 			
+		}
+		
+		private int setSegmentType(){	
+			if (mode == "metro"){
+				transport_type = RouteConstants.METRO;
+			} else
+			if (mode == "ferry"){
+				transport_type = RouteConstants.FERRY;
+			} else
+			if(mode.startsWith("Walking")){
+				transport_type = RouteConstants.WALKING;
+			}
+			if(mode.startsWith("Walking")==false && mode.contains("metro")==false && mode.contains("ferry")==false){
+				String returned = "";
+				RequestThread r= new RequestThread ();
+				returned = r.getLineInfo("001", mode);
+				//System.out.println(returned);
+				try {
+					JSONArray json = new JSONArray(returned);
+					transport_type = json.getJSONObject(0).getInt("transport_type_id");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			return transport_type;	
+		}
+
+		
+		public int getSegmentType(){
+			return transport_type;
 		}
 		
 		
