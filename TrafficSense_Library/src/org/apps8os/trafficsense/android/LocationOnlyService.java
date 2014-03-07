@@ -217,7 +217,7 @@ public class LocationOnlyService extends Service implements
 		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
 				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 		addGeofence(newFence);
-		sendNextWaypointIntent("");
+		sendNextWaypointIntent(null);
 		
 	}
 
@@ -325,6 +325,12 @@ public class LocationOnlyService extends Service implements
 			
 		}	
 	}
+	
+	/**
+	 * sends an intent that indicates current waypoint information has been updated. 
+	 * It can contain a message but it is currently unused. 
+	 * @param message
+	 */
 	
 	protected void sendNextWaypointIntent(String message){
 		Intent vi = new Intent();

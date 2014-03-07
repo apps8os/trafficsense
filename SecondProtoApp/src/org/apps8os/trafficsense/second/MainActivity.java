@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
 		super.onPause();
 		mContainer.activityDetach();
 	}
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -127,7 +128,7 @@ public class MainActivity extends Activity {
 			
 			//if the next stop
 			if(curWaypointIndex == 1){
-				//if(curWaypointIndex == 1 && curSegment.isWalking() == false){   //WHY IS ISWALKING() NOT WORKING
+				//if(curWaypointIndex == 1 && curSegment.isWalking() == false){   //WHY IS ISWALKING() NOT WORKING ?????
 				String transportId = curSegment.getSegmentMode();
 				String destination = curSegment.getLastWaypoint().getWaypointName();
 				String message[] = new String[1];
