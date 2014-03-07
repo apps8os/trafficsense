@@ -210,6 +210,7 @@ public class LocationOnlyService extends Service implements
 		
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
+		mContainer.getPebbleUiController().initializeList();
 		
 	}
 
@@ -292,7 +293,6 @@ public class LocationOnlyService extends Service implements
 			String parts[] = id.split(",");
 			mRouteSegmentIndex=Integer.parseInt(parts[0]);
 			mSegmentWaypointIndex=Integer.parseInt(parts[1])+1;
-			//if we are at the last waypoint set indexes to -1
 			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
@@ -311,8 +311,13 @@ public class LocationOnlyService extends Service implements
 
 					return; //the route has ended
 				}
+				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
+			} else {
+				// If we are not at the last waypoint, only update the list on pebble
+				mContainer.getPebbleUiController().updateList();
 			}
 
 			
