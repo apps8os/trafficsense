@@ -2,6 +2,7 @@
 #define __COMM_H__
 
 #include "main.h"
+#include "windowControl.h"
 
 // Constants for receiving commands
 #define KEY_COMMAND		0	// The key of the command tuple (the value of this tuple is the command)

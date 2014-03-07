@@ -12,9 +12,13 @@
 #define VIEW_MODE_NAMES		0
 #define VIEW_MODE_CODES		1
 
-#define NUM_TIME_UNITS		2
 
-static const char* timeUnitsStr[NUM_TIME_UNITS] = {"seconds", "minutes"};
+/* Usage example: strcpy(dest, timeUnitsStr[UNIT_MINUTES]) */
+#define UNIT_HOURS			2
+#define UNIT_MINUTES		1
+#define UNIT_SECONDS		0
+static const char* timeUnitsStr[3] = {"seconds", "minutes", "hours"};
+
 
 extern int viewMode;
 extern Window* windowArray[NUM_WINDOWS];
@@ -26,5 +30,10 @@ void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, 
 void click_config_provider(Window *window);
 // Pop up the get off alarm window and vibrate
 void show_get_off_alarm();
+// Looping function for updating the time in basic window
+void basic_window_loop();
 
+void show_3stop_window();
+void show_basic_window();
+void init_basic_window();
 #endif

@@ -26,6 +26,11 @@ void message_received(DictionaryIterator *iterator) {
       	strncpy(stopArray[stopPosition].name, name, STOP_NAME_LENGTH);
         strncpy(stopArray[stopPosition].code, code, STOP_CODE_LENGTH);
         strncpy(stopArray[stopPosition].time, time, TIME_STR_LENGTH);
+        if (stopPosition == NUM_STOPS -1) {
+        	// Here we've received the last stop, so the segment iniiialization is complete
+        	// Time to show the basic window
+        	show_basic_window();
+        }
       }
       else if (command == COMMAND_UPDATELIST) {
         // Update the list with a single stop
