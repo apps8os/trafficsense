@@ -63,7 +63,7 @@ public class MessageManager implements Runnable {
     	});
     }
 
-    public void notifyAckReceivedAsync() {
+    public void notifyAckReceivedAsync(final int transactionId) {
         messageHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -81,7 +81,7 @@ public class MessageManager implements Runnable {
         consumeAsync();
     }
 
-    public void notifyNackReceivedAsync() {
+    public void notifyNackReceivedAsync(final int transactionId) {
         messageHandler.post(new Runnable() {
             @Override
             public void run() {
