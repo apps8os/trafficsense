@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
 		 ListView listview = (ListView) findViewById(R.id.listview);
 		 
 		 listview.setVisibility(View.INVISIBLE); 
+		 map.setMyLocationEnabled(true);
 		 
 	}
 	
