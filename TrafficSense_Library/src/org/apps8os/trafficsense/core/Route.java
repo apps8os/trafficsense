@@ -107,6 +107,9 @@ public class Route {
 	}
 	
 	public Segment getSegment(int index) {
+		if(index > segmentList.size()-1){
+			return null;
+		}
 		return segmentList.get(index);
 	}
 	

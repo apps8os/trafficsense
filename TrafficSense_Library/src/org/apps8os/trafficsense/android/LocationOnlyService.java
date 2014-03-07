@@ -165,16 +165,15 @@ public class LocationOnlyService extends Service implements
 	 * geofence transition is made is currently hardcoded.
 	 * @param newFence
 	 */
-	private void addGeofence(Geofence newFence){
+	private void addGeofence(ArrayList<Geofence> list){
 		Intent i = new Intent();
 		i.setAction(ACTION_NEXT_GEOFENCE_REACHED);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, 
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		//if the location client is connected send the request
 		if(mLocationClient.isConnected()){
-			ArrayList<Geofence> geoList=new ArrayList<Geofence>();
-			geoList.add(newFence);
-			mLocationClient.addGeofences(geoList, pi, mOnAddGeofencesListener);
+			System.out.println("DBG adding geofence list");
+			mLocationClient.addGeofences(list, pi, mOnAddGeofencesListener);
 		}
 		else{
 			//TODO: figure out what happens if location client is not connected
@@ -210,16 +209,7 @@ public class LocationOnlyService extends Service implements
 	public void onConnected(Bundle connectionHint) {
 		
 		setGeofencesForRoute();
-		
-		Route currentRoute=mContainer.getRoute();
-		Segment currentSegment = currentRoute.getSegment(mRouteSegmentIndex);
-		Waypoint nextWaypoint = currentSegment.getWaypoint(mSegmentWaypointIndex);
-		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
-				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
-		addGeofence(newFence);
 		sendNextWaypointIntent(null);
-
-
 		
 	}
 
@@ -228,28 +218,33 @@ public class LocationOnlyService extends Service implements
 	 */
 	public void setGeofencesForRoute(){
 		Route currentRoute = mContainer.getRoute();
+		ArrayList<Geofence> listOfFences = new ArrayList<Geofence>();
 		for(int segmentIndex=0;;segmentIndex++){
-			Segment currentSegment = currentRoute.getSegment(mRouteSegmentIndex);
+			Segment currentSegment = currentRoute.getSegment(segmentIndex);
 			if(currentSegment == null){
 				break;
 			}
 			//TODO: check if the segment is a walking segment and if it is only set the last waypoint in it 
 			
 			//skip the first waypoint because it it also the last one in the last segment
-			for(int waypointIndex=1;;waypointIndex++){
-				Waypoint nextWaypoint = currentSegment.getWaypoint(mSegmentWaypointIndex);
+			for(int waypointIndex=0;;waypointIndex++){
+				if(segmentIndex!=0){
+					break;
+				}
+				Waypoint nextWaypoint = currentSegment.getWaypoint(waypointIndex);
 				if(nextWaypoint==null){
 					break;
 				}
+				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
 				String id = (new Integer(segmentIndex)).toString()+","+(new Integer(waypointIndex)).toString();
 				mNextBusStopGeofence = createGeofence(nextWaypoint, id, GEOFENCE_RADIUS,
 						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
-				addGeofence(mNextBusStopGeofence);	
+				listOfFences.add(mNextBusStopGeofence);
 				
 			}
 			
 		}
-			
+		addGeofence(listOfFences);		
 	}
 	
 	@Override

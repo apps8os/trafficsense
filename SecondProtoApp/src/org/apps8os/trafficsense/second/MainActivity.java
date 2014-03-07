@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
 		 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		 ListView listview = (ListView) findViewById(R.id.listview);
 		 
-		 listview.setVisibility(View.INVISIBLE);
+		 listview.setVisibility(View.INVISIBLE); 
 		 
 	}
 	
