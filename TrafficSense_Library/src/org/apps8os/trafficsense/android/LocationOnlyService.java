@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package org.apps8os.trafficsense.android;
 
 import java.util.ArrayList;
@@ -345,3 +346,5 @@ public class LocationOnlyService extends Service implements
 }
 
 
+=======
+>>>>>>> c6b03b5086b472b0130e2677315ac1453297b8ce
