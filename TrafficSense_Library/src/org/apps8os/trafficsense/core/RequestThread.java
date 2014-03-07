@@ -12,7 +12,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 
 
-public class RequestThread implements Runnable{
+/**
+ * TODO move to Container
+ * @deprecated
+ * @author user
+ *
+ */
+public class RequestThread extends Thread{
 
 	
 	//private final String URI ="http://api.reittiopas.fi/hsl/prod/?";
@@ -38,6 +44,11 @@ public class RequestThread implements Runnable{
     	//for (int i = 0; i < KEY.length; i++) {
        		//String finalURL =URL +KEY[i];
 			try {
+				/**
+				 * TODO: check whether stopCode is 0000, null, ""
+				 * these gives us HTTP 500
+				 */
+				System.out.println("DBG RequestThread url="+URL);
 				response = httpclient.execute(new HttpGet(URL));
 				
 				StatusLine statusLine = response.getStatusLine();
@@ -48,7 +59,7 @@ public class RequestThread implements Runnable{
             		responseString = out.toString();            
             	} 
             	else{
-            		System.out.println("Something failed.");
+            		System.out.println("DBG RequestThread status="+statusLine.getStatusCode());
             		//Closes the connection.
             		response.getEntity().getContent().close();
                 	throw new IOException(statusLine.getReasonPhrase());
@@ -64,7 +75,7 @@ public class RequestThread implements Runnable{
 	public String getGeocoding(String responseLimit, String cities , String locType, String key) {
 		URL = "http://api.reittiopas.fi/hsl/prod/?request=geocode"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT 
 		+"&loc_types=" + locType +"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit + "&cities=" + cities + "&lang=" + LANG[defLang] + "&key=";			
-			this.run();
+			this.start();
 			return responseString;
 	}
 	
@@ -72,21 +83,21 @@ public class RequestThread implements Runnable{
 	public String getLineInfo(String responseLimit, String query){
 		URL = "http://api.reittiopas.fi/hsl/prod/?request=lines"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 				"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit + "&query="+query;
-		this.run();
+		this.start();
 		return responseString;
 	}
 	
 	public String getReverseGeocoding (String responseLimit, String x, String y){
 		URL= "http://api.reittiopas.fi/hsl/prod/?request=reverse_geocode"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 		"&key="+ "&coordinate=" + x +","+ y +"&epsg_in=" + EPSG_IN + "&epsg_out=" + EPSG_OUT + responseLimit;
-		this.run();
+		this.start();
 		return responseString;	
 	}
 	
 	public String getStopInfo(String responseLimit, String stopCode){
 		URL = "http://api.reittiopas.fi/hsl/prod/?request=stop"+ "&user=" + USER + "&pass=" + PASS + "&format=" + FORMAT + 
 				"&epsg_out=" + EPSG_OUT + "&p=" + responseLimit + "&code="+stopCode;
-		this.run();
+		this.start();
 		return responseString;		
 	}
 	

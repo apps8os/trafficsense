@@ -295,6 +295,7 @@ public class TrafficsenseContainer {
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
+				// TODO: call retrieveCoordinatesForStopsBlockingPart()
 				startTrackerService(serviceType);
 				activityDetach();
 			}
@@ -397,6 +398,14 @@ public class TrafficsenseContainer {
 				}
 			}
 		}).start();
+	}
+	
+	/**
+	 * TODO
+	 */
+	public void retrieveCoordinatesForStopsBlockingPart() {
+		// iterate through mRoute and for each Waypoint,
+		// access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available)
 	}
 	
 	/**

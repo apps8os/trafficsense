@@ -139,10 +139,14 @@ public class Segment {
 				transport_type = RouteConstants.WALKING;
 			}
 			if(mode.startsWith("Walking")==false && mode.contains("metro")==false && mode.contains("ferry")==false){
+				/**
+				 * TODO move these to the Container
+				 */
+				/*
 				String returned = "";
 				RequestThread r= new RequestThread ();
 				returned = r.getLineInfo("001", mode);
-				//System.out.println(returned);
+				System.out.println("DBG setSegmentType returned:"+returned);
 				// TODO change this to Gson
 				try {
 					JSONArray json = new JSONArray(returned);
@@ -151,6 +155,7 @@ public class Segment {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				*/
 			}
 			
 			return transport_type;	

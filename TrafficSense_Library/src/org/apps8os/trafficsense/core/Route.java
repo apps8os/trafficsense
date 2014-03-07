@@ -151,6 +151,7 @@ public class Route {
 	public String getDepartureTime (){
 		return departure;
 	}
+	
 	/*
 	public void setCompleteCoordList(){
 		for (int i = 0; i < segmentList.size(); i++) {

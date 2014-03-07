@@ -210,7 +210,9 @@ public class LocationOnlyService extends Service implements
 	 */
 	public void onConnected(Bundle connectionHint) {
 		
-		setGeofencesForRoute();
+		// TODO wait until we fix coordinate retrieval.
+		System.out.println("DBG LocationOnlyService not setting fences");
+		// setGeofencesForRoute();
 		sendNextWaypointIntent(null);
 		mContainer.getPebbleUiController().initializeList();
 		

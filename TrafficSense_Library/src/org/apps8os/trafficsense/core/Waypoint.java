@@ -12,6 +12,8 @@ public class Waypoint{
 	private String stopCode;
 	private String longCord;
 	private String latCord;
+	private double mLatitude;
+	private double mLongitude;
 	
 	public String getWaypointTime(){
 		return time;
@@ -45,7 +47,8 @@ public class Waypoint{
 		setWaypointName (waypoint.get("name").getAsString());
 		if (waypoint.has("stopCode")) {
 			setWaypointStopCode(waypoint.get("stopCode").getAsString());
-			setWaypointCords(stopCode);
+			//TODO leave this to the Container
+			//setWaypointCords(stopCode);
 		} 
 			else { 
 				// TODO: what should this be if there is no stopCode ???
@@ -53,10 +56,27 @@ public class Waypoint{
 		}
 	}
 
+	/**
+	 * 
+	 * @param latitude
+	 * @param longitude
+	 */
+	public void setCoordinate(double latitude, double longitude) {
+		synchronized (this) {
+			mLatitude = latitude;
+			mLongitude = longitude;
+		}
+	}
+
+	/**
+	 * TODO move these work to Container
+	 * @deprecated
+	 * @param stopCode
+	 */
 	public void setWaypointCords(String stopCode){
 		RequestThread r= new RequestThread ();
 		String returned = r.getStopInfo("000000001", stopCode);
-		//System.out.println(returned);
+		System.out.println("DBG setWaypointCords returned:"+returned);
 		String coords ="";
 		try {
 			JSONArray json = new JSONArray(returned);
@@ -73,10 +93,20 @@ public class Waypoint{
 		latCord = coords.substring(0, 8);
 	}
 	
+	/**
+	 * TODO: return double version
+	 * @deprecated
+	 * @return
+	 */
 	public String getLongitude(){
 		return longCord;
 	}
 	
+	/**
+	 * TODO return double version
+	 * @deprecated
+	 * @return
+	 */
 	public String getLatitude(){
 		return latCord;
 	}
