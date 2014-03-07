@@ -94,8 +94,13 @@ void basic_window_loop() {
 
 void show_basic_window() {
   if (currentWindow != WINDOW_BASIC) {
+    // TODO: Make sure the buffer size is enough
     char buff[30];
-    
+    strcat(buff, stopArray[0].code);
+    strcat(buff, " ");
+    strcat(buff, stopArray[0].name);
+    text_layer_set_text(stopCodeAndName, buff); // Set the text of the stop
+    text_layer_set_text(lineCode, currentLineCode);
     currentWindow = WINDOW_BASIC;
     window_stack_pop(true); // Remove 3stop-window from the'window stack
     window_stack_push(windowArray[WINDOW_BASIC], true); // Push the basic window (show it)
