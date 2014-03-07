@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.apps8os.trafficsense.first"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <!-- Permissions required by ContextLogger3 -->
+    <!-- Launching -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <!-- All probes -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Storage -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Config downloading/Data uploading -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- WifiProbe -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!-- Location&CellProbe -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    
+    <!-- Alarm test -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="org.apps8os.trafficsense.first.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Time-based Journey Tracker -->
+        <service android:name="org.apps8os.trafficsense.android.TimeOnlyService" />
+        
+        <!-- ContextLogger3 related services -->
+        <service android:name="edu.mit.media.funf.FunfManager" >
+            <meta-data
+                android:name="default"
+                android:value="@string/default_pipeline" />
+        </service>
+        <receiver
+            android:name="edu.mit.media.funf.Launcher"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BATTERY_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.DOCK_EVENT" />
+                <action android:name="android.intent.action.ACTION_SCREEN_ON" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        
+    </application>
+
+</manifest>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SecondPrototype</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+
+    <string name="default_pipeline">
+        {"@type":"org.apps8os.contextlogger3.android.pipeline.MainPipeline",
+        "name":"default",
+        "archive": {
+                "@password": "justdoit"
+        },
+        "version":1,
+        "data":[
+        	"org.apps8os.contextlogger3.android.probe.AppProbe",
+        	"org.apps8os.contextlogger3.android.probe.GoogleLocationProbe",
+           "edu.mit.media.funf.probe.builtin.WifiProbe",
+           "edu.mit.media.funf.probe.builtin.AccelerometerSensorProbe",
+           "edu.mit.media.funf.probe.builtin.LocationProbe"
+        ]
+       }
+   </string>
+   
+</resources>
