@@ -21,6 +21,14 @@ public class Waypoint{
 	 */
 	private volatile double mLongitude;
 	
+	/**
+	 * Constructor.
+	 */
+	public Waypoint () {
+		stopCode = Constants.NO_STOP_CODE;
+		// TODO: how should the default/magic number for Lat/Long coord be?
+	}
+	
 	public String getWaypointTime(){
 		return time;
 	}
