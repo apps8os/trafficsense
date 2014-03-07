@@ -236,8 +236,10 @@ public class TrafficsenseContainer {
 	/**
 	 * Initialized the singleton.
 	 * Starts ContextLogger, Pebble communication and Pebble app.
+	 * Must invoke {@link #close()} afterwards to release resources.
 	 * 
 	 * @param ctx the Context for all further operations.
+	 * @see #close()
 	 */
 	private void open(Context ctx) {
 		System.out.println("DBG Container open");
@@ -257,6 +259,8 @@ public class TrafficsenseContainer {
 	/**
 	 * Release resources.
 	 * Stops ContextLogger, Pebble communication.
+	 * 
+	 * @see #open(Context)
 	 */
 	private void close() {
 		System.out.println("DBG Container close");
@@ -297,6 +301,7 @@ public class TrafficsenseContainer {
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
 				if (serviceType != Constants.SERVICE_TIME_ONLY) {
+					// TODO: check its return value!
 					retrieveCoordinatesForStopsBlockingPart();
 				}
 				startTrackerService(serviceType);
@@ -408,12 +413,14 @@ public class TrafficsenseContainer {
 	 * Retrieves GPS coordinates for all stops along the journey.
 	 * 
 	 * Must NOT invoke this from the main/UI thread.
+	 * 
+	 * @return true on success, false otherwise.
 	 */
-	public void retrieveCoordinatesForStopsBlockingPart() {
+	public boolean retrieveCoordinatesForStopsBlockingPart() {
 		if (mRoute == null) {
 			// TODO error handling ?
 			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
-			return;
+			return false;
 		}
 		JourneyInfoResolver resolver = new JourneyInfoResolver();
 		/**
@@ -421,9 +428,10 @@ public class TrafficsenseContainer {
 		 */
 		if (resolver.retrieveCoordinatesFromHsl(mRoute) == false) {
 			// TODO: error handling.
+			return false;
 		}
-		
 		// TODO: what about those who do not have a stopCode (= NO_STOP_CODE) ?
+		return true;
 	}
 	
 	/**

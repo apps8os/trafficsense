@@ -4,12 +4,21 @@ import org.apps8os.trafficsense.android.Constants;
 
 import com.google.gson.JsonObject;
 
+/**
+ * TODO: documentation
+ */
 public class Waypoint{
 	
 	private String time;
 	private String name;
 	private String stopCode;
+	/**
+	 * Coordinate system: WGS84.
+	 */
 	private volatile double mLatitude;
+	/**
+	 * Coordinate system: WGS84.
+	 */
 	private volatile double mLongitude;
 	
 	public String getWaypointTime(){

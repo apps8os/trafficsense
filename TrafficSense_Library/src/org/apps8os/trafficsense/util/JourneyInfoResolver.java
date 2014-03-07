@@ -35,8 +35,11 @@ public class JourneyInfoResolver {
 	private final static String HSL_API_USER = "trafficsenseuser";
 	private final static String HSL_API_PASS = "trafficsense";
 	private final static String HSL_API_FORMAT = "json";
+	/**
+	 * Coordinate system of choice: WGS84.
+	 */
 	private final static String HSL_API_EPSG_OUT = "4326";
-	private final static String HSL_API_EPSG_IN = "4326";
+	private final static String HSL_API_EPSG_IN = HSL_API_EPSG_OUT;
 	private final static String[] LANG = { "fi", "sv", "en" };
 	private final static int defLang = 2;
 
@@ -73,6 +76,7 @@ public class JourneyInfoResolver {
 	private ByteArrayOutputStream mByteOutStream;
 	private HttpClient mHttpClient;
 	private Gson mGson;
+	private boolean errorOccurred;
 	
 	/**
 	 * Constructor.
@@ -95,6 +99,7 @@ public class JourneyInfoResolver {
 		if (journey == null) {
 			return false;
 		}
+		errorOccurred = false;
 		ArrayList<Segment> segments = journey.getSegmentList();
 		for (Segment segment : segments) {
 			lookupSegmentTransportType(segment);
@@ -103,7 +108,11 @@ public class JourneyInfoResolver {
 				lookupWaypointCoordinate(waypoint);
 			}
 		}
-		return false;
+		if (errorOccurred) {
+			// TODO error handling
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -114,22 +123,29 @@ public class JourneyInfoResolver {
 	 */
 	private void lookupSegmentTransportType(Segment segment) {
 		if (segment == null) {
+			// TODO: error handling.
+			errorOccurred = true;
 			return;
 		}
-		if (segment.getSegmentType() == RouteConstants.UNKNOWN) {
-			String url = buildGetLineInfoUrl(lineResponseLimit, segment.getSegmentMode());
-			String result = doHttpRequest(url);
-			if (result.isEmpty()) {
-				// TODO: error handling.
-				return;
-			}
-			LineInfo[] info = mGson.fromJson(result, LineInfo[].class);
-			if (info.length == 0) {
-				System.out.println("DBG lookupSegmentTransportType info[] size = 0");
-				return;
-			}
-			segment.setSegmentType(info[0].transport_type_id);
+		if (segment.getSegmentType() != RouteConstants.UNKNOWN) {
+			// Determined by Segment.setSegmentType() already.
+			return;
 		}
+		String url = buildGetLineInfoUrl(lineResponseLimit, segment.getSegmentMode());
+		String result = doHttpRequest(url);
+		if (result.isEmpty()) {
+			// TODO: error handling.
+			errorOccurred = true;
+			return;
+		}
+		LineInfo[] info = mGson.fromJson(result, LineInfo[].class);
+		if (info.length == 0) {
+			System.out.println("DBG lookupSegmentTransportType info[] size = 0");
+			// TODO: error handling.
+			errorOccurred = true;
+			return;
+		}
+		segment.setSegmentType(info[0].transport_type_id);
 	}
 	
 	/**
@@ -140,27 +156,35 @@ public class JourneyInfoResolver {
 	 */
 	private void lookupWaypointCoordinate(Waypoint waypoint) {
 		if (waypoint == null) {
+			// TODO: error handling.
+			errorOccurred = true;
 			return;
 		}
 		String stopCode = waypoint.getWaypointStopCode();
 		if (stopCode == null || stopCode.isEmpty() || stopCode.equals(Constants.NO_STOP_CODE)) {
+			// TODO: Actually, the first two cases should be error if they get to this point.
 			return;
 		}
 		String url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
 		String result = doHttpRequest(url);
 		if (result.isEmpty()) {
 			// TODO error handling
+			errorOccurred = true;
 			return;
 		}
 		StopInfo[] stop = mGson.fromJson(result, StopInfo[].class);
 		if (stop.length == 0) {
 			System.out.println("DBG lookupWaypointCoordinate stop[] size = 0");
+			// TODO error handling.
+			errorOccurred = true;
 			return;
 		}
 		// Parse longitude and latitude coordinates from the result string
 		String coords = stop[0].wgs_coords;
 		if (coords.isEmpty()) {
 			System.out.println("DBG lookupWaypointCoordinate coords empty");
+			// TODO error handling.
+			errorOccurred = true;
 			return;
 		}
 		
@@ -186,19 +210,26 @@ public class JourneyInfoResolver {
 			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 				response.getEntity().writeTo(mByteOutStream);
 				responseString = mByteOutStream.toString();
+				// Clear the buffer
 				mByteOutStream.reset();
 			} else {
 				System.out.println("DBG doHttpRequest status="
 						+ statusLine.getStatusCode() + " : "
 						+ statusLine.getReasonPhrase());
-				// Close the connection
-				response.getEntity().getContent().close();
+				// TODO error handling
+				errorOccurred = true;
 			}
+			// Close the connection
+			response.getEntity().getContent().close();
 		} catch (ClientProtocolException ex) {
 			System.out.println("DBG doHttpRequest ClientProtocolEx: "
 					+ ex.getMessage());
+			// TODO error handling.
+			errorOccurred = true;
 		} catch (IOException ex) {
 			System.out.println("DBG doHttpRequest IOEx: " + ex.getMessage());
+			// TODO error handling.
+			errorOccurred = true;
 		}
 		System.out.println("DBG doHttpRequest response: " + responseString);
 		return responseString;
