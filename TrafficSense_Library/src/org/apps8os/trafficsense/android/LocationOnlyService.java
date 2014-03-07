@@ -217,11 +217,9 @@ public class LocationOnlyService extends Service implements
 		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
 				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 		addGeofence(newFence);
-<<<<<<< HEAD
 		sendNextWaypointIntent(null);
-=======
-		sendNextWaypointIntent("");
->>>>>>> a528075408e37b166a3d3f863936539734783318
+
+
 		
 	}
 
