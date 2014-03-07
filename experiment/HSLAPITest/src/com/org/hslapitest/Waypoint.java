@@ -72,4 +72,12 @@ public class Waypoint{
 		longCord = coords.substring(9, 17);
 		latCord = coords.substring(0, 8);
 	}
+	
+	public String getLongitude(){
+		return longCord;
+	}
+	
+	public String getLatitude(){
+		return latCord;
+	}
 }
