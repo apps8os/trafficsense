@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package org.apps8os.trafficsense.android;
 
 import java.util.ArrayList;
@@ -218,7 +217,11 @@ public class LocationOnlyService extends Service implements
 		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
 				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 		addGeofence(newFence);
+<<<<<<< HEAD
 		sendNextWaypointIntent(null);
+=======
+		sendNextWaypointIntent("");
+>>>>>>> a528075408e37b166a3d3f863936539734783318
 		
 	}
 
@@ -327,6 +330,7 @@ public class LocationOnlyService extends Service implements
 		}	
 	}
 	
+
 	/**
 	 * sends an intent that indicates current waypoint information has been updated. 
 	 * It can contain a message but it is currently unused. 
@@ -346,5 +350,3 @@ public class LocationOnlyService extends Service implements
 }
 
 
-=======
->>>>>>> c6b03b5086b472b0130e2677315ac1453297b8ce
