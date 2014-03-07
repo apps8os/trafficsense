@@ -8,8 +8,7 @@ import org.json.JSONException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.org.hslapitest.RequestThread;
-import com.org.hslapitest.RouteConstants;
+
 
 public class Segment {
 		private String startTime;
@@ -144,6 +143,7 @@ public class Segment {
 				RequestThread r= new RequestThread ();
 				returned = r.getLineInfo("001", mode);
 				//System.out.println(returned);
+				// TODO change this to Gson
 				try {
 					JSONArray json = new JSONArray(returned);
 					transport_type = json.getJSONObject(0).getInt("transport_type_id");
