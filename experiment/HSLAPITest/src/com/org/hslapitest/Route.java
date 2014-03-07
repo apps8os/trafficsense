@@ -20,7 +20,12 @@ public class Route {
 	private String departure;
 	private int currentSegment=0;
 	
-	//private ArrayList <String> stopList = new ArrayList<String>();
+	private ArrayList <Coordinates> stopList = new ArrayList<Coordinates>();
+	
+	private enum Coordinates{
+		longitude,
+		latitude
+	}
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
 	
@@ -136,6 +141,25 @@ public class Route {
 		return departure;
 	}
 	
+	public void setCompleteCoordList(){
+		for (int i = 0; i < segmentList.size(); i++) {
+			if (segmentList.get(i).getSegmentType() != "0"){
+				
+			}
+			for (int j = 0; j < segmentList.get(i).getWaypointList().size(); j++) {
+				
+			}
+		}
+	}
+	
+	
+	public ArrayList <Coordinates> getCompleteCoordList(){
+		
+		
+		
+		return stopList;
+		
+	}
 	
 	
 }
