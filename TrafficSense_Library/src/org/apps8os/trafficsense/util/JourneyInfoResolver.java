@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -109,6 +110,7 @@ public class JourneyInfoResolver {
 			}
 		}
 		if (errorOccurred) {
+			System.out.println("DBG retrieveCoordinatesFromHsl errorOccurred = true");
 			// TODO error handling
 			return false;
 		}
@@ -207,20 +209,28 @@ public class JourneyInfoResolver {
 		try {
 			HttpResponse response = mHttpClient.execute(new HttpGet(url));
 			StatusLine statusLine = response.getStatusLine();
-			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+			HttpEntity responseBody = response.getEntity();
+			if (statusLine.getStatusCode() == HttpStatus.SC_OK &&
+					responseBody != null) {
 				response.getEntity().writeTo(mByteOutStream);
 				responseString = mByteOutStream.toString();
 				// Clear the buffer
 				mByteOutStream.reset();
+				responseBody.consumeContent();
 			} else {
 				System.out.println("DBG doHttpRequest status="
 						+ statusLine.getStatusCode() + " : "
 						+ statusLine.getReasonPhrase());
+				if (responseBody == null) {
+					System.out.println("DBG doHttpRequest responseBody/Entity = null");
+				} else {
+					responseBody.consumeContent();
+				}
 				// TODO error handling
 				errorOccurred = true;
 			}
 			// Close the connection
-			response.getEntity().getContent().close();
+			response.getEntity().consumeContent();
 		} catch (ClientProtocolException ex) {
 			System.out.println("DBG doHttpRequest ClientProtocolEx: "
 					+ ex.getMessage());
