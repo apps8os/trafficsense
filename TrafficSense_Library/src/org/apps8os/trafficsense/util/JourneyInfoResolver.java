@@ -134,7 +134,7 @@ public class JourneyInfoResolver {
 			return;
 		}
 		String url = buildGetLineInfoUrl(lineResponseLimit, segment.getSegmentMode());
-		String result = doHttpRequest(url);
+		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
 			// TODO: error handling.
 			errorOccurred = true;
@@ -154,7 +154,7 @@ public class JourneyInfoResolver {
 	 * Query HSL API for the GPS coordinate of a given Waypoint.
 	 * Do nothing if stopCode is unavailable.
 	 * 
-	 * @param stopCode
+	 * @param waypoint waypoint to query for
 	 */
 	private void lookupWaypointCoordinate(Waypoint waypoint) {
 		if (waypoint == null) {
@@ -168,7 +168,7 @@ public class JourneyInfoResolver {
 			return;
 		}
 		String url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
-		String result = doHttpRequest(url);
+		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
 			// TODO error handling
 			errorOccurred = true;
@@ -203,7 +203,7 @@ public class JourneyInfoResolver {
 	 * @param url url to GET.
 	 * @return response body. empty on error.
 	 */
-	private String doHttpRequest(String url) {
+	private String doHttpGetRequest(String url) {
 		String responseString = "";
 		System.out.println("DBG doHttpRequest url=" + url);
 		try {
@@ -221,16 +221,18 @@ public class JourneyInfoResolver {
 				System.out.println("DBG doHttpRequest status="
 						+ statusLine.getStatusCode() + " : "
 						+ statusLine.getReasonPhrase());
-				if (responseBody == null) {
-					System.out.println("DBG doHttpRequest responseBody/Entity = null");
-				} else {
-					responseBody.consumeContent();
-				}
 				// TODO error handling
 				errorOccurred = true;
 			}
 			// Close the connection
-			response.getEntity().consumeContent();
+			if (responseBody == null) {
+				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+					System.out.println("DBG doHttpRequest responseBody/Entity = null");
+					// TODO error handling
+				}
+			} else {
+				responseBody.consumeContent();
+			}
 		} catch (ClientProtocolException ex) {
 			System.out.println("DBG doHttpRequest ClientProtocolEx: "
 					+ ex.getMessage());
