@@ -12,6 +12,7 @@ public class getCoords {
 	
 	public void getCoords() throws Exception{
 		
+		System.out.println("longitude, latitude");
 	
 		for(int i=0; i < listOfStopIds.length;i++ ){
 			URL url = new URL("http://api.reittiopas.fi/hsl/prod/?user=jussi&pass=infinity&request=stop&code=" + 
@@ -21,7 +22,7 @@ public class getCoords {
 			Pattern pattern = Pattern.compile(":\"(..)(.*),(..)(.*)\"");
 			Matcher matcher = pattern.matcher(inputline);
 			if (matcher.find()) {
-			    System.out.println("\"test\",\""+matcher.group(1)+"."+matcher.group(2)+","+matcher.group(3)+"."+matcher.group(4)+"\"");
+			    System.out.println(matcher.group(1)+"."+matcher.group(2)+","+matcher.group(3)+"."+matcher.group(4));
 			    
 			}
 			
@@ -40,7 +41,8 @@ public class getCoords {
 		}
 		
 		
-		
+		//convert to kml: http://www.mapsdata.co.uk/online-file-converter/#kml-instructions
+		//conver kml to ddms compatible kml: http://lab.soledadpenades.com/android/kml/
 	
 	
 	
