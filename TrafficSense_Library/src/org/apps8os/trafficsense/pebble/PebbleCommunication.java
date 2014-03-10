@@ -111,7 +111,7 @@ public class PebbleCommunication {
 	 */
 	public void sendWaypoint(Waypoint waypoint, int listIndex) {
 		if (waypoint == null) {
-			System.out.println("DBG sendWaypoint waypoint = null");
+			System.out.println("DBG pebbleCommunication sendWaypoint waypoint = null");
 			return;
 		}
 		String name = waypoint.getWaypointName();
@@ -131,7 +131,7 @@ public class PebbleCommunication {
 		 * En-queue this message to MessageHandler.
 		 */
 		messageManager.offer(dictionary);
-		System.out.println("DBG sendWaypoint: " + name);
+		System.out.println("DBG pebbleCommunication sendWaypoint: " + name);
 	}
 
 	/**
