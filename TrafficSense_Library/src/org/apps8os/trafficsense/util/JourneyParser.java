@@ -31,10 +31,12 @@ public class JourneyParser {
 	private ArrayList<String> _textArray = new ArrayList<String>();
 	/**
 	 * Number of lines of journey processed.
+	 * TODO: refactor to mNumberOfLines
 	 */
 	private int _nline = 0;
 	/**
 	 * Next non-empty journey text line to be processed.
+	 * TODO: refactor to mCurrentLine
 	 */
 	private String _txtLine;
 
@@ -49,6 +51,7 @@ public class JourneyParser {
 	/**
 	 * Return the number of lines of journey processed.
 	 * 
+	 * TODO: is this necessary?
 	 * @return number of lines of journey processed.
 	 */
 	private int getLine() {
@@ -85,6 +88,11 @@ public class JourneyParser {
 	/**
 	 * TODO: documentation
 	 * 
+	 * TODO: this method is only used internally in this class and
+	 * on most occasion the result is .get()-ed.
+	 * Is this level of abstraction really necessary?
+	 * TODO: Or maybe refactor it to return i-th element directly,
+	 * after some checks?
 	 * @return
 	 */
 	private ArrayList<String> getTextArray() {
@@ -164,6 +172,8 @@ public class JourneyParser {
 	 */
 	private void addJsonObject() {
 
+		System.out.println("DBG addJsonObject nline:"+_nline+" arraySz:"+_textArray.size()+" txtLine:"+_txtLine);
+		
 		if (getLine() == 1) {
 			addProperty("date", getTxtLine());
 			return;
@@ -171,6 +181,7 @@ public class JourneyParser {
 
 		if (this.getLine() == 3) {
 			String[] parts = getTxtLine().split(" ", 2);
+			// TODO: should check if |parts[]| >= 2 and fail gracefully.
 			addProperty("start", parts[1]);
 			return;
 		}
@@ -179,6 +190,12 @@ public class JourneyParser {
 		String str;
 		String[] str_split;
 
+		/** 
+		 * TODO: refactor!
+		 * 1. Check if _textArray.size() == 0
+		 * 2. If not, .get(0) and split()
+		 * 3. What if split() gives something other than expected??
+		 */
 		try {
 			str = getTextArray().get(0);
 			str_split = str.split(" ", 2); // will just split one time = 2 parts
@@ -187,10 +204,12 @@ public class JourneyParser {
 			return;
 		}
 
+		// TODO: check _textArray.size() >= 2 first!
 		if (!getTextArray().get(1).equals("Arrival") &&
 			!getTextArray().get(1).equals("Perillä") &&
 			!getTextArray().get(1).equals("Ankomst")) {
 
+			//TODO: check str_split[] first!
 			JsonObject SegmentsObj = new JsonObject();
 			SegmentsObj.addProperty("startTime", str_split[0]);
 			SegmentsObj.addProperty("startPoint", str_split[1]);
@@ -200,6 +219,7 @@ public class JourneyParser {
 
 			JsonArray waypointsArray = new JsonArray();
 
+			// TODO: what to do if .size() = 0 ?
 			for (int i = 2; i < getTextArray().size(); i++) {
 
 				JsonObject waypointObj = new JsonObject();
@@ -213,10 +233,15 @@ public class JourneyParser {
 					!getTextArray().get(1).contains("Gång")) {
 					// If the user is not walking will have a stopCode for each
 					// point
+					// TODO: This is _NOT_ the case ...
 					String stopCode;
 					int start, end;
 					start = str_split[1].indexOf("(") + 1;
 					end = str_split[1].indexOf(")");
+					if (start == -1 || end == -1) {
+						System.out.println("DBG addJsonObject start/end = -1");
+					}
+					// TODO: So this might crash
 					stopCode = str_split[1].substring(start, end);
 
 					waypointObj.remove("name");
@@ -251,6 +276,8 @@ public class JourneyParser {
 	 */
 	private void organizeJson() {
 
+		System.out.println("DBG organizeJson nline:"+_nline+" arraySz:"+_textArray.size()+" txtLine:"+_txtLine);
+		
 		switch (getLine()) {
 		case 1:
 			addJsonObject();
@@ -324,7 +351,7 @@ public class JourneyParser {
 	 * @param line the line
 	 */
 	private void parseOneLine(String line) {
-		System.out.println("Line: "+line);
+		System.out.println("DBG parseOneLine: "+line);
 		setTxtLine(line);
 		incrementLine();
 		organizeJson();
