@@ -140,13 +140,18 @@ public class PebbleCommunication {
 	 * @param waypoint new waypoint to be added to the list.
 	 */
 	public void updateList(Waypoint waypoint) {
+		String code;
+		String name;
+		String time;
 		if (waypoint == null) {
 			System.out.println("DBG updateList waypoint = null");
-			return;
-		}
-		String name = waypoint.getWaypointName();
-		if (name == null) {
-			name = "null";
+			name = "";
+			code = "";
+			time = "";
+		} else {
+			name = waypoint.getWaypointName();
+			code = waypoint.getWaypointStopCode();
+			time = waypoint.getWaypointTime();
 		}
 		// Maximum 20 characters.
 		int charLimit = Math.min(name.length(), 20);
@@ -154,8 +159,8 @@ public class PebbleCommunication {
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_UPDATELIST);
 		dictionary.addString(KEY_STOP_NAME, name);
-		dictionary.addString(KEY_STOP_CODE, waypoint.getWaypointStopCode());
-		dictionary.addString(KEY_STOP_TIME, waypoint.getWaypointTime());
+		dictionary.addString(KEY_STOP_CODE, code);
+		dictionary.addString(KEY_STOP_TIME, time);
 		/**
 		 * En-queue this message to MessageHandler.
 		 */

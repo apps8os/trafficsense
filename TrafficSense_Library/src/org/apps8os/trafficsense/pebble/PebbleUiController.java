@@ -32,9 +32,6 @@ public class PebbleUiController {
 	 */
 	public void initializeList() {
 		Segment newSegment = mRoute.getCurrentSegment();
-		if (newSegment.isWalking()) {
-			return;
-		}
 		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
 		
 		// Add the waypoints from the segment to the list
