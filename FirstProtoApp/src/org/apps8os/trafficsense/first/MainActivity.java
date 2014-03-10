@@ -124,7 +124,7 @@ public class MainActivity extends Activity {
 		System.out.println("DBG onClick_parse");
 		TextView view = (TextView) findViewById(R.id.textView2);
 
-		// mContainer.setJourneyText(getHardCodedJourneyText());
+		mContainer.setJourneyText(getHardCodedJourneyText());
 		mContainer.parseJourney();
 
 		view.setText(mContainer.getJourneyObject().toString());
