@@ -205,7 +205,7 @@ public class JourneyInfoResolver {
 	 */
 	private String doHttpGetRequest(String url) {
 		String responseString = "";
-		System.out.println("DBG doHttpRequest url=" + url);
+		System.out.println("DBG doHttpGetRequest url=" + url);
 		try {
 			HttpResponse response = mHttpClient.execute(new HttpGet(url));
 			StatusLine statusLine = response.getStatusLine();
@@ -218,7 +218,7 @@ public class JourneyInfoResolver {
 				mByteOutStream.reset();
 				responseBody.consumeContent();
 			} else {
-				System.out.println("DBG doHttpRequest status="
+				System.out.println("DBG doHttpGetRequest status="
 						+ statusLine.getStatusCode() + " : "
 						+ statusLine.getReasonPhrase());
 				// TODO error handling
@@ -227,28 +227,29 @@ public class JourneyInfoResolver {
 			// Close the connection
 			if (responseBody == null) {
 				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-					System.out.println("DBG doHttpRequest responseBody/Entity = null");
+					System.out.println("DBG doHttpGetRequest responseBody/Entity = null");
 					// TODO error handling
 				}
 			} else {
 				responseBody.consumeContent();
 			}
 		} catch (ClientProtocolException ex) {
-			System.out.println("DBG doHttpRequest ClientProtocolEx: "
+			System.out.println("DBG doHttpGetRequest ClientProtocolEx: "
 					+ ex.getMessage());
 			// TODO error handling.
 			errorOccurred = true;
 		} catch (IOException ex) {
-			System.out.println("DBG doHttpRequest IOEx: " + ex.getMessage());
+			System.out.println("DBG doHttpGetRequest IOEx: " + ex.getMessage());
 			// TODO error handling.
 			errorOccurred = true;
 		}
-		System.out.println("DBG doHttpRequest response: " + responseString);
+		System.out.println("DBG doHttpGetRequest response: " + responseString);
 		return responseString;
 	}
 
 
 	/**
+	 * TODO: documentation
 	 * 
 	 * @param responseLimit
 	 * @param query
@@ -263,6 +264,7 @@ public class JourneyInfoResolver {
 
 	
 	/**
+	 * TODO: documentation
 	 * 
 	 * @param responseLimit
 	 * @param stopCode
