@@ -52,6 +52,8 @@ public class MainActivity extends Activity {
 		 
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
 		mWaypointChangedReceiver = new WaypointChanged();
+		String welcome[] = {"Welcome"};
+		showList(welcome);
 		 
 	}
 	
@@ -59,14 +61,15 @@ public class MainActivity extends Activity {
 	public void onResume() {
 		super.onResume();
 		mContainer.activityAttach(getApplicationContext());
+		registerReceiver(mCoordsReadyReceiver, new IntentFilter(Constants.ACTION_COORDS_READY));
+		registerReceiver(mWaypointChangedReceiver, new IntentFilter(Constants.ACTION_ROUTE_EVENT));
 		
 		if (mContainer.getRoute().getCoordsReady()) {
-			 drawRoute();
+			Intent i = new Intent().setAction(Constants.ACTION_ROUTE_EVENT);
+			sendBroadcast(i);
+			drawRoute();
 		 }
-		registerReceiver(mCoordsReadyReceiver, new IntentFilter(Constants.ACTION_COORDS_READY));
-		registerReceiver(mWaypointChangedReceiver, new IntentFilter(Constants.ACTION_NEXT_WAYPOINT));
-		//TODO: update the ui with the latest info
-		
+
 	}
 	
 	@Override
@@ -150,12 +153,13 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			System.out.println("DBG: Main activity: Waypoint changed");
 			Segment curSegment = mContainer.getRoute().getCurrentSegment();
 			int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
 			int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
 			List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
 			
-			if(curSegmentIndex ==-1 & curSegmentIndex==-1){
+			if(curSegmentIndex ==-1 & curWaypointIndex==-1){
 				String message[] = {"Congratulations. You reached your destination"};
 				showList(message);
 			}
@@ -167,32 +171,33 @@ public class MainActivity extends Activity {
 			}
 			
 			//if the current segment is a walking one
-			/**if(curSegment.isWalking() == false){
-				String message[] = {"Walk to next stop"};
+			if(curSegment.isWalking() == false){
+				String message[] = {"Walk to next stop"}; 
 				showList(message);
 			}
-			**/
+			
 			
 			//if the next stop
 			if(curWaypointIndex == 1){
-				//if(curWaypointIndex == 1 && curSegment.isWalking() == false){   //WHY IS ISWALKING() NOT WORKING ?????
-				String transportId = curSegment.getSegmentMode();
-				String destination = curSegment.getLastWaypoint().getWaypointName();
-				String message[] = new String[1];
-				if(transportId.equals("metro")){
-					message[0] = "Take metro to "+ destination;
-				}
-				else if(transportId.length() == 1){
-					message[0] = "Take " + transportId+ " train to "+ destination;
-				}
-				else{
-					message[0]= "Take bus " + transportId + " to " + destination;
-				}
-				showList(message);
-						
+				if(curWaypointIndex == 1 && curSegment.isWalking() == false){
+					String transportId = curSegment.getSegmentMode();
+					String destination = curSegment.getLastWaypoint().getWaypointName();
+					String message[] = new String[1];
+					if(transportId.equals("metro")){
+						message[0] = "Take metro to "+ destination;
+					}
+					else if(transportId.length() == 1){
+						message[0] = "Take " + transportId+ " train to "+ destination;
+					}
+					else{
+						message[0]= "Take bus " + transportId + " to " + destination;
+					}
+					showList(message);
+				}		
 			}
 		
 		}
-	}
+		
 	
+	}
 }

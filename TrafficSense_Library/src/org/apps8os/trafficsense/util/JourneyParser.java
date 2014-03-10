@@ -199,6 +199,7 @@ public class JourneyParser {
 		try {
 			str = getTextArray().get(0);
 			str_split = str.split(" ", 2); // will just split one time = 2 parts
+			System.out.println("DBG: "+str);
 		} catch (IndexOutOfBoundsException ex) {
 			// this is an extra blank line, just ignore it
 			return;
