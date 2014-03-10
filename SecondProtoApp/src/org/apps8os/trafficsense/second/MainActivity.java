@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
@@ -15,12 +16,14 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,7 +32,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends Activity {
-
+	
+	CoordsReadyReceiver mCoordsReadyReceiver;
+	WaypointChanged mWaypointChangedReceiver;
+	
 	TrafficsenseContainer mContainer;
 	GoogleMap map;
 	
@@ -40,9 +46,12 @@ public class MainActivity extends Activity {
 		mContainer = TrafficsenseContainer.getInstance();
 		 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		 ListView listview = (ListView) findViewById(R.id.listview);
-		 
+		  
 		 listview.setVisibility(View.INVISIBLE); 
 		 map.setMyLocationEnabled(true);
+		 
+		mCoordsReadyReceiver = new CoordsReadyReceiver();
+		mWaypointChangedReceiver = new WaypointChanged();
 		 
 	}
 	
@@ -51,12 +60,19 @@ public class MainActivity extends Activity {
 		super.onResume();
 		mContainer.activityAttach(getApplicationContext());
 		
+		if (mContainer.getRoute().getCoordsReady()) {
+			 drawRoute();
+		 }
+		registerReceiver(mCoordsReadyReceiver, new IntentFilter(Constants.ACTION_COORDS_READY));
+		registerReceiver(mWaypointChangedReceiver, new IntentFilter(Constants.ACTION_NEXT_WAYPOINT));
 		//TODO: update the ui with the latest info
 		
 	}
 	
 	@Override
 	public void onPause() {
+		unregisterReceiver(mCoordsReadyReceiver);
+		unregisterReceiver(mWaypointChangedReceiver);
 		super.onPause();
 		mContainer.activityDetach();
 	}
@@ -98,6 +114,36 @@ public class MainActivity extends Activity {
 		 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		 listview.setAdapter(adapter);
 		 listview.setVisibility(View.VISIBLE);
+	}
+	
+	public void drawRoute() {
+		Route r = mContainer.getRoute();
+		PolylineOptions o = new PolylineOptions().geodesic(true);
+		for (Segment s : r.getSegmentList()) {
+			if (s.isWalking()) {
+				// Don't draw walking segments because they don't have coordinates
+				continue;
+			}
+			for (Waypoint w : s.getWaypointList()) {
+				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
+					continue;
+				}
+				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
+				o.add(coord);
+			}
+		}
+		map.addPolyline(o);
+	}
+	
+	class CoordsReadyReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context arg0, Intent intent) {
+			drawRoute();
+			
+		}
+		
+		
 	}
 	
 	class WaypointChanged extends BroadcastReceiver {

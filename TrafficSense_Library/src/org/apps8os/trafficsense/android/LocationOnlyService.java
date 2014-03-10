@@ -34,7 +34,7 @@ public class LocationOnlyService extends Service implements
 		OnConnectionFailedListener,
 		OnAddGeofencesResultListener{
 
-	private int GEOFENCE_RADIUS = 20;
+	private int GEOFENCE_RADIUS = 100;
 	//container that contains route information and else-
 	private TrafficsenseContainer mContainer; 
 	//index of which segment we are in
@@ -48,7 +48,7 @@ public class LocationOnlyService extends Service implements
 	//action that happens when geofence tranistion detected by locationClient
 	private String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
 	private Context mContext;
-	//callbacks by geofence will be made to these classes
+	//callbacks by geofence will be made to these classes 
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
 	
@@ -192,6 +192,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	private Geofence createGeofence(Waypoint busStop,String id, float radius, 
 			long expiryDuration, int transition){
+		System.out.println("DBG longitude: "+ busStop.getLongitude()+"latitude: "+ busStop.getLatitude());
 		return new Geofence.Builder()
 			.setRequestId(id)
 			.setTransitionTypes(transition)
@@ -212,6 +213,8 @@ public class LocationOnlyService extends Service implements
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
 		mContainer.getPebbleUiController().initializeList();
+		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
+		this.sendBroadcast(coordsReadyIntent);
 		
 	}
 
@@ -219,6 +222,7 @@ public class LocationOnlyService extends Service implements
 	 * Sets the geofences for all the waypoints on the route
 	 */
 	public void setGeofencesForRoute(){
+		System.out.println("DBG location service received intent");
 		Route currentRoute = mContainer.getRoute();
 		ArrayList<Geofence> listOfFences = new ArrayList<Geofence>();
 		for(int segmentIndex=0;;segmentIndex++){
@@ -230,9 +234,7 @@ public class LocationOnlyService extends Service implements
 			
 			//skip the first waypoint because it it also the last one in the last segment
 			for(int waypointIndex=0;;waypointIndex++){
-				if(segmentIndex!=0){
-					break;
-				}
+				
 				Waypoint nextWaypoint = currentSegment.getWaypoint(waypointIndex);
 				if(nextWaypoint==null){
 					break;
@@ -249,9 +251,14 @@ public class LocationOnlyService extends Service implements
 		addGeofence(listOfFences);		
 	}
 	
-	@Override
+	//TODO: add check to status code
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
-		// TODO Auto-generated method stub	
+		System.out.println("DBG: geofence status code: "+ statusCode);
+		String dbg="";
+		for(int i=0;i<geofenceRequestIds.length; i++){
+			dbg= dbg + " " + geofenceRequestIds[i];
+		}
+		System.out.println("DBG: geofences added: " + dbg);
 	}
 	
 	@Override
@@ -323,6 +330,8 @@ public class LocationOnlyService extends Service implements
 
 			
 			//inform clients that the next waypoint has changed. 
+			System.out.println("DBG Current position is " + nextWaypoint.getWaypointName());
+			
 			sendNextWaypointIntent("");
 			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
 			

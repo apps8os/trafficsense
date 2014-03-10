@@ -17,6 +17,7 @@ public class Route {
 	private String arrivaltime;
 	private String departure;
 	private int currentSegment=0;
+	private boolean coordsReady = false;
 	
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
@@ -142,6 +143,14 @@ public class Route {
 	
 	public String getDepartureTime (){
 		return departure;
+	}
+	
+	public void setCoordsReady(boolean isReady) {
+		coordsReady = isReady;
+	}
+	
+	public boolean getCoordsReady() {
+		return coordsReady;
 	}
 
 }

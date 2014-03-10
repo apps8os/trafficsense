@@ -114,6 +114,7 @@ public class JourneyInfoResolver {
 			// TODO error handling
 			return false;
 		}
+		journey.setCoordsReady(true);
 		return true;
 	}
 	

@@ -27,6 +27,7 @@ public class Waypoint{
 	public Waypoint () {
 		stopCode = Constants.NO_STOP_CODE;
 		// TODO: how should the default/magic number for Lat/Long coord be?
+		// 0 for now
 	}
 	
 	public String getWaypointTime(){
