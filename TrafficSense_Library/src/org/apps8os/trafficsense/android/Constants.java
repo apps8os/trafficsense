@@ -21,4 +21,10 @@ public class Constants {
 	 * @see appinfo.json
 	 */
 	final public static String PEBBLE_APP_UUID = "83eef382-21a4-473a-a189-ceffa42f86b1";
+	/**
+	 * Language codes.
+	 */
+	final public static int LANG_FI = 0;
+	final public static int LANG_SV = 1;
+	final public static int LANG_EN = 2;
 }
