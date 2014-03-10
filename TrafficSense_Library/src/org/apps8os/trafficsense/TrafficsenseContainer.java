@@ -94,7 +94,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
 	 */
-	protected TrafficsenseContainer() {
+	private TrafficsenseContainer() {
 		mCtxLogFunfManagerConn = new ServiceConnection () {
 
 			@Override
@@ -112,16 +112,23 @@ public class TrafficsenseContainer {
 	}
 
 	/**
+	 * An object which serves as a lock to synchronize {@link #getInstance()}.
+	 */
+	private static volatile Object instanceLock = new Object();
+	
+	/**
 	 * Returns the shared instance of this singleton object.
 	 * Instantiates it on first invocation.
 	 * 
 	 * @return	the shared singleton instance.
 	 */
 	public static TrafficsenseContainer getInstance() {
-		if(instance == null) {
-			instance = new TrafficsenseContainer();
+		synchronized (instanceLock) {
+			if(instance == null) {
+				instance = new TrafficsenseContainer();
+			}
+			return instance;
 		}
-		return instance;
 	}
 
 	/**

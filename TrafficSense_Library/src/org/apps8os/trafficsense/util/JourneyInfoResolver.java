@@ -27,8 +27,10 @@ import com.google.gson.Gson;
  * This includes GPS coordinates for Waypoints,
  * and HSL transport type for Segments.
  * 
- * TODO 1. support for Finnish and Swedish
+ * TODO 1. test Finnish and Swedish support
  * TODO 2. documentation.
+ * 
+ * @see http://developer.reittiopas.fi/pages/en/http-get-interface-version-2.php
  */
 public class JourneyInfoResolver {
 
@@ -41,43 +43,67 @@ public class JourneyInfoResolver {
 	 */
 	private final static String HSL_API_EPSG_OUT = "4326";
 	private final static String HSL_API_EPSG_IN = HSL_API_EPSG_OUT;
-	private final static String[] LANG = { "fi", "sv", "en" };
-	private final static int defLang = 2;
-
-	/*
-	private final static String[] locTypes = { "" };
-	private final static int disableErrorCorr = 0;
-	private final static int disableUniqStopNames = 0;
-	*/
-
 	/**
-	 * TODO: Once language support is implemented, remove the lang/LANG part.
+	 * Sequence here must match the values of Constants.LANG_*
 	 */
-	private final static String HSL_API_BASE_URL = HSL_API_ACCESS_POINT
+	private final static String[] HSL_API_LANG = { "fi", "sv", "en" };
+	/**
+	 * Fixed part of API access URL.
+	 */
+	private final static String HSL_API_BASE_URL_FIXED = HSL_API_ACCESS_POINT
 			+ "user=" + HSL_API_USER + "&pass=" + HSL_API_PASS + "&format="
 			+ HSL_API_FORMAT + "&epsg_in=" + HSL_API_EPSG_IN + "&epsg_out="
-			+ HSL_API_EPSG_OUT + "&lang=" + LANG[defLang];
-
+			+ HSL_API_EPSG_OUT;
 	/**
-	 * 
+	 * HSL Line Information response limiter.
+	 * Retrieve only field number 3: transport_type_id.
 	 */
 	private final static String lineResponseLimit = "001";
+	/**
+	 * A structure for Gson to parse JSON response from HSL. 
+	 */
 	private static class LineInfo {
 		public int transport_type_id;
 	};
-	
 	/**
-	 * 
+	 * HSL Stop Information response limiter.
+	 * Retrieve only field number 9: wgs_coords.
 	 */
 	private final static String stopResponseLimit = "000000001";
+	/**
+	 * A structure for Gson to parse JSON response from HSL. 
+	 */
 	private static class StopInfo {
 		public String wgs_coords;
 	};
 	
+	/**
+	 * ByteArrayOutputStream for flattening HTTP responses into Strings.
+	 */
 	private ByteArrayOutputStream mByteOutStream;
+	/**
+	 * Shared HttpClient instance.
+	 */
 	private HttpClient mHttpClient;
+	/**
+	 * Google Json library instance.
+	 */
 	private Gson mGson;
+	/**
+	 * Language.
+	 * @see Constants.LANG_*
+	 */
+	private int mLang;
+	/**
+	 * Flag indicating an error status in a long process.
+	 */
 	private boolean errorOccurred;
+	/**
+	 * API access base URL.
+	 * Initialized by the constructor.
+	 * Language parameter updated by {@link #setLanguage(int)}
+	 */
+	private String HSL_API_BASE_URL;
 	
 	/**
 	 * Constructor.
@@ -87,12 +113,49 @@ public class JourneyInfoResolver {
 		mByteOutStream = new ByteArrayOutputStream();
 		mByteOutStream.reset();
 		mGson = new Gson();
+		setLanguage(Constants.LANG_EN);
+	}
+	
+	/**
+	 * Set the desired language.
+	 * Defaults to Constants.LANG_EN on error.
+	 * 
+	 * This method is synchronized because changing the language
+	 * in the middle of a series of API requests may result in
+	 * mixed response sets.
+	 * 
+	 * @param language language code (Constants.LANG_*)
+	 * @return true on success.
+	 */
+	public boolean setLanguage(final int language) {
+		boolean success = true;
+		synchronized (this) {
+			switch (language) {
+			case Constants.LANG_EN:
+				break;
+			case Constants.LANG_FI:
+				break;
+			case Constants.LANG_SV:
+				break;
+			default:
+				mLang = Constants.LANG_EN;
+				success = false;
+				break;
+			}
+			mLang = language;
+			HSL_API_BASE_URL = HSL_API_BASE_URL_FIXED + "&lang="
+					+ HSL_API_LANG[mLang];
+			return success;
+		}
 	}
 	
 	/**
 	 * Retrieve GPS coordinates via HSL API for all Waypoints whose stopCode is
 	 * available. Others are ignored.
 	 * 
+	 * Invokes thread-unsafe private methods which make HTTP requests.
+	 * Thus, this method is also thread-unsafe and is synchronized.
+	 *  
 	 * @param journey the journey for which GPS coordinates shall be retrieved.
 	 * @return true on success, false otherwise.
 	 */
@@ -100,27 +163,31 @@ public class JourneyInfoResolver {
 		if (journey == null) {
 			return false;
 		}
-		errorOccurred = false;
-		ArrayList<Segment> segments = journey.getSegmentList();
-		for (Segment segment : segments) {
-			lookupSegmentTransportType(segment);
-			ArrayList<Waypoint> waypoints = segment.getWaypointList();
-			for (Waypoint waypoint : waypoints) {
-				lookupWaypointCoordinate(waypoint);
+		synchronized (this) {
+			errorOccurred = false;
+			ArrayList<Segment> segments = journey.getSegmentList();
+			for (Segment segment : segments) {
+				lookupSegmentTransportType(segment);
+				ArrayList<Waypoint> waypoints = segment.getWaypointList();
+				for (Waypoint waypoint : waypoints) {
+					lookupWaypointCoordinate(waypoint);
+				}
 			}
+			if (errorOccurred) {
+				System.out.println("DBG retrieveCoordinatesFromHsl errorOccurred = true");
+				// TODO error handling
+				return false;
+			}
+			journey.setCoordsReady(true);
+			return true;
 		}
-		if (errorOccurred) {
-			System.out.println("DBG retrieveCoordinatesFromHsl errorOccurred = true");
-			// TODO error handling
-			return false;
-		}
-		journey.setCoordsReady(true);
-		return true;
 	}
 	
 	/**
 	 * Query HSL API for the actual 'transport_type' of this segment.
 	 * Walking(0), Metro(6), and Ferry(7) are determined by Segment.setSegmentType().
+	 * 
+	 * Makes HTTP request, not thread-safe.
 	 * 
 	 * @param segment the segment.
 	 */
@@ -154,6 +221,8 @@ public class JourneyInfoResolver {
 	/**
 	 * Query HSL API for the GPS coordinate of a given Waypoint.
 	 * Do nothing if stopCode is unavailable.
+	 * 
+	 * Makes HTTP request, not thread-safe.
 	 * 
 	 * @param waypoint waypoint to query for
 	 */
@@ -197,9 +266,9 @@ public class JourneyInfoResolver {
 	}
 	
 	/**
-	 * Perform an HTTP GET request.
+	 * Make an HTTP GET request.
 	 * 
-	 * Not thread-safe.
+	 * Uses shared HttpClient instance and thus not thread-safe.
 	 * 
 	 * @param url url to GET.
 	 * @return response body. empty on error.
@@ -250,13 +319,13 @@ public class JourneyInfoResolver {
 
 
 	/**
-	 * TODO: documentation
+	 * Builds the URL to query HSL API for Line information.
 	 * 
-	 * @param responseLimit
-	 * @param query
-	 * @return
+	 * @param responseLimit response field filter.
+	 * @param query search key.
+	 * @return the URL.
 	 */
-	private static String buildGetLineInfoUrl(String responseLimit, String query) {
+	private String buildGetLineInfoUrl(String responseLimit, String query) {
 		String url;
 		url = HSL_API_BASE_URL + "&request=lines" + "&p=" + responseLimit
 				+ "&query=" + query;
@@ -265,13 +334,13 @@ public class JourneyInfoResolver {
 
 	
 	/**
-	 * TODO: documentation
+	 * Builds the URL to query HSL API for Stop information.
 	 * 
-	 * @param responseLimit
-	 * @param stopCode
-	 * @return
+	 * @param responseLimit response field filter.
+	 * @param stopCode stopCode.
+	 * @return the URL.
 	 */
-	private static String buildGetStopInfoUrl(String responseLimit,
+	private String buildGetStopInfoUrl(String responseLimit,
 			String stopCode) {
 		String url;
 		url = HSL_API_BASE_URL + "&request=stop" + "&p=" + responseLimit
@@ -291,7 +360,7 @@ public class JourneyInfoResolver {
 	 * @param key
 	 * @return
 	 */
-	private static String buildGetGeocodingUrl(String responseLimit,
+	private String buildGetGeocodingUrl(String responseLimit,
 			String cities, String locType, String key) {
 		String url;
 		url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types=" + locType
@@ -310,7 +379,7 @@ public class JourneyInfoResolver {
 	 * @param y
 	 * @return
 	 */
-	private static String buildGetReverseGeocodingUrl(String responseLimit,
+	private String buildGetReverseGeocodingUrl(String responseLimit,
 			String x, String y) {
 		String url;
 		url = HSL_API_BASE_URL + "&request=reverse_geocode" + "&coordinate="
