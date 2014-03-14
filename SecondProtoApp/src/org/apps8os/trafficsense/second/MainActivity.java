@@ -111,8 +111,9 @@ public class MainActivity extends Activity {
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
 	        case R.id.menu_start_journey:
-	            startJourney();
-	            invalidateOptionsMenu();
+	            item.setActionView(R.layout.progressbar);
+	            item.expandActionView();
+	        	startJourney();
 	            return true;
 	        case R.id.menu_stop_journey:
 	        	stopJourney();
@@ -131,7 +132,6 @@ public class MainActivity extends Activity {
 	
 	private void stopJourney(){
 		mContainer.stopJourney();
-		
 	}
 	
 	private void showList(String[] messages){
@@ -170,6 +170,7 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onReceive(Context arg0, Intent intent) {
+            invalidateOptionsMenu();
 			drawRoute();
 			
 		}

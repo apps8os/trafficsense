@@ -364,7 +364,6 @@ public class TrafficsenseContainer {
 		 * Bind Pebble UI controller to the communication channel.
 		 */
 		mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
-		
 		mContext.startService(mServiceIntent);
 	}
 	
