@@ -253,6 +253,7 @@ public class TrafficsenseContainer {
 	 * Stops all running tracker services.
 	 */
 	public void stopJourney() {
+		mJourneyStarted = false;
 		Intent serviceIntent;
 		synchronized (this) {
 			if (mRunningServices == 0) {
@@ -386,10 +387,6 @@ public class TrafficsenseContainer {
 		mContext.startService(mServiceIntent);
 	}
 	
-	public void stopJourney(){
-		mContext.stopService(mServiceIntent);
-		mJourneyStarted=false;
-	}
 
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
@@ -501,6 +498,7 @@ public class TrafficsenseContainer {
 		if (mJourneyText == null) {
 			return;
 		}
+		System.out.println("JRN_TEXT: " +  mJourneyText);
 		JourneyParser parser = new JourneyParser();
 		parser.parseString(mJourneyText);
 		mJourneyJsonObject = parser.getJsonObj();
