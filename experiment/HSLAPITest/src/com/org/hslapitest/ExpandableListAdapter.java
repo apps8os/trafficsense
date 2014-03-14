@@ -1,5 +1,7 @@
 package com.org.hslapitest;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -12,19 +14,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter{
-	 private final SparseArray<Group> groups;
+	  private final Route route;
+	  private final ArrayList<Segment> SegmentList;
 	  public LayoutInflater inflater;
 	  public Activity activity;
 
-	  public ExpandableListAdapter(Activity act, SparseArray<Group> groups) {
+	  public ExpandableListAdapter(Activity act, Route route) {
 	    activity = act;
-	    this.groups = groups;
+	    this.route = route;
 	    inflater = act.getLayoutInflater();
+	    this.SegmentList = route.getSegmentList();
 	  }
 
 	  @Override
 	  public Object getChild(int groupPosition, int childPosition) {
-	    return groups.get(groupPosition).children.get(childPosition);
+		 return SegmentList.get(groupPosition).getWaypointList().get(childPosition);
+	   // return groups.get(groupPosition).children.get(childPosition);
 	  }
 
 	  @Override
@@ -35,7 +40,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  @Override
 	  public View getChildView(int groupPosition, final int childPosition,
 	      boolean isLastChild, View convertView, ViewGroup parent) {
-	    final String children = (String) getChild(groupPosition, childPosition);
+	    final String children = "mah children!";
+	    		//(String) getChild(groupPosition, childPosition);
 	    TextView text = null;
 	    if (convertView == null) {
 	      convertView = inflater.inflate(R.layout.listrow_details, null);
@@ -54,17 +60,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
 	  @Override
 	  public int getChildrenCount(int groupPosition) {
-	    return groups.get(groupPosition).children.size();
+		  return SegmentList.get(groupPosition).getWaypointList().size();
+	    //return groups.get(groupPosition).children.size();
 	  }
 
 	  @Override
 	  public Object getGroup(int groupPosition) {
-	    return groups.get(groupPosition);
+		return SegmentList.get(groupPosition);
+	    //return groups.get(groupPosition);
 	  }
 
 	  @Override
 	  public int getGroupCount() {
-	    return groups.size();
+		return SegmentList.size();
+	    //return groups.size();
 	  }
 
 	  @Override
@@ -88,8 +97,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    if (convertView == null) {
 	      convertView = inflater.inflate(R.layout.listrow_group, null);
 	    }
-	    Group group = (Group) getGroup(groupPosition);
-	    ((CheckedTextView) convertView).setText(group.string);
+	   // Group group = (Group) getGroup(groupPosition);
+	    
+	    ((CheckedTextView) convertView).setText("hue");
 	    ((CheckedTextView) convertView).setChecked(isExpanded);
 	    return convertView;
 	  }
