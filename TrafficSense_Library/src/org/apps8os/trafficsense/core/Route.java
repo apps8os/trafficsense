@@ -134,6 +134,8 @@ public class Route {
 	    segmentList.trimToSize();
 	    setDepartureTime(segmentJs.get(0).getAsJsonObject());
 	}
+	
+	
 
 	public String setDepartureTime (JsonObject firstSegment){
 		departure = firstSegment.get("startTime").getAsString();

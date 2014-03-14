@@ -21,13 +21,13 @@
 
 // Receiving an alarm
 #define COMMAND_ALARM		2
-#define KEY_ALARM			1
+#define KEY_ALARM		1
 #define ALARM_GET_OFF		0
 
 // Segment initialization (waypoints are sent via COMMAND_GET_STOP one by one)
 /* Command for getting values such as public transport line number that need to
 be set when the segment has changed */
-#define COMMAND_INIT_SEGMENT	2
+#define COMMAND_INIT_SEGMENT		2
 // Key for the line number (e.g. 550, U etc.) of the next vehicle
 #define KEY_LINE_NUMBER			1
 #define KEY_START_TIME_HOUR		2

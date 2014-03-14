@@ -212,7 +212,7 @@ public class LocationOnlyService extends Service implements
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeList();
+		mContainer.getPebbleUiController().initializeSegment();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
 		this.sendBroadcast(coordsReadyIntent);
 		
@@ -306,7 +306,7 @@ public class LocationOnlyService extends Service implements
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
 			if (mSegmentWaypointIndex == 1) {
 				// Update pebble when at first waypoint
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 			}
 			if(nextWaypoint == null){
 				
@@ -323,7 +323,7 @@ public class LocationOnlyService extends Service implements
 
 					return; //the route has ended
 				}
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);

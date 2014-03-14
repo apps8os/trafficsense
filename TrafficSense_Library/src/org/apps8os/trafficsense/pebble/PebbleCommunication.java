@@ -35,6 +35,12 @@ public class PebbleCommunication {
 	private static final int KEY_STOP_NAME = 2;
 	private static final int KEY_STOP_CODE = 3;
 	private static final int KEY_STOP_TIME = 4;
+	
+	private static final int COMMAND_INIT_SEGMENT = 2;
+	private static final int KEY_LINE_NUMBER = 1;
+	private static final int KEY_START_TIME_HOUR = 2;
+	private static final int KEY_START_TIME_MIN = 3;
+	private static final int KEY_START_TIME_SEC = 4;
 	//private static final int MAX_DICT_SIZE = 124;
 	public static final int NUM_STOPS = 3;
 
@@ -166,6 +172,26 @@ public class PebbleCommunication {
 		 */
 		messageManager.offer(dictionary);
 		System.out.println("DBG updateList: " + name);
+	}
+	
+	/**
+	 * Sends values like transport mode (line number) and other segment related values
+	 *  Doesn't send the waypoints, they have to be sent after calling this.
+	 *  Parameters: line = transport line e.g. 550, hours = hours of day, 
+	 *  minutes = minutes of hour...
+	 */
+	public void initializeSegment(String line, int hours, int minutes, int seconds) {
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_INIT_SEGMENT);
+		dictionary.addString(KEY_LINE_NUMBER, line);
+		dictionary.addUint8(KEY_START_TIME_HOUR, (byte) hours);
+		dictionary.addUint8(KEY_START_TIME_MIN, (byte) minutes);
+		dictionary.addUint8(KEY_START_TIME_SEC, (byte) seconds);
+		/**
+		 * En-queue this message to MessageHandler.
+		 */
+		messageManager.offer(dictionary);
+		System.out.println("DBG PebbleCommunication:initializeSegment: " + line);
 	}
 
 	/** 

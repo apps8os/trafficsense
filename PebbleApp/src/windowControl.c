@@ -12,6 +12,7 @@ TextLayer* timeUnit;
 TextLayer* timeAmount;
 TextLayer* stopCodeAndName;
 static char timeAmountStr[4];
+char stopCodeAndNameBuff[30];
 
 void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context) {
   //Called when the MIDDLE button is clicked once.
@@ -93,19 +94,17 @@ void basic_window_loop() {
 }
 
 void show_basic_window() {
-  if (currentWindow != WINDOW_BASIC) {
-    // TODO: Make sure the buffer size is enough
-    char buff[30];
-    strcat(buff, stopArray[0].code);
-    strcat(buff, " ");
-    strcat(buff, stopArray[0].name);
-    text_layer_set_text(stopCodeAndName, buff); // Set the text of the stop
-    text_layer_set_text(lineCode, currentLineCode);
-    currentWindow = WINDOW_BASIC;
-    window_stack_pop(true); // Remove 3stop-window from the'window stack
-    window_stack_push(windowArray[WINDOW_BASIC], true); // Push the basic window (show it)
-    basic_window_loop();
-  }
+  // TODO: Make sure the buffer size is enough
+  stopCodeAndNameBuff[0] = '\0';
+  strncat(stopCodeAndNameBuff, stopArray[0].code, 30);
+  strncat(stopCodeAndNameBuff, " ", 30);
+  strncat(stopCodeAndNameBuff, stopArray[0].name, 30);
+  text_layer_set_text(stopCodeAndName, stopCodeAndNameBuff); // Set the text of the stop
+  text_layer_set_text(lineCode, currentLineCode);
+  currentWindow = WINDOW_BASIC;
+  window_stack_pop(true); // Remove 3stop-window from the'window stack
+  window_stack_push(windowArray[WINDOW_BASIC], true); // Push the basic window (show it)
+  basic_window_loop();
 }
 
 void show_3stop_window() {
