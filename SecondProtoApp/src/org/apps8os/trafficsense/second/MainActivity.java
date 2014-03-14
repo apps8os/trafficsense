@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
 	
 	TrafficsenseContainer mContainer;
 	GoogleMap map;
+	Menu mMenu;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +77,8 @@ public class MainActivity extends Activity {
 	public void onPause() {
 		unregisterReceiver(mCoordsReadyReceiver);
 		unregisterReceiver(mWaypointChangedReceiver);
-		super.onPause();
 		mContainer.activityDetach();
+		super.onPause();
 	}
 	
 
@@ -88,6 +89,22 @@ public class MainActivity extends Activity {
 	    inflater.inflate(R.menu.main_activity_action, menu);
 	    return super.onCreateOptionsMenu(menu);
 	}
+	
+	public boolean onPrepareOptionsMenu(Menu menu){
+
+		super.onPrepareOptionsMenu(menu);
+		MenuItem start = menu.findItem(R.id.menu_start_journey);
+		MenuItem stop = menu.findItem(R.id.menu_stop_journey);
+		if(mContainer.isJourneyStarted() == true){
+			start.setVisible(false);
+			stop.setVisible(true);
+		}
+		else{
+			start.setVisible(true);
+			stop.setVisible(false);
+		}
+		return(true);
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
@@ -95,7 +112,12 @@ public class MainActivity extends Activity {
 	    switch (item.getItemId()) {
 	        case R.id.menu_start_journey:
 	            startJourney();
+	            invalidateOptionsMenu();
 	            return true;
+	        case R.id.menu_stop_journey:
+	        	stopJourney();
+	            invalidateOptionsMenu();
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -104,6 +126,11 @@ public class MainActivity extends Activity {
 	private void startJourney(){
         EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
+		
+	}
+	
+	private void stopJourney(){
+		mContainer.stopJourney();
 		
 	}
 	
@@ -116,7 +143,7 @@ public class MainActivity extends Activity {
 		 }
 		 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		 listview.setAdapter(adapter);
-		 listview.setVisibility(View.VISIBLE);
+		 listview.setVisibility(View.VISIBLE); 
 	}
 	
 	public void drawRoute() {
@@ -127,6 +154,7 @@ public class MainActivity extends Activity {
 				// Don't draw walking segments because they don't have coordinates
 				continue;
 			}
+			
 			for (Waypoint w : s.getWaypointList()) {
 				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
 					continue;
@@ -154,6 +182,14 @@ public class MainActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG: Main activity: Waypoint changed");
+
+			
+			
+		
+		}
+		
+		public void outputLogic(){
+			
 			Segment curSegment = mContainer.getRoute().getCurrentSegment();
 			int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
 			int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
@@ -171,7 +207,7 @@ public class MainActivity extends Activity {
 			}
 			
 			//if the current segment is a walking one
-			if(curSegment.isWalking() == false){
+			if(curSegment.isWalking() == true){
 				String message[] = {"Walk to next stop"}; 
 				showList(message);
 			}
@@ -195,7 +231,6 @@ public class MainActivity extends Activity {
 					showList(message);
 				}		
 			}
-		
 		}
 		
 	

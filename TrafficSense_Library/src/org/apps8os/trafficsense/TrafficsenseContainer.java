@@ -90,6 +90,10 @@ public class TrafficsenseContainer {
 	 * @see #serviceDetach()
 	 */
 	private volatile int mRunningServices = 0;
+	
+	private boolean mJourneyStarted=false;
+	
+	private Intent mServiceIntent = null;
 
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
@@ -162,6 +166,10 @@ public class TrafficsenseContainer {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean isJourneyStarted(){
+		return mJourneyStarted;
 	}
 	
 	/**
@@ -272,7 +280,7 @@ public class TrafficsenseContainer {
 	private void close() {
 		System.out.println("DBG Container close");
 		// Stop ContextLogger3
-		mCtxLogFunfManager.disablePipeline(CTXLOG_PIPELINE_NAME);
+		mCtxLogFunfManager.disablePipeline(CTXLOG_PIPELINE_NAME); //ATT: throws null pointer error occasionally
 		mContext.unbindService(mCtxLogFunfManagerConn);
 		
 		mPebbleCommunication.stop();
@@ -281,6 +289,8 @@ public class TrafficsenseContainer {
 		mJourneyParser = null;
 		mRoute = null;
 		mContext = null;
+		mJourneyStarted = false;
+		mServiceIntent = null;
 		
 		if (isLast() != true) {
 			System.out.println("DBG Container: stop() but !isLast() ?!");
@@ -298,6 +308,7 @@ public class TrafficsenseContainer {
 	 * @see #startTrackerService(int) for supported serviceTypes.
 	 */
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
+		mJourneyStarted = true;
 		new Thread(new Runnable() {
 			public void run() {
 				/**
@@ -328,7 +339,7 @@ public class TrafficsenseContainer {
 	 * @see org.apps8os.trafficsense.android.Constants
 	 */
 	public void startTrackerService(int serviceType) {
-		Intent serviceIntent = null;
+		mServiceIntent = null;
 		
 		if (mRunningServices != 0) {
 			System.out.println("DBG startLocationOnly: trying to start multiple services?");
@@ -336,16 +347,16 @@ public class TrafficsenseContainer {
 		}
 		switch (serviceType) {
 		case Constants.SERVICE_TIME_ONLY:
-			serviceIntent = new Intent(mContext, TimeOnlyService.class);
+			mServiceIntent = new Intent(mContext, TimeOnlyService.class);
 			break;
 		case Constants.SERVICE_LOCATION_ONLY:
-			serviceIntent = new Intent(mContext, LocationOnlyService.class);
+			mServiceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
 			break;
 		}
-		if (serviceIntent == null) {
+		if (mServiceIntent == null) {
 			return;
 		}
 		
@@ -354,7 +365,12 @@ public class TrafficsenseContainer {
 		 */
 		mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
 		
-		mContext.startService(serviceIntent);
+		mContext.startService(mServiceIntent);
+	}
+	
+	public void stopJourney(){
+		mContext.stopService(mServiceIntent);
+		mJourneyStarted=false;
 	}
 
 	/**
