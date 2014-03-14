@@ -31,6 +31,10 @@ public class Constants {
 	 */
 	final public static long TEST_TIME = 5000;
 	/**
+	 * Duration to vibrate on certain events.
+	 */
+	final public static int VIBRATOR_DURATION = 250;
+	/**
 	 * Tracker service types.
 	 */
 	final public static int SERVICE_TIME_ONLY = 1;

@@ -369,8 +369,15 @@ public class TrafficsenseContainer {
 	public void startTrackerService(int serviceType) {
 		Intent serviceIntent = null;
 		
+		if (mRoute == null) {
+			System.out.println("DBG startTrackerService: route not set");
+			return;
+		}
+		/**
+		 * TODO: Currently only one service at a time is allowed.
+		 */
 		if (mRunningServices != 0) {
-			System.out.println("DBG startLocationOnly: trying to start multiple services?");
+			System.out.println("DBG startTrackerService: trying to start multiple services?");
 			return;
 		}
 		switch (serviceType) {
@@ -433,6 +440,9 @@ public class TrafficsenseContainer {
 	 * Retrieves a journey in plain text from the given e-mail account.
 	 * The result is stored in {@link #mJourneyText}.
 	 * May optionally update an UI element after completion.
+	 * 
+	 * Currently it is the last mail in inbox.
+	 * @see #retrieveJourneyBlockingPart(EmailCredential)
 	 *  
 	 * @param credential e-mail account to be accessed. 
 	 * @param update UI element to be updated. (optional)
@@ -469,7 +479,7 @@ public class TrafficsenseContainer {
 		}
 		JourneyInfoResolver resolver = new JourneyInfoResolver();
 		/**
-		 * Access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available).
+		 * Access HSL API to retrieve GPS coordinates for each Waypoint (if stopCode is available).
 		 */
 		if (resolver.retrieveCoordinatesFromHsl(route) == false) {
 			// TODO: error handling.
@@ -480,7 +490,8 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Return the plain text journey.
+	 * Return current plain text journey.
+	 * May return null if there is none, or empty string if error.
 	 * 
 	 * @return journey in plain text.
 	 */
@@ -490,6 +501,7 @@ public class TrafficsenseContainer {
 	
 	/**
 	 * Assign a string as the plain text journey.
+	 * 
 	 * @param journey the journey in plain text with line breaks.
 	 * @see #mJourneyText
 	 */
@@ -514,6 +526,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Return current journey as a Gson JsonObject.
 	 * Must call {@link #parseJourney()} before this.
+	 * May return null if there is none.
 	 * 
 	 * @return the journey.
 	 */
