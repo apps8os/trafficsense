@@ -348,7 +348,7 @@ public class TrafficsenseContainer {
 					 * false is returned on error.
 					 * Maybe send an Intent?
 					 */
-					retrieveCoordinatesForStopsBlockingPart();
+					retrieveCoordinatesForStopsBlockingPart(mRoute);
 				}
 				startTrackerService(serviceType);
 				activityDetach();
@@ -461,8 +461,8 @@ public class TrafficsenseContainer {
 	 * 
 	 * @return true on success, false otherwise.
 	 */
-	public boolean retrieveCoordinatesForStopsBlockingPart() {
-		if (mRoute == null) {
+	public static boolean retrieveCoordinatesForStopsBlockingPart(Route route) {
+		if (route == null) {
 			// TODO error handling ?
 			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
 			return false;
@@ -471,7 +471,7 @@ public class TrafficsenseContainer {
 		/**
 		 * Access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available).
 		 */
-		if (resolver.retrieveCoordinatesFromHsl(mRoute) == false) {
+		if (resolver.retrieveCoordinatesFromHsl(route) == false) {
 			// TODO: error handling.
 			return false;
 		}
