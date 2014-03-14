@@ -27,12 +27,17 @@ public class MainActivity extends Activity {
 	private TrafficsenseContainer mContainer;
 	private EmailCredential mCred;
 
+	/**
+	 * Listens for events from journey tracker service.
+	 */
 	private class RouteServiceEventReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG RouteServiceEventReceiver onReceive");
-			// TODO update UI here
 			TextView view = (TextView) findViewById(R.id.textView3);
+			/**
+			 * TimeOnlyService puts a string describing current progress in extra.
+			 */
 			if (intent.hasExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE)) {
 				view.setText(intent
 						.getStringExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE));
@@ -79,9 +84,18 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	// called by button that fetches emails.
-	// email address and password are hardcoded and the last received email is
-	// always gotten
+	/**
+	 * Retrieve a journey from e-mail account.
+	 * 
+	 * This method, together with {@link #onClick_parse(View)} and
+	 * {@link #onClick_activate(View)} demonstrates how a journey tracking
+	 * service should be started step-by-step.
+	 * 
+	 * Note that the Activity _MUST NOT_ become invisible in the middle of
+	 * this process, otherwise you have to start from fetch() again.
+	 * 
+	 * @param v UI widget.
+	 */
 	public void onClick_fetch(View v) {
 		System.out.println("DBG onClick_fetch");
 		
@@ -101,6 +115,11 @@ public class MainActivity extends Activity {
 
 	}
 
+	/**
+	 * Reads the hard-coded journey text into a String with line breaks.
+	 * 
+	 * @return the journey text.
+	 */
 	private String getHardCodedJourneyText() {
 		Resources mRes = getResources();
 		StringBuilder buf = new StringBuilder();
@@ -120,24 +139,52 @@ public class MainActivity extends Activity {
 		return buf.toString();
 	}
 
+	/**
+	 * Parse the retrieved journey text.
+	 * @see docs of #onClick_fetch(View)
+	 * 
+	 * @param v UI widget.
+	 */
 	public void onClick_parse(View v) {
 		System.out.println("DBG onClick_parse");
 		TextView view = (TextView) findViewById(R.id.textView2);
 
 		mContainer.setJourneyText(getHardCodedJourneyText());
 		mContainer.parseJourney();
-
-		view.setText(mContainer.getJourneyObject().toString());
+		if (mContainer.getJourneyObject() != null) {
+			view.setText(mContainer.getJourneyObject().toString());
+		}
 	}
 
+	/**
+	 * Start the time-based tracker service.
+	 * @see docs of #onClick_fetch(View)
+	 * 
+	 * @param v UI widget.
+	 */
 	public void onClick_activate(View v) {
 		System.out.println("DBG onClick_activate");
 		mContainer.startTrackerService(Constants.SERVICE_TIME_ONLY);
 	}
 	
+	/**
+	 * Full-automatic mode.
+	 * 
+	 * @param v UI widget.
+	 */
 	public void onClick_automatic(View v) {
 		System.out.println("DBG onClick_automatic");
 		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, mCred);
+	}
+	
+	/**
+	 * Stop tracking the journey.
+	 * 
+	 * @param v UI widget.
+	 */
+	public void onClick_stop(View v) {
+		System.out.println("DBG onClick_stop");
+		mContainer.stopJourney();
 	}
 
 }
