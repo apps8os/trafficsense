@@ -50,7 +50,7 @@ public class PebbleUiController {
 		cal.setTime(segmentStart);
 		int seconds = cal.get(Calendar.SECOND);
 		int minutes = cal.get(Calendar.MINUTE);
-		int hours = cal.get(Calendar.HOUR);
+		int hours = cal.get(Calendar.HOUR_OF_DAY);
 		mPblCom.initializeSegment(segmentMode, hours, minutes, seconds);
 		
 		// Then, send the stops
