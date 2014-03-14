@@ -75,9 +75,9 @@ public class TrafficsenseContainer {
 	 */
 	private volatile String mJourneyText;
 	/**
-	 * An instance of plain text to JSON parser.
+	 * Last parsed journey as Gson JsonObject.
 	 */
-	private JourneyParser mJourneyParser;
+	private volatile JsonObject mJourneyJsonObject;
 	/**
 	 * Number of attached Activity.
 	 * @see #activityAttach(Context)
@@ -241,6 +241,24 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
+	 * Stop following current journey.
+	 * Stops all running tracker services.
+	 */
+	public void stopJourney() {
+		Intent serviceIntent;
+		synchronized (this) {
+			if (mRunningServices == 0) {
+				return;
+			}
+		}
+		serviceIntent = new Intent(mContext, TimeOnlyService.class);
+		mContext.stopService(serviceIntent);
+		serviceIntent = new Intent(mContext, LocationOnlyService.class);
+		mContext.stopService(serviceIntent);
+		// TODO: add some code here if a new Service is introduced.
+	}
+	
+	/**
 	 * Initialized the singleton.
 	 * Starts ContextLogger, Pebble communication and Pebble app.
 	 * Must invoke {@link #close()} afterwards to release resources.
@@ -259,7 +277,8 @@ public class TrafficsenseContainer {
 		mPebbleCommunication = new PebbleCommunication(mContext);
 		mPebbleCommunication.startAppOnPebble();
 		
-		mJourneyParser = new JourneyParser();
+		mJourneyText = null;
+		mJourneyJsonObject = null;
 		mRoute = new Route();
 	}
 	
@@ -278,7 +297,7 @@ public class TrafficsenseContainer {
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
 		mJourneyText = null;
-		mJourneyParser = null;
+		mJourneyJsonObject = null;
 		mRoute = null;
 		mContext = null;
 		
@@ -467,8 +486,10 @@ public class TrafficsenseContainer {
 		if (mJourneyText == null) {
 			return;
 		}
-		mJourneyParser.parseString(mJourneyText);
-		mRoute.setRoute(getJourneyObject());
+		JourneyParser parser = new JourneyParser();
+		parser.parseString(mJourneyText);
+		mJourneyJsonObject = parser.getJsonObj();
+		mRoute.setRoute(parser.getJsonObj());
 	}
 	
 	/**
@@ -478,25 +499,9 @@ public class TrafficsenseContainer {
 	 * @return the journey.
 	 */
 	public JsonObject getJourneyObject() {
-		return mJourneyParser.getJsonObj();
-	}
-	
-	/**
-	 * (Debug Only) Launch time-based journey tracker.
-	 * @deprecated use {@link #startTrackerService(int)}
-	 */
-	public void startTimeOnlyService() {
-		startTrackerService(Constants.SERVICE_TIME_ONLY);
+		return mJourneyJsonObject;
 	}
 
-	/**
-	 * (Debug Only) Launch location-based journey tracker.
-	 * @deprecated use {@link #startTrackerService(int)}
-	 */
-	public void startLocationOnlyService() {
-		startTrackerService(Constants.SERVICE_LOCATION_ONLY);
-	}
-	
 	/**
 	 * Assign a Pebble UI Controller object for use.
 	 * 

@@ -124,10 +124,11 @@ public class MainActivity extends Activity {
 		System.out.println("DBG onClick_parse");
 		TextView view = (TextView) findViewById(R.id.textView2);
 
-		// mContainer.setJourneyText(getHardCodedJourneyText());
+		//mContainer.setJourneyText(getHardCodedJourneyText());
 		mContainer.parseJourney();
-
-		view.setText(mContainer.getJourneyObject().toString());
+		if (mContainer.getJourneyObject() != null) {
+			view.setText(mContainer.getJourneyObject().toString());
+		}
 	}
 
 	public void onClick_activate(View v) {
@@ -138,6 +139,11 @@ public class MainActivity extends Activity {
 	public void onClick_automatic(View v) {
 		System.out.println("DBG onClick_automatic");
 		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, mCred);
+	}
+	
+	public void onClick_stop(View v) {
+		System.out.println("DBG onClick_stop");
+		mContainer.stopJourney();
 	}
 
 }

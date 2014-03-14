@@ -109,5 +109,15 @@
             android:onClick="onClick_automatic"
             android:text="@string/automatic" />
 
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/button4"
+            android:layout_alignBottom="@+id/button4"
+            android:layout_alignRight="@+id/button3"
+            android:onClick="onClick_stop"
+            android:text="@string/stop" />
+
     </RelativeLayout>
 </ScrollView>
