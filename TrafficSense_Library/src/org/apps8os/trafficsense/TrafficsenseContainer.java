@@ -323,12 +323,14 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Retrieve and start following a journey.
+	 * Retrieve and start following a journey in a separate Thread.
 	 * 
 	 * Retrieves a journey from an e-mail account.
 	 * GPS coordinates are retrieved if the desired service is location-based.
 	 * Then starts the specified tracker service for the journey.
 	 * This is expected to be invoked from an Activity.
+	 * Starts a new Thread in order to keep working in case the calling
+	 * Activity becomes invisible before the service is started.
 	 * 
 	 * @param serviceType type of journey tracker service desired.
 	 * @param credential account details for accessing mailbox.
@@ -337,15 +339,15 @@ public class TrafficsenseContainer {
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
 		new Thread(new Runnable() {
 			public void run() {
-				/**
-				 * This keeps our work running in case the calling Activity becomes
-				 * invisible before the services is started.
-				 */
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
 				if (serviceType != Constants.SERVICE_TIME_ONLY) {
-					// TODO: check its return value!
+					/**
+					 * TODO: Check its return value!
+					 * false is returned on error.
+					 * Maybe send an Intent?
+					 */
 					retrieveCoordinatesForStopsBlockingPart();
 				}
 				startTrackerService(serviceType);
