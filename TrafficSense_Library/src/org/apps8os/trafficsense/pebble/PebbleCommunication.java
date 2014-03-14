@@ -186,10 +186,12 @@ public class PebbleCommunication {
 		dictionary.addString(KEY_LINE_NUMBER, line);
 		dictionary.addUint8(KEY_START_TIME_HOUR, (byte) hours);
 		dictionary.addUint8(KEY_START_TIME_MIN, (byte) minutes);
-		dictionary.addUint8(KEY_START_TIME_SEC, (byte) seconds);
+		dictionary.addUint8(KEY_START_TIME_SEC, (byte) seconds); 
 		/**
 		 * En-queue this message to MessageHandler.
 		 */
+		System.out.println("PEBBLE_DBG: sending time:" + hours + "." + minutes + "." + seconds);
+		
 		messageManager.offer(dictionary);
 		System.out.println("DBG PebbleCommunication:initializeSegment: " + line);
 	}

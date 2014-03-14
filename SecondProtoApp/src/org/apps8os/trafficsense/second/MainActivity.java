@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
 		 map.setMyLocationEnabled(true);
 		 
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
-		mWaypointChangedReceiver = new WaypointChanged();
+		mWaypointChangedReceiver = new WaypointChanged();  
 		String welcome[] = {"Welcome"};
 		showList(welcome);
 		 
@@ -102,6 +102,7 @@ public class MainActivity extends Activity {
 	}
 	
 	private void startJourney(){
+		//TODO: check for network connectivity
         EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
 		
