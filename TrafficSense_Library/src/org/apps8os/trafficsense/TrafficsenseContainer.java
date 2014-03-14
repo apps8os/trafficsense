@@ -259,6 +259,7 @@ public class TrafficsenseContainer {
 	 * Does not reset current progress in mRoute.
 	 */
 	public void stopJourney() {
+		mJourneyStarted = false;
 		Intent serviceIntent;
 		synchronized (this) {
 			if (mRunningServices == 0) {
@@ -402,6 +403,10 @@ public class TrafficsenseContainer {
 		mContext.startService(serviceIntent);
 	}
 	
+<<<<<<< HEAD
+
+=======
+>>>>>>> 8005b7e5e3bc32ce6eb1b9d050ca68701e33945e
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.
@@ -517,6 +522,7 @@ public class TrafficsenseContainer {
 		if (mJourneyText == null) {
 			return;
 		}
+		System.out.println("JRN_TEXT: " +  mJourneyText);
 		JourneyParser parser = new JourneyParser();
 		parser.parseString(mJourneyText);
 		mJourneyJsonObject = parser.getJsonObj();

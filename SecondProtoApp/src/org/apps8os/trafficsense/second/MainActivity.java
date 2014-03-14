@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
 	        case R.id.menu_start_journey:
-	            item.setActionView(R.layout.progressbar);
+	            item.setActionView(R.layout.progressbar); 
 	            item.expandActionView();
 	        	startJourney();
 	            return true;
@@ -124,12 +124,18 @@ public class MainActivity extends Activity {
 	    }
 	}
 	
+	/**
+	 * Starts the journey.
+	 */
 	private void startJourney(){
         EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
 		
 	}
 	
+	/**
+	 * Stops the journey.
+	 */
 	private void stopJourney(){
 		mContainer.stopJourney();
 	}
