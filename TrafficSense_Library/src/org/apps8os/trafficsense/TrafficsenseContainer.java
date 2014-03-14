@@ -90,10 +90,6 @@ public class TrafficsenseContainer {
 	 * @see #serviceDetach()
 	 */
 	private volatile int mRunningServices = 0;
-	
-	private boolean mJourneyStarted=false;
-	
-	private Intent mServiceIntent = null;
 
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
@@ -166,10 +162,6 @@ public class TrafficsenseContainer {
 			return true;
 		}
 		return false;
-	}
-	
-	public boolean isJourneyStarted(){
-		return mJourneyStarted;
 	}
 	
 	/**
@@ -249,6 +241,19 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
+	 * Whether at least one journey tracker service is active.
+	 * 
+	 * @return true if at least one journey tracker service is active.
+	 */
+	public boolean isJourneyStarted() {
+		synchronized (this) {
+			if (mRunningServices > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
 	 * Stop following current journey.
 	 * Stops all running tracker services.
 	 * Does not reset current progress in mRoute.
@@ -265,10 +270,6 @@ public class TrafficsenseContainer {
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
 		// TODO: add some code here if a new Service is introduced.
-		
-		// TODO merged Jussi's code
-		mContext.stopService(mServiceIntent);
-		mJourneyStarted=false;
 	}
 	
 	/**
@@ -313,8 +314,6 @@ public class TrafficsenseContainer {
 		mJourneyJsonObject = null;
 		mRoute = null;
 		mContext = null;
-		mJourneyStarted = false;
-		mServiceIntent = null;
 		
 		if (isLast() != true) {
 			System.out.println("DBG Container: stop() but !isLast() ?!");
@@ -324,7 +323,11 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Start the journey tracker.
+	 * Retrieve and start following a journey.
+	 * 
+	 * Retrieves a journey from an e-mail account.
+	 * GPS coordinates are retrieved if the desired service is location-based.
+	 * Then starts the specified tracker service for the journey.
 	 * This is expected to be invoked from an Activity.
 	 * 
 	 * @param serviceType type of journey tracker service desired.
@@ -332,7 +335,6 @@ public class TrafficsenseContainer {
 	 * @see #startTrackerService(int) for supported serviceTypes.
 	 */
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
-		mJourneyStarted = true;
 		new Thread(new Runnable() {
 			public void run() {
 				/**
@@ -363,7 +365,7 @@ public class TrafficsenseContainer {
 	 * @see org.apps8os.trafficsense.android.Constants
 	 */
 	public void startTrackerService(int serviceType) {
-		mServiceIntent = null;
+		Intent serviceIntent = null;
 		
 		if (mRunningServices != 0) {
 			System.out.println("DBG startLocationOnly: trying to start multiple services?");
@@ -371,16 +373,16 @@ public class TrafficsenseContainer {
 		}
 		switch (serviceType) {
 		case Constants.SERVICE_TIME_ONLY:
-			mServiceIntent = new Intent(mContext, TimeOnlyService.class);
+			serviceIntent = new Intent(mContext, TimeOnlyService.class);
 			break;
 		case Constants.SERVICE_LOCATION_ONLY:
-			mServiceIntent = new Intent(mContext, LocationOnlyService.class);
+			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
 			break;
 		}
-		if (mServiceIntent == null) {
+		if (serviceIntent == null) {
 			return;
 		}
 		
@@ -388,7 +390,7 @@ public class TrafficsenseContainer {
 		 * Bind Pebble UI controller to the communication channel.
 		 */
 		mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
-		mContext.startService(mServiceIntent);
+		mContext.startService(serviceIntent);
 	}
 	
 	/**
