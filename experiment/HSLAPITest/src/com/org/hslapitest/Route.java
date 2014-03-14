@@ -1,24 +1,31 @@
-package org.apps8os.trafficsense.core;
+package com.org.hslapitest;
 
 import java.util.ArrayList;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 
-/**
- * TODO: Documentation.
- */
 public class Route {
-
+	HttpResponse response;
+	HttpClient httpclient = new DefaultHttpClient();
+	
 	private String date;
 	private String start;
 	private String destination;
 	private String arrivaltime;
 	private String departure;
 	private int currentSegment=0;
-	private boolean coordsReady = false;
 	
+	//private ArrayList <Coordinates> stopList = new ArrayList<Coordinates>();
+	
+	//private enum Coordinates{
+		//longitude,
+		//latitude
+	//}
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
 	
@@ -36,14 +43,6 @@ public class Route {
 		
 	}
 
-	public Segment setNextSegment(int nextSegment){
-        if(currentSegment+1 < segmentList.size()){
-                currentSegment=nextSegment;
-                return(getCurrentSegment());
-        }
-        else return(null);
-}
-	
 	//sets the current segment to the next segment
 	//and returns the next segment.
 	//returns null if on last segment.
@@ -113,9 +112,6 @@ public class Route {
 	}
 	
 	public Segment getSegment(int index) {
-		if(index > segmentList.size()-1){
-	        return null;
-	}
 		return segmentList.get(index);
 	}
 	
@@ -144,13 +140,30 @@ public class Route {
 	public String getDepartureTime (){
 		return departure;
 	}
+	/*
+	public void setCompleteCoordList(){
+		for (int i = 0; i < segmentList.size(); i++) {
+			if (segmentList.get(i).getSegmentType() != 0){
+				for (int j = 0; j < segmentList.get(i).getWaypointList().get(j); j++) {
+					Coordinates.longitude = segmentList.get(i).getWaypointList().get(j).getLongitude();
+					Coordinates.latitude =  segmentList.get(i).getWaypointList().get(j).getLongitude();
+				}
+				
+			}
+			for (int j = 0; j < segmentList.get(i).getWaypointList().size(); j++) {
+				
+			}
+		}
+	}*/
 	
-	public void setCoordsReady(boolean isReady) {
-		coordsReady = isReady;
-	}
 	
-	public boolean getCoordsReady() {
-		return coordsReady;
-	}
-
+	/*public ArrayList <Coordinates> getCompleteCoordList(){
+		
+		
+		
+		return stopList;
+		
+	}*/
+	
+	
 }

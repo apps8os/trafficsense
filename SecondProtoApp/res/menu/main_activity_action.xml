@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
         
-	<item android:id="@+id/menu_select_route"
-		android:title="Select Route"
+	<item android:id="@+id/menu_start_journey"
+		android:title="Start Journey"
         android:showAsAction="ifRoom"></item>
 	
 	<item android:id="@+id/menu_settings"

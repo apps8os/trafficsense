@@ -9,6 +9,7 @@ import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.EmailCredential;
 import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.JourneyInfoResolver;
 import org.apps8os.trafficsense.util.JourneyParser;
 import org.apps8os.trafficsense.util.GmailReader.EmailException;
 
@@ -43,7 +44,7 @@ public class TrafficsenseContainer {
 	/**
 	 * The shared instance of this singleton.
 	 */
-	private static TrafficsenseContainer instance = null;
+	private static volatile TrafficsenseContainer instance = null;
 	/**
 	 * The associated context.
 	 */
@@ -66,12 +67,13 @@ public class TrafficsenseContainer {
 	private PebbleUiController mPebbleUi;
 	/**
 	 * Current journey in internal data structure.
+	 * @see #startTrackerService(int)
 	 */
-	private Route mRoute;
+	private volatile Route mRoute;
 	/**
 	 * Last set/retrieved plain text journey.
 	 */
-	private String mJourneyText;
+	private volatile String mJourneyText;
 	/**
 	 * An instance of plain text to JSON parser.
 	 */
@@ -81,18 +83,18 @@ public class TrafficsenseContainer {
 	 * @see #activityAttach(Context)
 	 * @see #activityDetach()
 	 */
-	private int mAttachedActivities = 0;
+	private volatile int mAttachedActivities = 0;
 	/**
 	 * Number of attached Service.
 	 * @see #serviceAttach(Context)
 	 * @see #serviceDetach()
 	 */
-	private int mRunningServices = 0;
+	private volatile int mRunningServices = 0;
 
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
 	 */
-	protected TrafficsenseContainer() {
+	private TrafficsenseContainer() {
 		mCtxLogFunfManagerConn = new ServiceConnection () {
 
 			@Override
@@ -110,16 +112,23 @@ public class TrafficsenseContainer {
 	}
 
 	/**
+	 * An object which serves as a lock to synchronize {@link #getInstance()}.
+	 */
+	private static volatile Object instanceLock = new Object();
+	
+	/**
 	 * Returns the shared instance of this singleton object.
 	 * Instantiates it on first invocation.
 	 * 
 	 * @return	the shared singleton instance.
 	 */
 	public static TrafficsenseContainer getInstance() {
-		if(instance == null) {
-			instance = new TrafficsenseContainer();
+		synchronized (instanceLock) {
+			if(instance == null) {
+				instance = new TrafficsenseContainer();
+			}
+			return instance;
 		}
-		return instance;
 	}
 
 	/**
@@ -234,8 +243,10 @@ public class TrafficsenseContainer {
 	/**
 	 * Initialized the singleton.
 	 * Starts ContextLogger, Pebble communication and Pebble app.
+	 * Must invoke {@link #close()} afterwards to release resources.
 	 * 
 	 * @param ctx the Context for all further operations.
+	 * @see #close()
 	 */
 	private void open(Context ctx) {
 		System.out.println("DBG Container open");
@@ -255,6 +266,8 @@ public class TrafficsenseContainer {
 	/**
 	 * Release resources.
 	 * Stops ContextLogger, Pebble communication.
+	 * 
+	 * @see #open(Context)
 	 */
 	private void close() {
 		System.out.println("DBG Container close");
@@ -294,6 +307,10 @@ public class TrafficsenseContainer {
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
+				if (serviceType != Constants.SERVICE_TIME_ONLY) {
+					// TODO: check its return value!
+					retrieveCoordinatesForStopsBlockingPart();
+				}
 				startTrackerService(serviceType);
 				activityDetach();
 			}
@@ -333,9 +350,9 @@ public class TrafficsenseContainer {
 		}
 		
 		/**
-		 * Populate Pebble UI.
+		 * Bind Pebble UI controller to the communication channel.
 		 */
-		mPebbleUi = new PebbleUiController(mContext, mRoute);
+		mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
 		
 		mContext.startService(serviceIntent);
 	}
@@ -343,7 +360,8 @@ public class TrafficsenseContainer {
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.
-	 * Should be run in an AsyncTask or a separate Thread.
+	 * 
+	 * Must NOT invoke this from the main/UI thread.
 	 * 
 	 * @param credential the e-mail account to be accessed.
 	 * @return the journey text as a String.
@@ -396,6 +414,31 @@ public class TrafficsenseContainer {
 				}
 			}
 		}).start();
+	}
+	
+	/**
+	 * Retrieves GPS coordinates for all stops along the journey.
+	 * 
+	 * Must NOT invoke this from the main/UI thread.
+	 * 
+	 * @return true on success, false otherwise.
+	 */
+	public boolean retrieveCoordinatesForStopsBlockingPart() {
+		if (mRoute == null) {
+			// TODO error handling ?
+			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
+			return false;
+		}
+		JourneyInfoResolver resolver = new JourneyInfoResolver();
+		/**
+		 * Access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available).
+		 */
+		if (resolver.retrieveCoordinatesFromHsl(mRoute) == false) {
+			// TODO: error handling.
+			return false;
+		}
+		// TODO: what about those who do not have a stopCode (= NO_STOP_CODE) ?
+		return true;
 	}
 	
 	/**
@@ -476,6 +519,7 @@ public class TrafficsenseContainer {
 	 * Return current Pebble UI Controller object.
 	 * 
 	 * @return current Pebble UI Controller object.
+	 * @see #startTrackerService(int)
 	 * @see #setPebbleUiController(PebbleUiController)
 	 */
 	public PebbleUiController getPebbleUiController() {

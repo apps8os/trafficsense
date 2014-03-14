@@ -18,7 +18,7 @@ import android.util.Log;
 public class MessageManager implements Runnable {
     public Handler messageHandler;
     private final BlockingQueue<PebbleDictionary> messageQueue = new LinkedBlockingQueue<PebbleDictionary>();
-    private Boolean isMessagePending = Boolean.valueOf(false);
+    private volatile Boolean isMessagePending = Boolean.valueOf(false);
     private Context mContext;
     private UUID mUUID;
     private Looper threadLooper;
@@ -46,51 +46,48 @@ public class MessageManager implements Runnable {
     }
 
     private void consumeAsync() {
-        messageHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (isMessagePending) {
-                    if (isMessagePending.booleanValue()) {
-                        return;
-                    }
-
-                    synchronized (messageQueue) {
-                        if (messageQueue.size() == 0) {
-                            return;
-                        }
-                        
-                        PebbleKit.sendDataToPebble(mContext.getApplicationContext(), mUUID, messageQueue.peek());
-                    }
-
-                    isMessagePending = Boolean.valueOf(true);
-                }
-            }
-        });
+    	messageHandler.post(new Runnable() {
+    		@Override
+    		public void run() {
+    			synchronized (this) {
+    				if (isMessagePending.booleanValue()) {
+    					return;
+    				}
+    				if (messageQueue.size() == 0) {
+    					return;
+    				}
+    				PebbleKit.sendDataToPebble(mContext.getApplicationContext(), mUUID, messageQueue.peek());
+    				isMessagePending = Boolean.valueOf(true);
+    			}
+    		}
+    	});
     }
 
-    public void notifyAckReceivedAsync() {
+    public void notifyAckReceivedAsync(final int transactionId) {
         messageHandler.post(new Runnable() {
             @Override
             public void run() {
-                synchronized (isMessagePending) {
-                    isMessagePending = Boolean.valueOf(false);
-                }
-                //Log.i("Pebble", "Received ack from stop: " + messageQueue.peek().toString());
-                //TODO: I guess this is about fragmentation
-                if (messageQueue.isEmpty() == false)
-                	messageQueue.remove();
+            	synchronized (this) {
+            		isMessagePending = Boolean.valueOf(false);
+            		//Log.i("Pebble", "Received ack from stop: " + messageQueue.peek().toString());
+            		//TODO: I guess this is about fragmentation
+            		if (messageQueue.isEmpty() == false)
+            		{
+            			messageQueue.remove();
+            		}
+            	}
             }
         });
         consumeAsync();
     }
 
-    public void notifyNackReceivedAsync() {
+    public void notifyNackReceivedAsync(final int transactionId) {
         messageHandler.post(new Runnable() {
             @Override
             public void run() {
-                synchronized (isMessagePending) {
-                    isMessagePending = Boolean.valueOf(false);
-                }
+            	synchronized (this) {
+            		isMessagePending = Boolean.valueOf(false);
+            	}
             }
         });
         consumeAsync();

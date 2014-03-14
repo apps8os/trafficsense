@@ -13,80 +13,165 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+/**
+ * Class for parsing plain text journey into a Gson JSON object.
+ */
 public class JourneyParser {
-	private JsonObject _mainObj; // Declare the JSON object
+	/**
+	 * The Gson JSON object for the current journey.
+	 */
+	private JsonObject _mainObj;
+	/**
+	 * TODO: documentation
+	 */
 	private JsonArray _segmentsArray;
-
+	/**
+	 * TODO: documentation
+	 */
 	private ArrayList<String> _textArray = new ArrayList<String>();
-	private int _nline = 0; // Line number of txt file
-	private String _txtLine; // the line read it from the txt
+	/**
+	 * Number of lines of journey processed.
+	 */
+	private int _nline = 0;
+	/**
+	 * Next non-empty journey text line to be processed.
+	 */
+	private String _txtLine;
 
+	/**
+	 * Constructor
+	 */
 	public JourneyParser() {
 		_mainObj = new JsonObject();
 		_segmentsArray = new JsonArray();
 	}
 
+	/**
+	 * Return the number of lines of journey processed.
+	 * 
+	 * @return number of lines of journey processed.
+	 */
 	private int getLine() {
 		return _nline;
 	}
 
+	/**
+	 * Increment the number of lines of journey processed.
+	 */
 	private void incrementLine() {
 		_nline++;
 	}
 
+	/**
+	 * Return the next non-empty journey text line to be processed.
+	 * 
+	 * @return next non-empty journey text line to be processed.
+	 */
 	private String getTxtLine() {
 		return _txtLine;
 	}
 
+	/**
+	 * Set the next non-empty journey text line to be processed.
+	 * 
+	 * @param txtLine the journey text line.
+	 * @see #parseOneLine(String)
+	 */
 	private void setTxtLine(String txtLine) {
+		// TODO: should we check if the line is empty here?
 		_txtLine = txtLine;
 	}
 
+	/**
+	 * TODO: documentation
+	 * 
+	 * @return
+	 */
 	private ArrayList<String> getTextArray() {
 
 		return _textArray;
 	}
 
+	/**
+	 * TODO: documentation
+	 */
 	private void flushTextArray() {
 
-		this.getTextArray().clear();
+		getTextArray().clear();
 	}
 
+	/**
+	 * TODO: documentation
+	 * 
+	 * @param line
+	 */
 	private void addTextArray(String line) {
 		// trim removes the white space at the beginning and end
 		this.getTextArray().add(line.trim());
 	}
 
+	/**
+	 * Return the Gson JSON object of the journey.
+	 * 
+	 * @return Gson JSON object of the journey.
+	 */
 	public JsonObject getJsonObj() {
 		return _mainObj;
 	}
 
-	private void setJsonObj(String key, String value) {
+	/**
+	 * Add a String property field to journey object.
+	 * 
+	 * @param key key as a String.
+	 * @param value value as a String.
+	 */
+	private void addProperty(String key, String value) {
 		_mainObj.addProperty(key, value);
 	}
 
-	private void setJsonObj(String key, JsonElement element) {
+	/**
+	 * Add a JsonElement property field to journey object.
+	 * 
+	 * @param key key as a String.
+	 * @param element value as a JsonElement.
+	 */
+	private void addProperty(String key, JsonElement element) {
 		_mainObj.add(key, element);
 	}
 
+	/**
+	 * TODO: documentation
+	 * 
+	 * @return
+	 */
 	private JsonArray getSegmentsArray() {
 		return _segmentsArray;
 	}
 
+	/**
+	 * TODO: documentation
+	 * 
+	 * @param value
+	 */
 	private void setSegmentsArray(JsonElement value) {
 		_segmentsArray.add(value);
 	}
 
+	/**
+	 * Add an element for newly encountered journey text line.
+	 * 
+	 * @see #organizeJson(String)
+	 */
 	private void addJsonObject() {
 
-		if (this.getLine() == 1) {
-			this.setJsonObj("date", this.getTxtLine());
+		if (getLine() == 1) {
+			addProperty("date", getTxtLine());
 			return;
 		}
 
 		if (this.getLine() == 3) {
-			String[] parts = this.getTxtLine().split(" ", 2);
-			this.setJsonObj("start", parts[1]);
+			String[] parts = getTxtLine().split(" ", 2);
+			addProperty("start", parts[1]);
 			return;
 		}
 
@@ -97,6 +182,7 @@ public class JourneyParser {
 		try {
 			str = getTextArray().get(0);
 			str_split = str.split(" ", 2); // will just split one time = 2 parts
+			System.out.println("DBG: "+str);
 		} catch (IndexOutOfBoundsException ex) {
 			// this is an extra blank line, just ignore it
 			return;
@@ -111,7 +197,7 @@ public class JourneyParser {
 			SegmentsObj.addProperty("startPoint", str_split[1]);
 			SegmentsObj.addProperty("mode", getTextArray().get(1));
 
-			this.setSegmentsArray(SegmentsObj);
+			setSegmentsArray(SegmentsObj);
 
 			JsonArray waypointsArray = new JsonArray();
 
@@ -149,79 +235,107 @@ public class JourneyParser {
 			// Last line of the file, "Arrival" line
 
 			// System.out.println("ARRAY " + this.getSegmentsArray());
-			this.setJsonObj("dest", str_split[1]);
-			this.setJsonObj("arrivalTime", str_split[0]);
-			this.setJsonObj("segments", this.getSegmentsArray());
+			addProperty("dest", str_split[1]);
+			addProperty("arrivalTime", str_split[0]);
+			addProperty("segments", this.getSegmentsArray());
 		}
 	}
 
 	/**
-	 * Will add the different objects and arrays to JSON file
+	 * Augment journey object with a newly encountered journey text line.
+	 * The newly read encountered line should had been passed to
+	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should
+	 * be called before.
+	 * 
+	 * @param line journey text line encountered.
+	 * @see #addJsonObject()
 	 */
+	private void organizeJson() {
 
-	private void organizeJson(String line) {
-
-		switch (this.getLine()) {
+		switch (getLine()) {
 		case 1:
-			this.addJsonObject();
+			addJsonObject();
 			return; // Add to json object the key value "date"
 		case 2:
 			return; // "Departure" line
 		case 3:
-			this.addJsonObject(); // Add to json object the key value "start"
+			addJsonObject(); // Add to json object the key value "start"
+			break;
+		default:
+			// TODO: what to do here?
+			break;
 		}
 
 		/*
 		 * isNotBlank - Checks if a String is not empty (""), not null and not
 		 * whitespace only
 		 */
-		if (line.trim().equals("")) {
+		if (getTxtLine().trim().equals("")) {
 			// The line is blank
-			this.addJsonObject();
+			addJsonObject();
 			// System.out.println("ARRAY: " + text);
 			// System.out.println("FLUSH ********");
-			this.flushTextArray();
+			flushTextArray();
 			return;
 		} else {
-			this.addTextArray(line);
+			addTextArray(getTxtLine());
 		}
 
-		if (this.getTxtLine().equals("Arrival") ||
-			this.getTxtLine().equals("Perillä") ||
-			this.getTxtLine().equals("Ankomst")) {
+		if (getTxtLine().equals("Arrival") ||
+			getTxtLine().equals("Perillä") ||
+			getTxtLine().equals("Ankomst")) {
 
-			this.addJsonObject();
-			this.flushTextArray();
+			addJsonObject();
+			flushTextArray();
 		}
 
 	}
 
+	/**
+	 * Return the parsed journey in JSON text.
+	 * 
+	 * @return parsed journey in JSON.
+	 */
 	public String getJsonText() {
 		return _mainObj.toString();
 	}
 
+	/**
+	 * Write parsed journey in JSON to a file.
+	 * 
+	 * @param outFileName path to file.
+	 * @deprecated are we going to access sdcard ?
+	 * @see #parsingFile(String)
+	 */
 	public void writeJsonFile(String outFileName) {
+		FileWriter file = null;
 		try {
-
-			FileWriter file = new FileWriter(outFileName);
-			file.write(this.getJsonObj().toString());
+			file = new FileWriter(outFileName);
+			file.write(getJsonObj().toString());
 			file.flush();
 			file.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Process one line of the journey.
+	 * 
+	 * @param line the line
+	 */
 	private void parseOneLine(String line) {
 		System.out.println("Line: "+line);
-		this.setTxtLine(line);
-		this.incrementLine(); // will increment a read line on txt file, counter
-								// starts 0
-		this.organizeJson(line);
+		setTxtLine(line);
+		incrementLine();
+		organizeJson();
 	}
 
-	/* parse a journey supplied in a String */
+	/**
+	 * Parse a journey supplied in a String with line breaks.
+	 * 
+	 * @param jsonText plain text journey with line breaks.
+	 */
 	public void parseString(String jsonText) {
 		Scanner scanner = new Scanner(jsonText);
 		while (scanner.hasNextLine()) {
@@ -236,7 +350,11 @@ public class JourneyParser {
 		scanner.close();
 	}
 
-	/* parse a journey in a text file */
+	/**
+	 * Read and parse a plain text journey from a file.
+	 * @param fileName path to the file.
+	 * @deprecated are we going to access sdcard ?
+	 */
 	public void parsingFile(String fileName) {
 		// This will reference one line at a time
 		String line = null;

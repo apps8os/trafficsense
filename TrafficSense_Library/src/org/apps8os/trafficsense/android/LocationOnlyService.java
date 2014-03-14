@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.Vibrator;
 
 
 public class LocationOnlyService extends Service implements 
@@ -33,7 +34,7 @@ public class LocationOnlyService extends Service implements
 		OnConnectionFailedListener,
 		OnAddGeofencesResultListener{
 
-	private int GEOFENCE_RADIUS = 20;
+	private int GEOFENCE_RADIUS = 100;
 	//container that contains route information and else-
 	private TrafficsenseContainer mContainer; 
 	//index of which segment we are in
@@ -47,7 +48,7 @@ public class LocationOnlyService extends Service implements
 	//action that happens when geofence tranistion detected by locationClient
 	private String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
 	private Context mContext;
-	//callbacks by geofence will be made to these classes
+	//callbacks by geofence will be made to these classes 
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
 	
@@ -93,6 +94,8 @@ public class LocationOnlyService extends Service implements
             }
         }
     }
+	
+	
 	
 	/**
 	 * Send segment and waypoint index to clients. Meant to be used to
@@ -162,16 +165,15 @@ public class LocationOnlyService extends Service implements
 	 * geofence transition is made is currently hardcoded.
 	 * @param newFence
 	 */
-	private void addGeofence(Geofence newFence){
+	private void addGeofence(ArrayList<Geofence> list){
 		Intent i = new Intent();
 		i.setAction(ACTION_NEXT_GEOFENCE_REACHED);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, 
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		//if the location client is connected send the request
 		if(mLocationClient.isConnected()){
-			ArrayList<Geofence> geoList=new ArrayList<Geofence>();
-			geoList.add(newFence);
-			mLocationClient.addGeofences(geoList, pi, mOnAddGeofencesListener);
+			System.out.println("DBG adding geofence list");
+			mLocationClient.addGeofences(list, pi, mOnAddGeofencesListener);
 		}
 		else{
 			//TODO: figure out what happens if location client is not connected
@@ -190,6 +192,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	private Geofence createGeofence(Waypoint busStop,String id, float radius, 
 			long expiryDuration, int transition){
+		System.out.println("DBG longitude: "+ busStop.getLongitude()+"latitude: "+ busStop.getLatitude());
 		return new Geofence.Builder()
 			.setRequestId(id)
 			.setTransitionTypes(transition)
@@ -206,14 +209,12 @@ public class LocationOnlyService extends Service implements
 	 */
 	public void onConnected(Bundle connectionHint) {
 		
+		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
-		
-		Route currentRoute=mContainer.getRoute();
-		Segment currentSegment = currentRoute.getSegment(mRouteSegmentIndex);
-		Waypoint nextWaypoint = currentSegment.getWaypoint(mSegmentWaypointIndex);
-		Geofence newFence = createGeofence(nextWaypoint, "nextWaypoint", GEOFENCE_RADIUS,
-				Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
-		addGeofence(newFence);
+		sendNextWaypointIntent(null);
+		mContainer.getPebbleUiController().initializeList();
+		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
+		this.sendBroadcast(coordsReadyIntent);
 		
 	}
 
@@ -221,33 +222,43 @@ public class LocationOnlyService extends Service implements
 	 * Sets the geofences for all the waypoints on the route
 	 */
 	public void setGeofencesForRoute(){
+		System.out.println("DBG location service received intent");
 		Route currentRoute = mContainer.getRoute();
+		ArrayList<Geofence> listOfFences = new ArrayList<Geofence>();
 		for(int segmentIndex=0;;segmentIndex++){
-			Segment currentSegment = currentRoute.getSegment(mRouteSegmentIndex);
+			Segment currentSegment = currentRoute.getSegment(segmentIndex);
 			if(currentSegment == null){
 				break;
 			}
-			//TODO: check if the segment is a walking segment and skip it if it is
+			//TODO: check if the segment is a walking segment and if it is only set the last waypoint in it 
 			
+			//skip the first waypoint because it it also the last one in the last segment
 			for(int waypointIndex=0;;waypointIndex++){
-				Waypoint nextWaypoint = currentSegment.getWaypoint(mSegmentWaypointIndex);
+				
+				Waypoint nextWaypoint = currentSegment.getWaypoint(waypointIndex);
 				if(nextWaypoint==null){
 					break;
 				}
+				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
 				String id = (new Integer(segmentIndex)).toString()+","+(new Integer(waypointIndex)).toString();
 				mNextBusStopGeofence = createGeofence(nextWaypoint, id, GEOFENCE_RADIUS,
 						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
-				addGeofence(mNextBusStopGeofence);	
+				listOfFences.add(mNextBusStopGeofence);
 				
 			}
 			
 		}
-			
+		addGeofence(listOfFences);		
 	}
 	
-	@Override
+	//TODO: add check to status code
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
-		// TODO Auto-generated method stub	
+		System.out.println("DBG: geofence status code: "+ statusCode);
+		String dbg="";
+		for(int i=0;i<geofenceRequestIds.length; i++){
+			dbg= dbg + " " + geofenceRequestIds[i];
+		}
+		System.out.println("DBG: geofences added: " + dbg);
 	}
 	
 	@Override
@@ -288,27 +299,67 @@ public class LocationOnlyService extends Service implements
 			//get the id of the geofence that triggered the alert and increment it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
-			mRouteSegmentIndex=Integer.parseInt(parts[0])+1;
+			mRouteSegmentIndex=Integer.parseInt(parts[0]);
 			mSegmentWaypointIndex=Integer.parseInt(parts[1])+1;
-			//if we are at the last waypoint set indexes to -1
+			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
-			if(currentSegment==null){
-				mRouteSegmentIndex=-1;
-				mSegmentWaypointIndex=-1;
-				sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
-				return; //the route has ended
+			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+			if (mSegmentWaypointIndex == 1) {
+				// Update pebble when at first waypoint
+				mContainer.getPebbleUiController().initializeList();
 			}
-			Waypoint currentWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
-			if(currentWaypoint==null){
-				System.out.println("Some weird error has happend");
-				return;
+			if(nextWaypoint == null){
+				
+				mRouteSegmentIndex++;
+				currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
+				
+				
+				if(currentSegment==null){
+					mRouteSegmentIndex=-1;
+					mSegmentWaypointIndex=-1;
+					//inform clients that waypoint has changed
+					sendNextWaypointIntent("");
+					sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
+
+					return; //the route has ended
+				}
+				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().alarmGetOff();
+				mSegmentWaypointIndex=0;
+				nextWaypoint = currentSegment.setNextWaypoint(0);
+			} else {
+				// If we are not at the last waypoint, only update the list on pebble
+				mContainer.getPebbleUiController().updateList();
 			}
+
 			
 			//inform clients that the next waypoint has changed. 
+			if(nextWaypoint.getWaypointName()!=null)
+				System.out.println("DBG Next position is " + nextWaypoint.getWaypointName());
+			
+			sendNextWaypointIntent("");
 			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
 			
 		}	
 	}
+	
+
+	/**
+	 * sends an intent that indicates current waypoint information has been updated. 
+	 * It can contain a message but it is currently unused. 
+	 * @param message
+	 */
+	
+	protected void sendNextWaypointIntent(String message){
+		Intent vi = new Intent();
+		if(message == null){
+			message ="";
+		}
+		vi.putExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE, message);
+		vi.setAction(Constants.ACTION_ROUTE_EVENT);
+		sendBroadcast(vi);
+	}
+
 }
 
 

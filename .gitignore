@@ -51,3 +51,9 @@ proguard/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+
+# Eclipse plugin metadata
+.metadata/
+
+# vim swap file
+*.swp

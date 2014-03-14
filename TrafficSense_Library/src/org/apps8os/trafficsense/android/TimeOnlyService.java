@@ -21,19 +21,59 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.widget.Toast;
 
-//service that follows our route by always scheduling the nextwaypoint with the alarm manager. 
+/**
+ * Service that follows our route based on time. 
+ */
 public class TimeOnlyService extends Service {
 
+	/**
+	 * The TrafficSense service container. 
+	 */
 	private TrafficsenseContainer mContainer;
+	/**
+	 * The journey we are following.
+	 */
 	private Route mRoute;
+	/**
+	 * Handler for next-stop events.
+	 */
 	private NextWaypointReceiver mNextWaypointReceiver;
+	/**
+	 * Handler for actual alert generation.
+	 */
 	private VibrateAndMakeNotificationReceiver mMakeAlertReceiver;
+	/**
+	 * The context in which we are operating.
+	 */
 	private Context mContext;
+	/**
+	 * The clock/alarm event generator.
+	 */
 	private AlarmManager mAM;
+	/**
+	 * PendingIntent for next stop events.
+	 * Use a common instance so we can cancel the pending one (if any) before
+	 * we stop the service.
+	 */
 	private PendingIntent mNextWaypointIntent;
+	/**
+	 * PendingIntent for get off notifications.
+	 * @see #mNextWaypointIntent
+	 */
 	private PendingIntent mGetOffIntent;
+	/**
+	 * Did we encounter an error during onStartCommand().
+	 * If true, the service failed to start.
+	 * onStartCommand() should stopSelf() and onDestroy() should
+	 * not do the clean up.
+	 * This would be true if the service is automatically restarted
+	 * by Android.
+	 */
 	boolean errorOnStart;
 
+	/**
+	 * Create common resources for the service.
+	 */
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -55,7 +95,14 @@ public class TimeOnlyService extends Service {
 		errorOnStart = false;
 	}
 
-	// the service is stopped when: 1) the journey ends 2) Android kills it 3) error on start
+	/**
+	 * Start rolling the service.
+	 * 
+	 * The service is stopped when:
+	 * 1) the journey ends
+	 * 2) Android kills it
+	 * 3) {@link #errorOnStart} is true
+	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		System.out.println("DBG TimeOnlyService.onStartCommand");
@@ -65,6 +112,10 @@ public class TimeOnlyService extends Service {
 			errorOnStart = true;
 		} else if (mRoute == null) {
 			System.out.println("DBG TimeOnlyService: mRoute = null");
+			mContainer.serviceDetach();
+			errorOnStart = true;
+		} else if (mContainer.getPebbleUiController() == null) {
+			System.out.println("DBG TimeOnlyService: Pebble UI not set up properly");
 			mContainer.serviceDetach();
 			errorOnStart = true;
 		} else {
@@ -99,11 +150,16 @@ public class TimeOnlyService extends Service {
 		if (errorOnStart) {
 			this.stopSelf();
 		}
-		// We are currently unable to resume operation, so do not re-create automatically
+		/**
+		 * We are currently unable to resume operation, so do not re-create automatically.
+		 */
 		return START_NOT_STICKY;
 	}
 
-	// TODO: not always called when force-stop
+	/**
+	 * Clean up.
+	 * Note that invocation is not guaranteed. 
+	 */
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -118,6 +174,11 @@ public class TimeOnlyService extends Service {
 		}
 	}
 
+	/**
+	 * Schedule a next stop alarm.
+	 * 
+	 * @param atMillis time in milliseconds that the alarm should go off.
+	 */
 	private void scheduleNextAlarm(long atMillis) {
 		// mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
 		// TODO testing use
@@ -125,11 +186,21 @@ public class TimeOnlyService extends Service {
 				+ Constants.TEST_TIME, mNextWaypointIntent);
 	}
 
+	/**
+	 * Schedule a get off alarm.
+	 * 
+	 * @param atMillis time in milliseconds that the alarm should go off.
+	 */
 	private void scheduleGetOffAlarm(long atMillis) {
 		mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mGetOffIntent);
 		System.out.println("DBG TimeOnlyService scheduled GetOff alarm");
 	}
 
+	/**
+	 * TODO: documentation
+	 * @param timeStr
+	 * @return
+	 */
 	private Date timeStringToDate(String timeStr) {
 		Date date = null;
 		try {
@@ -216,7 +287,10 @@ public class TimeOnlyService extends Service {
 
 	}
 
-	// causes the phone to vibrate.
+	/**
+	 * Handler for get off events. Vibrate the hand set and send a notification
+	 * to Pebble.
+	 */
 	class VibrateAndMakeNotificationReceiver extends BroadcastReceiver {
 
 		@Override
@@ -230,9 +304,11 @@ public class TimeOnlyService extends Service {
 
 	}
 
+	/**
+	 * No bind to this service. 
+	 */
 	@Override
 	public IBinder onBind(Intent intent) {
-		// no bind to this service
 		return null;
 	}
 
