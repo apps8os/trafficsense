@@ -15,6 +15,10 @@ public class Constants {
 	 */
 	final public static boolean isDevelopmentMode = true;
 	/**
+	 * Whether time-based service(s) should use wall clock or toy time.
+	 */
+	final public static boolean useWallClock = false;
+	/**
 	 * Action strings of Intents.
 	 */
 	final public static String ACTION_NEXT_WAYPOINT = "trafficsense.NextWaypointAlarm";
