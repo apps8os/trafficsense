@@ -251,6 +251,7 @@ public class TrafficsenseContainer {
 	/**
 	 * Stop following current journey.
 	 * Stops all running tracker services.
+	 * Does not reset current progress in mRoute.
 	 */
 	public void stopJourney() {
 		mJourneyStarted = false;
@@ -265,6 +266,10 @@ public class TrafficsenseContainer {
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
 		// TODO: add some code here if a new Service is introduced.
+		
+		// TODO merged Jussi's code
+		mContext.stopService(mServiceIntent);
+		mJourneyStarted=false;
 	}
 	
 	/**
@@ -387,7 +392,10 @@ public class TrafficsenseContainer {
 		mContext.startService(mServiceIntent);
 	}
 	
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8005b7e5e3bc32ce6eb1b9d050ca68701e33945e
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.

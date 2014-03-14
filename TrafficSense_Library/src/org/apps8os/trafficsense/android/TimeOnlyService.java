@@ -133,16 +133,17 @@ public class TimeOnlyService extends Service {
 					mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()
 					).getTime();
 
-			// TODO do not check this at the moment
-			/*
-			if(timeToNextWaypoint < System.currentTimeMillis()) {
-				System.out.println("DBG next waypoint in the past"); Toast
-				toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
-				toast.show(); errorOnStart = true;
+			if (Constants.useWallClock == true
+					&& timeToNextWaypoint < System.currentTimeMillis()) {
+				System.out.println("DBG next waypoint in the past");
+				Toast toast = Toast.makeText(mContext,
+						"Error:next waypoint is in the past",
+						Toast.LENGTH_SHORT);
+				toast.show();
+				errorOnStart = true;
 			} else {
-			*/
-			scheduleNextAlarm(timeToNextWaypoint);
-			//}
+				scheduleNextAlarm(timeToNextWaypoint);
+			}
 		}
 		
 		System.out.println("DBG TimeOnlyService.onStartCommand cp2");
@@ -180,10 +181,12 @@ public class TimeOnlyService extends Service {
 	 * @param atMillis time in milliseconds that the alarm should go off.
 	 */
 	private void scheduleNextAlarm(long atMillis) {
-		// mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
-		// TODO testing use
-		mAM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-				+ Constants.TEST_TIME, mNextWaypointIntent);
+		if (Constants.useWallClock == true) {
+			mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
+		} else {
+			mAM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+					+ Constants.TEST_TIME, mNextWaypointIntent);
+		}
 	}
 
 	/**
@@ -247,12 +250,19 @@ public class TimeOnlyService extends Service {
 					mContainer.getPebbleUiController().initializeList();
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
-					// TODO: Test with real time
-					// long timeToAlarm =
-					// timeStringToDate(mContainer.getRoute().getDate() +
-					// " "+nextSegment.getWaypointList().get(secondLastWpIndex).getWaypointTime()).getTime();
-					long timeToAlarm = (secondLastWpIndex + 1)
-							* Constants.TEST_TIME + System.currentTimeMillis();
+					long timeToAlarm = 0;
+					if (Constants.useWallClock == true) {
+						timeToAlarm = timeStringToDate(
+								mContainer.getRoute().getDate()
+										+ " "
+										+ nextSegment.getWaypointList()
+												.get(secondLastWpIndex)
+												.getWaypointTime()).getTime();
+					} else {
+						timeToAlarm = (secondLastWpIndex + 1)
+								* Constants.TEST_TIME
+								+ System.currentTimeMillis();
+					}
 					System.out.println("DBG TimeOnlyService scheduling getOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
 				}
