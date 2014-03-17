@@ -11,6 +11,7 @@ import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -152,8 +153,12 @@ public class MainActivity extends Activity {
 		 listview.setVisibility(View.VISIBLE); 
 	}
 	
+	/**
+	 * draws the route on the map using lines that dont follow roads. Also zooms to first waypoint with location. 
+	 */
 	public void drawRoute() {
 		Route r = mContainer.getRoute();
+		boolean zoomed = false;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
 		for (Segment s : r.getSegmentList()) {
 			if (s.isWalking()) {
@@ -166,12 +171,30 @@ public class MainActivity extends Activity {
 					continue;
 				}
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
+				
 				o.add(coord);
+				
+				if(zoomed == false){
+					centerLocationOnMap(coord);
+					zoomed = true;
+				}
 			}
 		}
 		map.addPolyline(o);
 	}
 	
+	/**
+	 * centers the map on a location
+	 */
+	public void centerLocationOnMap(LatLng location){
+		map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
+	}
+	
+	/**
+	 * Class that receives an intent when all the coordinates have been loaded
+	 * @author traffisense
+	 *
+	 */
 	class CoordsReadyReceiver extends BroadcastReceiver {
 
 		@Override
@@ -180,18 +203,19 @@ public class MainActivity extends Activity {
 			drawRoute();
 			
 		}
-		
-		
 	}
 	
+	/**
+	 * Class that receives an intent when current waypoint has changed. 
+	 * @author traffisense
+	 *
+	 */
 	class WaypointChanged extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG: Main activity: Waypoint changed");
-
-			
-			
+			outputLogic();
 		
 		}
 		
