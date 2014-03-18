@@ -54,4 +54,14 @@ public class Constants {
 	final public static int LANG_FI = 0;
 	final public static int LANG_SV = 1;
 	final public static int LANG_EN = 2;
+	
+	/**
+	 * id of the notification 
+	 */
+	final public static int NOTIFICATION_ID = 1;
+	
+	/**
+	 * how long the phone vibrates on alerts
+	 */
+	final public int VIBRATION_TIME = 4000;
 }

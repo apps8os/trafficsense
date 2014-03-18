@@ -11,6 +11,8 @@ import com.google.gson.JsonObject;
  * TODO: Documentation
  */
 public class Segment {
+	// Time format: EEEE dd.M.yyyy kk:mm (used in both TimeOnlyService and PebbleUiController
+	// TODO: save times as Date objects or something instead of strings
 	private String startTime;
 	private String startPoint;
 	private String mode;

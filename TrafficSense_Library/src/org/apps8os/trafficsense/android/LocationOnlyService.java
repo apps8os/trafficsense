@@ -1,8 +1,10 @@
 package org.apps8os.trafficsense.android;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
+import org.apps8os.trafficsense.core.OutputLogic;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
@@ -14,6 +16,9 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 
+import android.R;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -21,11 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.os.Vibrator;
 
 
@@ -51,67 +52,9 @@ public class LocationOnlyService extends Service implements
 	//callbacks by geofence will be made to these classes 
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
-	
-	//messenger used to communicate between client and service
-	private Messenger mMessenger = new Messenger (new IncomingHandler());
-		static final int MSG_REGISTER_CLIENT = 1;
-		static final int MSG_UNREGISTER_CLIENT = 2;
-		static final int MSG_GET_CURRENT_WAYPOINT = 3;
-		static final int MSG_CURRENT_WAYPOINT = 4;
-	private ArrayList<Messenger> mClients =new ArrayList<Messenger>();
-	
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return mMessenger.getBinder();
-	}
-	
-	/**
-	 * Class to handle incoming message to the service
-	 * @author traffisense
-	 *
-	 */
-	class IncomingHandler extends Handler { // Handler of incoming messages from clients.
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MSG_REGISTER_CLIENT:
-                mClients.add(msg.replyTo);
-                break;
-            case MSG_UNREGISTER_CLIENT:
-                mClients.remove(msg.replyTo);
-                break;
-            case MSG_GET_CURRENT_WAYPOINT:
-                try {
-                	//send current segment and waypoint index to the requestee. 
-					msg.replyTo.send(Message.obtain(null, MSG_CURRENT_WAYPOINT, mRouteSegmentIndex, mSegmentWaypointIndex));
-				} catch (RemoteException e) {
-					//the client is dead so remove them
-					mClients.remove(msg.replyTo);
-				}
-                break;
-            default:
-                super.handleMessage(msg);
-            }
-        }
-    }
-	
-	
-	
-	/**
-	 * Send segment and waypoint index to clients. Meant to be used to
-	 * inform clients a new waypoint has been reached
-	 * @param segmentIndex
-	 * @param waypointIndex
-	 */
-	private void sendNextWaypointMessage(int segmentIndex, int waypointIndex){
-		for (int i= 0; i<mClients.size();i++){
-			try {
-				mClients.get(i).send(Message.obtain(null, MSG_CURRENT_WAYPOINT, segmentIndex, waypointIndex));
-			} catch (RemoteException e) {
-				mClients.remove(i);
-			}
-		}
-	}
+	//the id of the notification we are giving to the users
+
+
 	
 	
 	/**
@@ -156,6 +99,9 @@ public class LocationOnlyService extends Service implements
 		super.onDestroy();
 		//need to detach from container
 		mContainer.serviceDetach();
+		//remove any notifications
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	    mNotificationManager.cancel(Constants.NOTIFICATION_ID);
 		//need to unregister receivers
 		unregisterReceiver(mEnteredWaypointAlertReceiver);
 	}
@@ -212,7 +158,7 @@ public class LocationOnlyService extends Service implements
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeList();
+		mContainer.getPebbleUiController().initializeSegment();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
 		this.sendBroadcast(coordsReadyIntent);
 		
@@ -306,7 +252,7 @@ public class LocationOnlyService extends Service implements
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
 			if (mSegmentWaypointIndex == 1) {
 				// Update pebble when at first waypoint
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 			}
 			if(nextWaypoint == null){
 				
@@ -319,11 +265,9 @@ public class LocationOnlyService extends Service implements
 					mSegmentWaypointIndex=-1;
 					//inform clients that waypoint has changed
 					sendNextWaypointIntent("");
-					sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
-
 					return; //the route has ended
 				}
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
@@ -336,10 +280,8 @@ public class LocationOnlyService extends Service implements
 			//inform clients that the next waypoint has changed. 
 			if(nextWaypoint.getWaypointName()!=null)
 				System.out.println("DBG Next position is " + nextWaypoint.getWaypointName());
-			
+			makeNotificationAndAlert();
 			sendNextWaypointIntent("");
-			sendNextWaypointMessage(mRouteSegmentIndex, mSegmentWaypointIndex);
-			
 		}	
 	}
 	
@@ -358,6 +300,41 @@ public class LocationOnlyService extends Service implements
 		vi.putExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE, message);
 		vi.setAction(Constants.ACTION_ROUTE_EVENT);
 		sendBroadcast(vi);
+	}
+	
+	/**
+	 * Shows and updates the notification and if we are on the second last waypoint makes the phone vibrate. 
+	 */
+	
+	protected void makeNotificationAndAlert(){
+		
+		//display last notification
+		String msg = OutputLogic.getOutput();                 //TODO: I think we need to add an icon here to make this work. 
+		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
+		
+		Notification noti = new Notification.Builder(mContext)
+				.setContentTitle("Trafficsense Route Tracking")
+				.setContentText(msg)
+				.setSmallIcon(resID)
+				.build();
+		
+		NotificationManager mNotificationManager =(NotificationManager) getSystemService(mContext.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
+		
+		//vibrate if user needs to get off at next waypoint
+		Segment curSegment = mContainer.getRoute().getCurrentSegment();
+		int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
+		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
+		
+		if((curWaypointIndex == waypointList.size() -1) & !curSegment.isWalking()){
+			Vibrator vib = (Vibrator) getSystemService(mContext.VIBRATOR_SERVICE);
+			vib.vibrate(Constants.VIBRATOR_DURATION);
+		}
+	}
+	@Override
+	public IBinder onBind(Intent arg0) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

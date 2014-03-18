@@ -1,6 +1,11 @@
 package org.apps8os.trafficsense.pebble;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
@@ -23,7 +28,52 @@ public class PebbleUiController {
 		mPblCom = comm;
 		mRoute = route;
 	}
-
+	
+	/**
+	 * Initializes segment-related values on pebble, including
+	 * the stops that need to be shown initially
+	 */
+	public void initializeSegment() {
+		Segment currentSegment = mRoute.getCurrentSegment();
+		// Don't do anything if the segment is walking
+		if (currentSegment.isWalking()) return;
+		
+		String segmentMode = currentSegment.getSegmentMode();
+		
+		// do things to get the seconds of minute, minute of hour and hour of day
+		System.out.println("DBG segment time: " + currentSegment.getSegmentStartTime());
+		Date segmentStart = timeStringToDate(currentSegment.getSegmentStartTime());
+		if (segmentStart == null) System.out.println("DBG Date segmentStart was null");
+		
+		Calendar cal = Calendar.getInstance();
+		if (cal == null) System.out.println("DBG Calendar cal was null");
+		cal.setTime(segmentStart);
+		int seconds = cal.get(Calendar.SECOND);
+		int minutes = cal.get(Calendar.MINUTE);
+		int hours = cal.get(Calendar.HOUR_OF_DAY);
+		mPblCom.initializeSegment(segmentMode, hours, minutes, seconds);
+		
+		// Then, send the stops
+		int currentWpIndex = currentSegment.getCurrentIndex();
+		int lastWpIndex = currentSegment.getWaypointList().size() - 1;
+		
+		ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+		for (int i = currentWpIndex; i < lastWpIndex; i++) {
+			waypoints.add(currentSegment.getWaypointList().get(i));
+		}
+		// if there are less than NUM_STOPS-1 waypoints to be sent, send additional null
+		// waypoints to clear the list (not including the last waypoint yet)
+		for (int i = waypoints.size(); i < PebbleCommunication.NUM_STOPS-1; i++) {
+			waypoints.add(null);
+		}
+		// finally add the last waypoint to the list
+		waypoints.add(currentSegment.getLastWaypoint());
+		for (int i = 0; i < PebbleCommunication.NUM_STOPS; i++) {
+			mPblCom.sendWaypoint(waypoints.get(i), i);
+		}
+	}
+	
+	
 	/**
 	 * Sets Pebble UI to the first two and the last stop of current segment.
 	 * 
@@ -79,5 +129,18 @@ public class PebbleUiController {
 	 */
 	public void alarmGetOff() {
 		mPblCom.sendMessage("Alarm", "Get off on the next stop!");
+	}
+	
+	// TODO: stop using this and somehow get times as date objects from the route
+	private Date timeStringToDate(String timeStr) {
+		Date date = null;
+		try {
+			// TODO: Locale problem
+			date = new SimpleDateFormat("kk:mm", Locale.ENGLISH)
+			.parse(timeStr);
+		} catch (ParseException e) {
+			System.out.println("DBG TimeOnlyService timeStringToDate error: " + e.getMessage());
+		}
+		return date;
 	}
 }

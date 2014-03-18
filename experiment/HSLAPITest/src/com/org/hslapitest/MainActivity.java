@@ -44,8 +44,8 @@ public class MainActivity extends Activity {
 		/*
 		myButton = (Button) findViewById(R.id.button1);
 		myEditText = (EditText) findViewById(R.id.editText1);
-		myTextView = (TextView) findViewById(R.id.textView2);
-		   	String myString = null;
+		myTextView = (TextView) findViewById(R.id.textView2);*/
+		 String myString = null;
                 try {
 
                     InputStream is = getAssets().open("sample.js");
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-				String myString = null;
+				
                 Route route = new Route();
     			Gson gson = new Gson();
     			//System.out.println(myString);
@@ -72,11 +72,11 @@ public class MainActivity extends Activity {
     			JsonObject json = (JsonObject) parser.parse(myString);
     			//System.out.println(json.toString());
     			route.setRoute(json);
-    			//System.out.println(gson.toJson(route));*/
+    			System.out.println(gson.toJson(route));
             
-    		    createData();
+    		    //createData();
     		    ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-    		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, groups);
+    		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
     		    listView.setAdapter(adapter);
     		  }
 
