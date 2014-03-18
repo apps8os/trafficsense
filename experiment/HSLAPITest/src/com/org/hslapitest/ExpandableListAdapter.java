@@ -28,7 +28,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 
 	  @Override
 	  public Object getChild(int groupPosition, int childPosition) {
-		 return SegmentList.get(groupPosition).getWaypointList().get(childPosition);
+		 return SegmentList.get(groupPosition).getWaypointList().get(childPosition).getWaypointName();
 	   // return groups.get(groupPosition).children.get(childPosition);
 	  }
 
@@ -40,8 +40,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  @Override
 	  public View getChildView(int groupPosition, final int childPosition,
 	      boolean isLastChild, View convertView, ViewGroup parent) {
-	    final String children = "mah children!";
-	    		//(String) getChild(groupPosition, childPosition);
+	    final String children = (String) getChild(groupPosition, childPosition);
 	    TextView text = null;
 	    if (convertView == null) {
 	      convertView = inflater.inflate(R.layout.listrow_details, null);
@@ -99,7 +98,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    }
 	   // Group group = (Group) getGroup(groupPosition);
 	    
-	    ((CheckedTextView) convertView).setText("hue");
+	    ((CheckedTextView) convertView).setText(SegmentList.get(groupPosition).getSegmentMode());
 	    ((CheckedTextView) convertView).setChecked(isExpanded);
 	    return convertView;
 	  }
