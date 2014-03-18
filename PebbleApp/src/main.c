@@ -21,9 +21,16 @@ TimeOfDay getCurrentTime() {
 
 TimeOfDay getTimeToStart() {
   TimeOfDay currentTime = getCurrentTime();
-  TimeOfDay timeToStart =   {startTime.hours - currentTime.hours,
-                            startTime.minutes - currentTime.minutes,
-                            startTime.seconds - currentTime.seconds};
+  uint32_t seconds = 0;
+  seconds += (startTime.hours - currentTime.hours) * 3600;
+  seconds += (startTime.minutes - currentTime.minutes) * 60;
+  seconds += (startTime.seconds - currentTime.seconds);
+  uint8_t hours = seconds / 3600;
+  seconds -= hours * 3600;
+  uint8_t minutes = seconds / 60;
+  seconds -= minutes * 60;
+
+  TimeOfDay timeToStart =   {hours, minutes, seconds};
   return timeToStart;
 }
 
