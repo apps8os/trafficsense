@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.core.OutputLogic;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
@@ -157,6 +158,7 @@ public class MainActivity extends Activity {
 	 * draws the route on the map using lines that dont follow roads. Also zooms to first waypoint with location. 
 	 */
 	public void drawRoute() {
+		map.clear();
 		Route r = mContainer.getRoute();
 		boolean zoomed = false;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
@@ -215,54 +217,11 @@ public class MainActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG: Main activity: Waypoint changed");
-			outputLogic();
-		
+			String msg[] = {OutputLogic.getOutput()};
+			showList(msg);
 		}
 		
-		public void outputLogic(){
-			
-			Segment curSegment = mContainer.getRoute().getCurrentSegment();
-			int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
-			int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
-			List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
-			
-			if(curSegmentIndex ==-1 & curWaypointIndex==-1){
-				String message[] = {"Congratulations. You reached your destination"};
-				showList(message);
-			}
-			
-			//if the next stop is the last stop on a segment
-			if(curWaypointIndex == waypointList.size()-1){
-				String message[] = {"Get off at next stop"};
-				showList(message);
-			}
-			
-			//if the current segment is a walking one
-			if(curSegment.isWalking() == true){
-				String message[] = {"Walk to next stop"}; 
-				showList(message);
-			}
-			
-			
-			//if the next stop
-			if(curWaypointIndex == 1){
-				if(curWaypointIndex == 1 && curSegment.isWalking() == false){
-					String transportId = curSegment.getSegmentMode();
-					String destination = curSegment.getLastWaypoint().getWaypointName();
-					String message[] = new String[1];
-					if(transportId.equals("metro")){
-						message[0] = "Take metro to "+ destination;
-					}
-					else if(transportId.length() == 1){
-						message[0] = "Take " + transportId+ " train to "+ destination;
-					}
-					else{
-						message[0]= "Take bus " + transportId + " to " + destination;
-					}
-					showList(message);
-				}		
-			}
-		}
+		
 		
 	
 	}
