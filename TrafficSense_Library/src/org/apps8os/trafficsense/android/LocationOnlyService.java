@@ -16,6 +16,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 
+import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -98,6 +99,9 @@ public class LocationOnlyService extends Service implements
 		super.onDestroy();
 		//need to detach from container
 		mContainer.serviceDetach();
+		//remove any notifications
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	    mNotificationManager.cancel(Constants.NOTIFICATION_ID);
 		//need to unregister receivers
 		unregisterReceiver(mEnteredWaypointAlertReceiver);
 	}
@@ -306,10 +310,14 @@ public class LocationOnlyService extends Service implements
 		
 		//display last notification
 		String msg = OutputLogic.getOutput();                 //TODO: I think we need to add an icon here to make this work. 
+		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
+		
 		Notification noti = new Notification.Builder(mContext)
 				.setContentTitle("Trafficsense Route Tracking")
 				.setContentText(msg)
+				.setSmallIcon(resID)
 				.build();
+		
 		NotificationManager mNotificationManager =(NotificationManager) getSystemService(mContext.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
 		
