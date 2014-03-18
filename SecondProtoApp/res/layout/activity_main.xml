@@ -18,7 +18,7 @@
          android:layout_below="@id/listview"
          class="com.google.android.gms.maps.MapFragment"
          map:cameraTargetLat="60.1708"
-         map:cameraTargetLng="24.9375"
+         map:cameraTargetLng="24.9375" 
          map:cameraZoom="13" />
    
 </RelativeLayout>

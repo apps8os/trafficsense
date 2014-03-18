@@ -16,6 +16,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 
+import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -98,6 +99,9 @@ public class LocationOnlyService extends Service implements
 		super.onDestroy();
 		//need to detach from container
 		mContainer.serviceDetach();
+		//remove any notifications
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+	    mNotificationManager.cancel(Constants.NOTIFICATION_ID);
 		//need to unregister receivers
 		unregisterReceiver(mEnteredWaypointAlertReceiver);
 	}
@@ -154,7 +158,7 @@ public class LocationOnlyService extends Service implements
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeList();
+		mContainer.getPebbleUiController().initializeSegment();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
 		this.sendBroadcast(coordsReadyIntent);
 		
@@ -248,7 +252,7 @@ public class LocationOnlyService extends Service implements
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
 			if (mSegmentWaypointIndex == 1) {
 				// Update pebble when at first waypoint
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 			}
 			if(nextWaypoint == null){
 				
@@ -263,7 +267,7 @@ public class LocationOnlyService extends Service implements
 					sendNextWaypointIntent("");
 					return; //the route has ended
 				}
-				mContainer.getPebbleUiController().initializeList();
+				mContainer.getPebbleUiController().initializeSegment();
 				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
@@ -306,10 +310,14 @@ public class LocationOnlyService extends Service implements
 		
 		//display last notification
 		String msg = OutputLogic.getOutput();                 //TODO: I think we need to add an icon here to make this work. 
+		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
+		
 		Notification noti = new Notification.Builder(mContext)
 				.setContentTitle("Trafficsense Route Tracking")
 				.setContentText(msg)
+				.setSmallIcon(resID)
 				.build();
+		
 		NotificationManager mNotificationManager =(NotificationManager) getSystemService(mContext.NOTIFICATION_SERVICE);
 		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
 		
