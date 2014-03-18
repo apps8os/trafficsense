@@ -133,16 +133,17 @@ public class TimeOnlyService extends Service {
 					mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()
 					).getTime();
 
-			// TODO do not check this at the moment
-			/*
-			if(timeToNextWaypoint < System.currentTimeMillis()) {
-				System.out.println("DBG next waypoint in the past"); Toast
-				toast = Toast.makeText(mContext, "Error:next waypoint is in the past", Toast.LENGTH_SHORT);
-				toast.show(); errorOnStart = true;
+			if (Constants.useWallClock == true
+					&& timeToNextWaypoint < System.currentTimeMillis()) {
+				System.out.println("DBG next waypoint in the past");
+				Toast toast = Toast.makeText(mContext,
+						"Error:next waypoint is in the past",
+						Toast.LENGTH_SHORT);
+				toast.show();
+				errorOnStart = true;
 			} else {
-			*/
-			scheduleNextAlarm(timeToNextWaypoint);
-			//}
+				scheduleNextAlarm(timeToNextWaypoint);
+			}
 		}
 		
 		System.out.println("DBG TimeOnlyService.onStartCommand cp2");
@@ -180,10 +181,12 @@ public class TimeOnlyService extends Service {
 	 * @param atMillis time in milliseconds that the alarm should go off.
 	 */
 	private void scheduleNextAlarm(long atMillis) {
-		// mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
-		// TODO testing use
-		mAM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-				+ Constants.TEST_TIME, mNextWaypointIntent);
+		if (Constants.useWallClock == true) {
+			mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
+		} else {
+			mAM.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+					+ Constants.TEST_TIME, mNextWaypointIntent);
+		}
 	}
 
 	/**
@@ -228,14 +231,19 @@ public class TimeOnlyService extends Service {
 					+ arg1.getAction());
 			String message = "ERROR: No message set in onReceive()";
 
-			// get the next waypointindex
+			/**
+			 * Advance to next waypoint and get its index.
+			 */
 			Waypoint nextWaypoint = mContainer.getRoute().getCurrentSegment()
 					.setNextWaypoint();
-			// if waypoint is null then get the next segment
+			/**
+			 * If nextWaypoint is null then we have finished this Segment.
+			 */
 			if (nextWaypoint == null) {
 				Segment nextSegment = mContainer.getRoute().setNextSegment();
-				// if the nextSegment is null then we have reached the end of
-				// the route
+				/**
+				 * If there is no more Segment remaining we have finished this journey.
+				 */
 				if (nextSegment == null) {
 					message = "Journey ended.";
 					fJourneyEnded = true;
@@ -247,19 +255,28 @@ public class TimeOnlyService extends Service {
 					mContainer.getPebbleUiController().initializeList();
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
-					// TODO: Test with real time
-					// long timeToAlarm =
-					// timeStringToDate(mContainer.getRoute().getDate() +
-					// " "+nextSegment.getWaypointList().get(secondLastWpIndex).getWaypointTime()).getTime();
-					long timeToAlarm = (secondLastWpIndex + 1)
-							* Constants.TEST_TIME + System.currentTimeMillis();
+					long timeToAlarm = 0;
+					if (Constants.useWallClock == true) {
+						timeToAlarm = timeStringToDate(
+								mContainer.getRoute().getDate()
+										+ " "
+										+ nextSegment.getWaypointList()
+												.get(secondLastWpIndex)
+												.getWaypointTime()).getTime();
+					} else {
+						timeToAlarm = (secondLastWpIndex + 1)
+								* Constants.TEST_TIME
+								+ System.currentTimeMillis();
+					}
 					System.out.println("DBG TimeOnlyService scheduling getOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
 				}
 			}
 
+			/**
+			 * Set the alarm for the next waypoint.
+			 */
 			if (nextWaypoint != null) {
-				// set the alarm for the next waypoint
 				mContainer.getPebbleUiController().updateList();
 				long timeToNextWaypoint = timeStringToDate(
 						mContainer.getRoute().getDate() + " "
@@ -270,16 +287,23 @@ public class TimeOnlyService extends Service {
 
 			System.out.println("DBG TimeOnlyService NextWaypointReceiver.onReceive cp");
 
-			// send an Intent to MainActivity
+			/**
+			 * Notify the UI.
+			 */
 			Intent vi = new Intent();
 			vi.putExtra(Constants.ACTION_ROUTE_EVENT_EXTRA_MESSAGE, message);
 			vi.setAction(Constants.ACTION_ROUTE_EVENT);
 			sendBroadcast(vi);
 
+			/**
+			 * Show a Toast. This shows even if the UI is not visible.
+			 */
 			Toast toast = Toast.makeText(mContext, message, Toast.LENGTH_SHORT);
 			toast.show();
 			
-			// stop the service when the journey ends
+			/**
+			 * Stop the service when the journey ends.
+			 */
 			if (fJourneyEnded == true) {
 				((TimeOnlyService)mContext).stopSelf();
 			}
@@ -288,17 +312,18 @@ public class TimeOnlyService extends Service {
 	}
 
 	/**
-	 * Handler for get off events. Vibrate the hand set and send a notification
-	 * to Pebble.
+	 * Handler for get off events.
+	 * Vibrate the hand set and send a notification to Pebble.
+	 * This lives in a Service, so it works without the UI being visible.
 	 */
-	class VibrateAndMakeNotificationReceiver extends BroadcastReceiver {
+	private class VibrateAndMakeNotificationReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG TimeOnlyService received getoffalarm");
 			mContainer.getPebbleUiController().alarmGetOff();
 			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-			vibrator.vibrate(250);
+			vibrator.vibrate(Constants.VIBRATOR_DURATION);
 
 		}
 

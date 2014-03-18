@@ -18,10 +18,12 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.util.JsonReader;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,15 +34,18 @@ public class MainActivity extends Activity {
 	TextView myTextView;
 	String key=null;
 	String request;
+	
+	 SparseArray<Group> groups = new SparseArray<Group>();
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+		/*
 		myButton = (Button) findViewById(R.id.button1);
 		myEditText = (EditText) findViewById(R.id.editText1);
-		myTextView = (TextView) findViewById(R.id.textView2);
-		   	String myString = null;
+		myTextView = (TextView) findViewById(R.id.textView2);*/
+		 String myString = null;
                 try {
 
                     InputStream is = getAssets().open("sample.js");
@@ -59,6 +64,7 @@ public class MainActivity extends Activity {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+				
                 Route route = new Route();
     			Gson gson = new Gson();
     			//System.out.println(myString);
@@ -66,13 +72,23 @@ public class MainActivity extends Activity {
     			JsonObject json = (JsonObject) parser.parse(myString);
     			//System.out.println(json.toString());
     			route.setRoute(json);
-    			//System.out.println(gson.toJson(route));
-            }
-           
-       
-		
-		
-	
+    			System.out.println(gson.toJson(route));
+            
+    		    //createData();
+    		    ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
+    		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
+    		    listView.setAdapter(adapter);
+    		  }
+
+    		  public void createData() {
+    		    for (int j = 0; j < 5; j++) {
+    		      Group group = new Group("Test " + j);
+    		      for (int i = 0; i < 5; i++) {
+    		        group.children.add("Sub Item" + i);
+    		      }
+    		      groups.append(j, group);
+    		    }
+    		  }
 	
 
 	@Override

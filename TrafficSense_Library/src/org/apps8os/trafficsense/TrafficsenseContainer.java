@@ -75,9 +75,9 @@ public class TrafficsenseContainer {
 	 */
 	private volatile String mJourneyText;
 	/**
-	 * An instance of plain text to JSON parser.
+	 * Last parsed journey as Gson JsonObject.
 	 */
-	private JourneyParser mJourneyParser;
+	private volatile JsonObject mJourneyJsonObject;
 	/**
 	 * Number of attached Activity.
 	 * @see #activityAttach(Context)
@@ -241,6 +241,38 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
+	 * Whether at least one journey tracker service is active.
+	 * 
+	 * @return true if at least one journey tracker service is active.
+	 */
+	public boolean isJourneyStarted() {
+		synchronized (this) {
+			if (mRunningServices > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
+	 * Stop following current journey.
+	 * Stops all running tracker services.
+	 * Does not reset current progress in mRoute.
+	 */
+	public void stopJourney() {
+		Intent serviceIntent;
+		synchronized (this) {
+			if (mRunningServices == 0) {
+				return;
+			}
+		}
+		serviceIntent = new Intent(mContext, TimeOnlyService.class);
+		mContext.stopService(serviceIntent);
+		serviceIntent = new Intent(mContext, LocationOnlyService.class);
+		mContext.stopService(serviceIntent);
+		// TODO: add some code here if a new Service is introduced.
+	}
+	
+	/**
 	 * Initialized the singleton.
 	 * Starts ContextLogger, Pebble communication and Pebble app.
 	 * Must invoke {@link #close()} afterwards to release resources.
@@ -259,7 +291,8 @@ public class TrafficsenseContainer {
 		mPebbleCommunication = new PebbleCommunication(mContext);
 		mPebbleCommunication.startAppOnPebble();
 		
-		mJourneyParser = new JourneyParser();
+		mJourneyText = null;
+		mJourneyJsonObject = null;
 		mRoute = new Route();
 	}
 	
@@ -272,13 +305,13 @@ public class TrafficsenseContainer {
 	private void close() {
 		System.out.println("DBG Container close");
 		// Stop ContextLogger3
-		mCtxLogFunfManager.disablePipeline(CTXLOG_PIPELINE_NAME);
+		mCtxLogFunfManager.disablePipeline(CTXLOG_PIPELINE_NAME); //ATT: throws null pointer error occasionally
 		mContext.unbindService(mCtxLogFunfManagerConn);
 		
 		mPebbleCommunication.stop();
 		mPebbleCommunication = null;
 		mJourneyText = null;
-		mJourneyParser = null;
+		mJourneyJsonObject = null;
 		mRoute = null;
 		mContext = null;
 		
@@ -290,8 +323,14 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Start the journey tracker.
+	 * Retrieve and start following a journey in a separate Thread.
+	 * 
+	 * Retrieves a journey from an e-mail account.
+	 * GPS coordinates are retrieved if the desired service is location-based.
+	 * Then starts the specified tracker service for the journey.
 	 * This is expected to be invoked from an Activity.
+	 * Starts a new Thread in order to keep working in case the calling
+	 * Activity becomes invisible before the service is started.
 	 * 
 	 * @param serviceType type of journey tracker service desired.
 	 * @param credential account details for accessing mailbox.
@@ -300,16 +339,17 @@ public class TrafficsenseContainer {
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
 		new Thread(new Runnable() {
 			public void run() {
-				/**
-				 * This keeps our work running in case the calling Activity becomes
-				 * invisible before the services is started.
-				 */
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
 				parseJourney();
+				System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
 				if (serviceType != Constants.SERVICE_TIME_ONLY) {
-					// TODO: check its return value!
-					retrieveCoordinatesForStopsBlockingPart();
+					/**
+					 * TODO: Check its return value!
+					 * false is returned on error.
+					 * Maybe send an Intent?
+					 */
+					retrieveCoordinatesForStopsBlockingPart(mRoute);
 				}
 				startTrackerService(serviceType);
 				activityDetach();
@@ -330,8 +370,15 @@ public class TrafficsenseContainer {
 	public void startTrackerService(int serviceType) {
 		Intent serviceIntent = null;
 		
+		if (mRoute == null) {
+			System.out.println("DBG startTrackerService: route not set");
+			return;
+		}
+		/**
+		 * TODO: Currently only one service at a time is allowed.
+		 */
 		if (mRunningServices != 0) {
-			System.out.println("DBG startLocationOnly: trying to start multiple services?");
+			System.out.println("DBG startTrackerService: trying to start multiple services?");
 			return;
 		}
 		switch (serviceType) {
@@ -353,10 +400,9 @@ public class TrafficsenseContainer {
 		 * Bind Pebble UI controller to the communication channel.
 		 */
 		mPebbleUi = new PebbleUiController(mPebbleCommunication, mRoute);
-		
 		mContext.startService(serviceIntent);
 	}
-
+	
 	/**
 	 * Retrieve the journey text from the last message in the inbox of the given account.
 	 * This method perform possibly long network operations.
@@ -395,6 +441,9 @@ public class TrafficsenseContainer {
 	 * Retrieves a journey in plain text from the given e-mail account.
 	 * The result is stored in {@link #mJourneyText}.
 	 * May optionally update an UI element after completion.
+	 * 
+	 * Currently it is the last mail in inbox.
+	 * @see #retrieveJourneyBlockingPart(EmailCredential)
 	 *  
 	 * @param credential e-mail account to be accessed. 
 	 * @param update UI element to be updated. (optional)
@@ -423,17 +472,17 @@ public class TrafficsenseContainer {
 	 * 
 	 * @return true on success, false otherwise.
 	 */
-	public boolean retrieveCoordinatesForStopsBlockingPart() {
-		if (mRoute == null) {
+	public static boolean retrieveCoordinatesForStopsBlockingPart(Route route) {
+		if (route == null) {
 			// TODO error handling ?
 			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
 			return false;
 		}
 		JourneyInfoResolver resolver = new JourneyInfoResolver();
 		/**
-		 * Access HSL api to retrieve GPS coordinates for each Waypoint (if stopCode is available).
+		 * Access HSL API to retrieve GPS coordinates for each Waypoint (if stopCode is available).
 		 */
-		if (resolver.retrieveCoordinatesFromHsl(mRoute) == false) {
+		if (resolver.retrieveCoordinatesFromHsl(route) == false) {
 			// TODO: error handling.
 			return false;
 		}
@@ -442,7 +491,8 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Return the plain text journey.
+	 * Return current plain text journey.
+	 * May return null if there is none, or empty string if error.
 	 * 
 	 * @return journey in plain text.
 	 */
@@ -452,6 +502,7 @@ public class TrafficsenseContainer {
 	
 	/**
 	 * Assign a string as the plain text journey.
+	 * 
 	 * @param journey the journey in plain text with line breaks.
 	 * @see #mJourneyText
 	 */
@@ -467,36 +518,23 @@ public class TrafficsenseContainer {
 		if (mJourneyText == null) {
 			return;
 		}
-		mJourneyParser.parseString(mJourneyText);
-		mRoute.setRoute(getJourneyObject());
+		JourneyParser parser = new JourneyParser();
+		parser.parseString(mJourneyText);
+		mJourneyJsonObject = parser.getJsonObj();
+		mRoute.setRoute(parser.getJsonObj());
 	}
 	
 	/**
 	 * Return current journey as a Gson JsonObject.
 	 * Must call {@link #parseJourney()} before this.
+	 * May return null if there is none.
 	 * 
 	 * @return the journey.
 	 */
 	public JsonObject getJourneyObject() {
-		return mJourneyParser.getJsonObj();
-	}
-	
-	/**
-	 * (Debug Only) Launch time-based journey tracker.
-	 * @deprecated use {@link #startTrackerService(int)}
-	 */
-	public void startTimeOnlyService() {
-		startTrackerService(Constants.SERVICE_TIME_ONLY);
+		return mJourneyJsonObject;
 	}
 
-	/**
-	 * (Debug Only) Launch location-based journey tracker.
-	 * @deprecated use {@link #startTrackerService(int)}
-	 */
-	public void startLocationOnlyService() {
-		startTrackerService(Constants.SERVICE_LOCATION_ONLY);
-	}
-	
 	/**
 	 * Assign a Pebble UI Controller object for use.
 	 * 

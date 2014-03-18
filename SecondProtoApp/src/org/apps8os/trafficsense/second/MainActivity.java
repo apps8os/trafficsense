@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.core.OutputLogic;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,6 +40,7 @@ public class MainActivity extends Activity {
 	
 	TrafficsenseContainer mContainer;
 	GoogleMap map;
+	Menu mMenu;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +79,8 @@ public class MainActivity extends Activity {
 	public void onPause() {
 		unregisterReceiver(mCoordsReadyReceiver);
 		unregisterReceiver(mWaypointChangedReceiver);
-		super.onPause();
 		mContainer.activityDetach();
+		super.onPause();
 	}
 	
 
@@ -88,24 +91,56 @@ public class MainActivity extends Activity {
 	    inflater.inflate(R.menu.main_activity_action, menu);
 	    return super.onCreateOptionsMenu(menu);
 	}
+	
+	public boolean onPrepareOptionsMenu(Menu menu){
+
+		super.onPrepareOptionsMenu(menu);
+		MenuItem start = menu.findItem(R.id.menu_start_journey);
+		MenuItem stop = menu.findItem(R.id.menu_stop_journey);
+		if(mContainer.isJourneyStarted() == true){
+			start.setVisible(false);
+			stop.setVisible(true);
+		}
+		else{
+			start.setVisible(true);
+			stop.setVisible(false);
+		}
+		return(true);
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
 	    // Handle presses on the action bar items
 	    switch (item.getItemId()) {
 	        case R.id.menu_start_journey:
-	            startJourney();
+	            item.setActionView(R.layout.progressbar); 
+	            item.expandActionView();
+	        	startJourney();
 	            return true;
+	        case R.id.menu_stop_journey:
+	        	stopJourney();
+	            invalidateOptionsMenu();
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
 	
+	/**
+	 * Starts the journey.
+	 */
 	private void startJourney(){
 		//TODO: check for network connectivity
         EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
 		
+	}
+	
+	/**
+	 * Stops the journey.
+	 */
+	private void stopJourney(){
+		mContainer.stopJourney();
 	}
 	
 	private void showList(String[] messages){
@@ -117,87 +152,77 @@ public class MainActivity extends Activity {
 		 }
 		 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		 listview.setAdapter(adapter);
-		 listview.setVisibility(View.VISIBLE);
+		 listview.setVisibility(View.VISIBLE); 
 	}
 	
+	/**
+	 * draws the route on the map using lines that dont follow roads. Also zooms to first waypoint with location. 
+	 */
 	public void drawRoute() {
+		map.clear();
 		Route r = mContainer.getRoute();
+		boolean zoomed = false;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
 		for (Segment s : r.getSegmentList()) {
 			if (s.isWalking()) {
 				// Don't draw walking segments because they don't have coordinates
 				continue;
 			}
+			
 			for (Waypoint w : s.getWaypointList()) {
 				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
 					continue;
 				}
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
+				
 				o.add(coord);
+				
+				if(zoomed == false){
+					centerLocationOnMap(coord);
+					zoomed = true;
+				}
 			}
 		}
 		map.addPolyline(o);
 	}
 	
+	/**
+	 * centers the map on a location
+	 */
+	public void centerLocationOnMap(LatLng location){
+		map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
+	}
+	
+	/**
+	 * Class that receives an intent when all the coordinates have been loaded
+	 * @author traffisense
+	 *
+	 */
 	class CoordsReadyReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context arg0, Intent intent) {
+            invalidateOptionsMenu();
 			drawRoute();
 			
 		}
-		
-		
 	}
 	
+	/**
+	 * Class that receives an intent when current waypoint has changed. 
+	 * @author traffisense
+	 *
+	 */
 	class WaypointChanged extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG: Main activity: Waypoint changed");
-			Segment curSegment = mContainer.getRoute().getCurrentSegment();
-			int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
-			int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
-			List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
-			
-			if(curSegmentIndex ==-1 & curWaypointIndex==-1){
-				String message[] = {"Congratulations. You reached your destination"};
-				showList(message);
-			}
-			
-			//if the next stop is the last stop on a segment
-			if(curWaypointIndex == waypointList.size()-1){
-				String message[] = {"Get off at next stop"};
-				showList(message);
-			}
-			
-			//if the current segment is a walking one
-			if(curSegment.isWalking() == false){
-				String message[] = {"Walk to next stop"}; 
-				showList(message);
-			}
-			
-			
-			//if the next stop
-			if(curWaypointIndex == 1){
-				if(curWaypointIndex == 1 && curSegment.isWalking() == false){
-					String transportId = curSegment.getSegmentMode();
-					String destination = curSegment.getLastWaypoint().getWaypointName();
-					String message[] = new String[1];
-					if(transportId.equals("metro")){
-						message[0] = "Take metro to "+ destination;
-					}
-					else if(transportId.length() == 1){
-						message[0] = "Take " + transportId+ " train to "+ destination;
-					}
-					else{
-						message[0]= "Take bus " + transportId + " to " + destination;
-					}
-					showList(message);
-				}		
-			}
-		
+			String msg[] = {OutputLogic.getOutput()};
+			showList(msg);
 		}
+		
+		
 		
 	
 	}
