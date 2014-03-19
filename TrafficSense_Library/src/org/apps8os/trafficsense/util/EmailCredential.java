@@ -12,6 +12,10 @@ public class EmailCredential {
 	 * Password for this account.
 	 */
 	private String mPassword;
+	/**
+	 * IMAP server for this account.
+	 */
+	private String mImapServer;
 	
 	/**
 	 * Constructor.
@@ -19,17 +23,21 @@ public class EmailCredential {
 	public EmailCredential() {
 		mAddress = "";
 		mPassword = "";
+		mImapServer = "";
 	}
 	
 	/**
-	 * Instantiate this class with supplied e-mail address and password.
+	 * Instantiate this class with supplied information.
+	 * The IMAP server must support IMAP over SSL (imaps).
 	 * 
 	 * @param address e-mail address.
 	 * @param password password for the account.
+	 * @param imapServer IMAP server for the account.
 	 */
-	public EmailCredential(String address, String password) {
+	public EmailCredential(String address, String password, String imapServer) {
 		mAddress = address;
 		mPassword = password;
+		mImapServer = imapServer;
 	}
 	
 	/**
@@ -66,5 +74,19 @@ public class EmailCredential {
 	 */
 	public void setPassword(String password) {
 		mPassword = password;
+	}
+	
+	public String getImapServer() {
+		return mImapServer;
+	}
+	
+	/**
+	 * Assign the given IMAP server.
+	 * Must support IMAP over SSL (imaps).
+	 * 
+	 * @param imapServer IMAP server.
+	 */
+	public void setImapServer(String imapServer) {
+		mImapServer = imapServer;
 	}
 }

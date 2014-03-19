@@ -8,10 +8,10 @@ import org.apps8os.trafficsense.pebble.PebbleCommunication;
 import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.EmailCredential;
-import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.EmailReader;
 import org.apps8os.trafficsense.util.JourneyInfoResolver;
 import org.apps8os.trafficsense.util.JourneyParser;
-import org.apps8os.trafficsense.util.GmailReader.EmailException;
+import org.apps8os.trafficsense.util.EmailReader.EmailException;
 
 import com.google.gson.JsonObject;
 
@@ -415,10 +415,10 @@ public class TrafficsenseContainer {
 	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
 		String journeyText = null;
 		Email email = null;
-		GmailReader reader = new GmailReader();
+		EmailReader reader = new EmailReader();
 
 		try {
-			reader.initMailbox(credential.getAddress(), credential.getPassword());
+			reader.initMailbox(credential);
 			/**
 			 * The first invocation gets the last (newest) message.
 			 */
