@@ -43,6 +43,8 @@ public class PebbleCommunication {
 	private static final int KEY_START_TIME_HOUR = 4;
 	private static final int KEY_START_TIME_MIN = 5;
 	private static final int KEY_START_TIME_SEC = 6;
+	
+	private static final int COMMAND_SHOW_3STOP_WINDOW = 3;
 	//private static final int MAX_DICT_SIZE = 124;
 	public static final int NUM_STOPS = 3;
 
@@ -88,6 +90,23 @@ public class PebbleCommunication {
 		mMessageManagerThread.start();
 		registerReceivers();
 		PebbleKit.startAppOnPebble(mContext, APP_UUID);
+	}
+	
+	/**
+	 * Swithches the screen shown in pebble to the 3 stop list
+	 */
+	public void switchTo3stopScreen() {
+		PebbleDictionary dictionary = new PebbleDictionary();
+		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_SHOW_3STOP_WINDOW);
+		/**
+		 * En-queue this message to MessageHandler.
+		 */
+		if (messageManager.offer(dictionary) == false) {
+			System.out.println("DBG PebbleCommunicaitonswitchTo3stopScreen error: " +
+					"could not offer dictionary");
+		} else {
+			System.out.println("DBG PebbleCommunication switchTo3stopScreen() success");
+		}
 	}
 
 	/**
@@ -186,6 +205,8 @@ public class PebbleCommunication {
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_INIT_SEGMENT);
 		dictionary.addString(KEY_LINE_NUMBER, line);
+		dictionary.addString(KEY_FIRST_STOP_NAME, stopName);
+		dictionary.addString(KEY_FIRST_STOP_CODE, stopCode);
 		dictionary.addUint8(KEY_START_TIME_HOUR, (byte) hours);
 		dictionary.addUint8(KEY_START_TIME_MIN, (byte) minutes);
 		dictionary.addUint8(KEY_START_TIME_SEC, (byte) seconds); 

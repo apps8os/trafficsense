@@ -15,11 +15,15 @@ import org.apps8os.trafficsense.core.Waypoint;
  * Class for Pebble user interface controller.
  */
 public class PebbleUiController {
+	private static final int WINDOW_BASIC = 0;
+	private static final int WINDOW_3STOP = 1;
+	
 	private PebbleCommunication mPblCom;
 	private Route mRoute;
 	// Store the last segment and wp indices sent to Pebble
 	private int mLastSegmentIndex;
 	private int mLastWpIndex;
+	
 
 	/**
 	 * Constructor.
@@ -28,16 +32,19 @@ public class PebbleUiController {
 	 * @param route route object to use.
 	 */
 	public PebbleUiController(PebbleCommunication comm, Route route) {
+		mLastSegmentIndex = -1;
+		mLastWpIndex = 0;
 		mPblCom = comm;
 		mRoute = route;
 	}
 	
-	/*
+	/**
 	 * Call this whenever anything needs to be updated in Pebble
 	 */
 	public void update() {
 		int newSegmentIndex = mRoute.getCurrentIndex();
 		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
+		System.out.println("DBG PebbleUiController update() segment: " + newSegmentIndex + " waypoint: " + newWpIndex);
 		Segment newSegment = mRoute.getCurrentSegment();
 		Waypoint newWaypoint = newSegment.getCurrentWaypoint();
 		
@@ -53,24 +60,19 @@ public class PebbleUiController {
 				// We've jumped over a wp, so update the whole list
 				alarmIfNeeded();
 				updateList();
+				mPblCom.switchTo3stopScreen();
 			}
 		} else {
 			// Segment has changed
-			if (newWpIndex == 0) {
-				// Find the first non-walking segment (don't care about walking segments)
-				for (int i = newSegmentIndex; i < mRoute.getSegmentList().size(); i++) {
-					Segment seg = mRoute.getSegmentList().get(i);
-					if (seg.isWalking() == false) {
-						// When the first non-walking segment is found, initialize it on Pebble and stop the loop
-						initializeSegment();
-						break;
-					}
-				}
+			if (newWpIndex == 1 || newSegment.isWalking()) {
+				// We are on the first waypoint (or on a walking segment), so initialize the segment
+				initializeSegment();
 			} else {
 				/* Segment changed, but we've jumped over it's first waypoint,
 				 * so don't use initializeSegment
 				 */
 				updateList();
+				mPblCom.switchTo3stopScreen();
 			}
 		}
 		// Update the segment indices before returning. Don't return from this method before this!
@@ -78,7 +80,7 @@ public class PebbleUiController {
 		mLastWpIndex = newWpIndex;
 	}
 	
-	/*
+	/**
 	 * Send an alarm if we are on the second last stop
 	 */
 	private void alarmIfNeeded() {
@@ -98,10 +100,20 @@ public class PebbleUiController {
 	 * that tells how many minutes until the vehicles comes.
 	 * Should be only used when we are at the first wp of a non-walking segment.
 	 */
-	public void initializeSegment() {
-		Segment currentSegment = mRoute.getCurrentSegment();
-		// Don't do anything if the segment is walking
-		if (currentSegment.isWalking()) return;
+	private void initializeSegment() {
+		Segment currentSegment = null;
+		// Find the first non-walking segment (don't care about walking segments)
+		for (int i = mRoute.getCurrentIndex(); i < mRoute.getSegmentList().size(); i++) {
+			Segment seg = mRoute.getSegmentList().get(i);
+			if (seg.isWalking() == false) {
+				// When the first non-walking segment is found, initialize it on Pebble and stop the loop
+				currentSegment = seg;
+				break;
+			}
+		}
+		
+		// If there are no non-walking segments left, don't do anything
+		if (currentSegment == null) return;
 		
 		String segmentMode = currentSegment.getSegmentMode();
 		
@@ -124,6 +136,9 @@ public class PebbleUiController {
 		updateList();
 	}
 	
+	/**
+	 * Updates all stops shown in the 3stop list
+	 */
 	private void updateList() {
 		Segment currentSegment = mRoute.getCurrentSegment();
 		int currentWpIndex = currentSegment.getCurrentIndex();
@@ -164,12 +179,13 @@ public class PebbleUiController {
 			waypoint = mRoute.getCurrentSegment().getWaypoint(newWaypoint);
 		}
 		mPblCom.updateList(waypoint);
+		mPblCom.switchTo3stopScreen();
 	}
 
 	/**
 	 * Triggers a 'Get off' alarm on Pebble.
 	 */
-	public void alarmGetOff() {
+	private void alarmGetOff() {
 		mPblCom.sendMessage("Alarm", "Get off on the next stop!");
 	}
 	

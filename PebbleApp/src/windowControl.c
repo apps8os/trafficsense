@@ -1,6 +1,7 @@
 #include "windowControl.h"
 
 Window* windowArray[NUM_WINDOWS]; // Array of all windows
+// TODO: maybe just check the currently active window from the window stack
 int currentWindow; // Currently active window
 Window* alarmWindow;
 TextLayer* alarmText;
@@ -112,7 +113,7 @@ void show_basic_window() {
 }
 
 void show_3stop_window() {
-  if (currentWindow != WINDOW_3STOP) {
+  if (1){//currentWindow != WINDOW_3STOP) {
     currentWindow = WINDOW_3STOP;
     window_stack_pop(true); // Remove basic window from the'window stack
     window_stack_push(windowArray[WINDOW_3STOP], true); // Push the 3stop window (show it)

@@ -48,6 +48,8 @@ void init_stopArray() {
 void init(void) {
   //Initializes the app, called when the app is started, in main()
   strncpy(currentLineCode, "280", LINE_CODE_LENGTH-1);
+  strncpy(firstStopName, "Some stop2", STOP_NAME_LENGTH-1);
+  strncpy(firstStopCode, "1235", STOP_CODE_LENGTH-1);
   init_stopArray();
   init_windows();
   init_app_message();
