@@ -22,7 +22,7 @@ public class OutputLogic {
 		int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
 		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
 		
-		if(curSegmentIndex ==-1 & curWaypointIndex==-1){
+		if(mContainer.getRoute().isJourneyEnded()==true){
 			String message = "Congratulations. You reached your destination";
 			return(message);
 		}
@@ -58,4 +58,6 @@ public class OutputLogic {
 		
 		return("");
 	}
+	
+	
 }

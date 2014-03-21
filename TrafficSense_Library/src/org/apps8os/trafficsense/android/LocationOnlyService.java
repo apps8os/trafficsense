@@ -84,6 +84,7 @@ public class LocationOnlyService extends Service implements
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//successfully connecting to the client also adds all the geofences
 		// TODO: should check return value!!
+
 		mContainer.serviceAttach(getApplicationContext());
 		mLocationClient.connect();
 		// TODO: check that we can indeed handle service restart.
@@ -147,7 +148,6 @@ public class LocationOnlyService extends Service implements
 			.build();
 	}
 	
-
 	
 	@Override
 	/**
@@ -176,7 +176,6 @@ public class LocationOnlyService extends Service implements
 			if(currentSegment == null){
 				break;
 			}
-			//TODO: check if the segment is a walking segment and if it is only set the last waypoint in it 
 			
 			//skip the first waypoint because it it also the last one in the last segment
 			for(int waypointIndex=0;;waypointIndex++){
@@ -254,15 +253,17 @@ public class LocationOnlyService extends Service implements
 				// Update pebble when at first waypoint
 				mContainer.getPebbleUiController().initializeSegment();
 			}
+			//segment had ended
 			if(nextWaypoint == null){
 				
 				mRouteSegmentIndex++;
 				currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 				
-				
+				//journey has ended
 				if(currentSegment==null){
 					mRouteSegmentIndex=-1;
 					mSegmentWaypointIndex=-1;
+					mContainer.getRoute().setJourneyEnded(true);
 					//inform clients that waypoint has changed
 					sendNextWaypointIntent("");
 					return; //the route has ended
@@ -309,7 +310,7 @@ public class LocationOnlyService extends Service implements
 	protected void makeNotificationAndAlert(){
 		
 		//display last notification
-		String msg = OutputLogic.getOutput();                 //TODO: I think we need to add an icon here to make this work. 
+		String msg = OutputLogic.getOutput();             
 		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
 		
 		Notification noti = new Notification.Builder(mContext)

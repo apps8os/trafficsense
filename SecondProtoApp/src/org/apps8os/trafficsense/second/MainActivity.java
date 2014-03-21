@@ -63,6 +63,7 @@ public class MainActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+        invalidateOptionsMenu();
 		mContainer.activityAttach(getApplicationContext());
 		registerReceiver(mCoordsReadyReceiver, new IntentFilter(Constants.ACTION_COORDS_READY));
 		registerReceiver(mWaypointChangedReceiver, new IntentFilter(Constants.ACTION_ROUTE_EVENT));

@@ -2,6 +2,7 @@ package org.apps8os.trafficsense;
 
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.android.LocationOnlyService;
+import org.apps8os.trafficsense.android.LocationService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
@@ -269,6 +270,8 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
+		serviceIntent = new Intent(mContext, LocationService.class);
+		mContext.stopService(serviceIntent);
 		// TODO: add some code here if a new Service is introduced.
 	}
 	
@@ -387,6 +390,9 @@ public class TrafficsenseContainer {
 			break;
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
+			break;
+		case Constants.LOCATION_SERVICE:
+			serviceIntent = new Intent(mContext, LocationService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
