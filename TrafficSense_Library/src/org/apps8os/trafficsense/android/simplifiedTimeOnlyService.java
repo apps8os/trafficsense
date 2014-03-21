@@ -125,7 +125,8 @@ public class simplifiedTimeOnlyService extends Service {
 			errorOnStart = true;
 		} else {
 			System.out.println("DBG TimeOnlyService.onStartCommand cp1");
-			mContainer.getPebbleUiController().initializeList();
+			// TODO: check
+			mContainer.getPebbleUiController().update();
 
 			registerReceiver(mNextWaypointReceiver, new IntentFilter(
 					Constants.ACTION_NEXT_WAYPOINT));
@@ -246,7 +247,8 @@ public class simplifiedTimeOnlyService extends Service {
 					nextWaypoint = nextSegment.setNextWaypoint(0);
 					if (mContainer.getPebbleUiController() == null)
 						System.out.println("DBG SIMP_TM_SERV PebbleUIController is null");
-					mContainer.getPebbleUiController().initializeList();
+					// TODO: check
+					mContainer.getPebbleUiController().update();
 
 				}
 			}
@@ -255,7 +257,8 @@ public class simplifiedTimeOnlyService extends Service {
 			 * Set the alarm for the next waypoint.
 			 */
 			if (nextWaypoint != null) {
-				mContainer.getPebbleUiController().updateList();
+				// TODO: check
+				mContainer.getPebbleUiController().update();
 				long timeToNextWaypoint = timeStringToDate(mContainer.getRoute().getDate() + " "+ nextWaypoint.getWaypointTime()).getTime();
 				scheduleNextAlarm(timeToNextWaypoint+mOffset);
 				System.out.println("DBG SimpTmServ: Next waypoint is: " + nextWaypoint.getWaypointName());

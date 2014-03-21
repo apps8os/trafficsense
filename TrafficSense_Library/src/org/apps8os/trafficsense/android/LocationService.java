@@ -101,7 +101,8 @@ public class LocationService extends Service implements
 		System.out.println("DBG: Location manager connected");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeSegment();
+		// TODO: check
+		mContainer.getPebbleUiController().update();
 	}
 	
 	/**
@@ -234,7 +235,8 @@ public class LocationService extends Service implements
 		}
 		timeOnlyServiceStarted = true;
 		if (mContainer.getRoute().isJourneyEnded() == false) {
-			mContainer.getPebbleUiController().updateList();
+			// TODO: check
+			mContainer.getPebbleUiController().update();
 			long timeToNextWaypoint = timeStringToDate(mContainer.getRoute().getDate() + " "+ mContainer.getRoute()
 									.getCurrentSegment().getCurrentWaypoint().getWaypointTime()).getTime();
 			
@@ -365,7 +367,8 @@ public class LocationService extends Service implements
 			 * Set the alarm for the next waypoint.
 			 */
 			if (mContainer.getRoute().isJourneyEnded() == false) {
-				mContainer.getPebbleUiController().updateList();
+				// TODO: check
+				mContainer.getPebbleUiController().update();
 				long timeToNextWaypoint = timeStringToDate(mContainer.getRoute().getDate() + " "+ mContainer.getRoute()
 										.getCurrentSegment().getCurrentWaypoint().getWaypointTime()).getTime();
 				
