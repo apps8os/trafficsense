@@ -2,6 +2,9 @@
 
 Stop stopArray[NUM_STOPS];
 char currentLineCode[LINE_CODE_LENGTH];
+char firstStopName[STOP_NAME_LENGTH];
+char firstStopCode[STOP_CODE_LENGTH];
+
 TimeOfDay startTime = {23, 59, 59}; // 23:59:59 for testing purpose
 
 TimeOfDay getCurrentTime() {

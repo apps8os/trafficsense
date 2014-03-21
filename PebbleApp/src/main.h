@@ -29,6 +29,8 @@ struct TimeOfDay {
 extern Stop stopArray[NUM_STOPS];
 // Code of the current public transport line of the current segment
 extern char currentLineCode[LINE_CODE_LENGTH];
+extern char firstStopName[STOP_NAME_LENGTH];
+extern char firstStopCode[STOP_CODE_LENGTH];
 extern TimeOfDay startTime; // Time when vehicle leaves the first stop
 
 // Get time to start of segment

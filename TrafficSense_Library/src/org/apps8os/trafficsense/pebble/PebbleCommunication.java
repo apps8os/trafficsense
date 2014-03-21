@@ -38,9 +38,11 @@ public class PebbleCommunication {
 	
 	private static final int COMMAND_INIT_SEGMENT = 2;
 	private static final int KEY_LINE_NUMBER = 1;
-	private static final int KEY_START_TIME_HOUR = 2;
-	private static final int KEY_START_TIME_MIN = 3;
-	private static final int KEY_START_TIME_SEC = 4;
+	private static final int KEY_FIRST_STOP_NAME = 2; // Don't confuse with KEY_STOP_NAME and -_CODE1
+	private static final int KEY_FIRST_STOP_CODE = 3;
+	private static final int KEY_START_TIME_HOUR = 4;
+	private static final int KEY_START_TIME_MIN = 5;
+	private static final int KEY_START_TIME_SEC = 6;
 	//private static final int MAX_DICT_SIZE = 124;
 	public static final int NUM_STOPS = 3;
 
@@ -180,7 +182,7 @@ public class PebbleCommunication {
 	 *  Parameters: line = transport line e.g. 550, hours = hours of day, 
 	 *  minutes = minutes of hour...
 	 */
-	public void initializeSegment(String line, int hours, int minutes, int seconds) {
+	public void initializeSegment(String line, String stopName, String stopCode, int hours, int minutes, int seconds) {
 		PebbleDictionary dictionary = new PebbleDictionary();
 		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_INIT_SEGMENT);
 		dictionary.addString(KEY_LINE_NUMBER, line);
