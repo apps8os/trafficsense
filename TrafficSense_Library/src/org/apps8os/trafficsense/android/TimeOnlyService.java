@@ -120,7 +120,7 @@ public class TimeOnlyService extends Service {
 			errorOnStart = true;
 		} else {
 			System.out.println("DBG TimeOnlyService.onStartCommand cp1");
-			mContainer.getPebbleUiController().initializeList();
+			mContainer.getPebbleUiController().update();
 
 			registerReceiver(mNextWaypointReceiver, new IntentFilter(
 					Constants.ACTION_NEXT_WAYPOINT));
@@ -252,7 +252,6 @@ public class TimeOnlyService extends Service {
 					nextWaypoint = nextSegment.getCurrentWaypoint();
 					if (mContainer.getPebbleUiController() == null)
 						System.out.println("DBG TimeOnlyService uicontroller is null");
-					mContainer.getPebbleUiController().initializeList();
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
 					long timeToAlarm = 0;
@@ -277,7 +276,6 @@ public class TimeOnlyService extends Service {
 			 * Set the alarm for the next waypoint.
 			 */
 			if (nextWaypoint != null) {
-				mContainer.getPebbleUiController().updateList();
 				long timeToNextWaypoint = timeStringToDate(
 						mContainer.getRoute().getDate() + " "
 								+ nextWaypoint.getWaypointTime()).getTime();
@@ -307,6 +305,9 @@ public class TimeOnlyService extends Service {
 			if (fJourneyEnded == true) {
 				((TimeOnlyService)mContext).stopSelf();
 			}
+			
+			// Update pebble UI
+			mContainer.getPebbleUiController().update();
 		}
 
 	}
@@ -321,7 +322,6 @@ public class TimeOnlyService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			System.out.println("DBG TimeOnlyService received getoffalarm");
-			mContainer.getPebbleUiController().alarmGetOff();
 			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			vibrator.vibrate(Constants.VIBRATOR_DURATION);
 

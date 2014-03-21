@@ -1,6 +1,7 @@
 #include "windowControl.h"
 
 Window* windowArray[NUM_WINDOWS]; // Array of all windows
+// TODO: maybe just check the currently active window from the window stack
 int currentWindow; // Currently active window
 Window* alarmWindow;
 TextLayer* alarmText;
@@ -71,6 +72,10 @@ void set_time_text_by_unit(int unit) {
 }
 
 void basic_window_loop() {
+  if (window_stack_get_top_window() != windowArray[WINDOW_BASIC]) {
+    return; // If the window is not shown, stop the loop
+    // It is possible that we want to show the 3stop window early, so we need to check this
+  }
   uint32_t timeout_ms;
   TimeOfDay timeToStart = getTimeToStart();
   if (timeToStart.hours < 1) {
@@ -96,9 +101,9 @@ void basic_window_loop() {
 void show_basic_window() {
   // TODO: Make sure the buffer size is enough
   stopCodeAndNameBuff[0] = '\0';
-  strncat(stopCodeAndNameBuff, stopArray[0].code, 30);
+  strncat(stopCodeAndNameBuff, firstStopCode, 30);
   strncat(stopCodeAndNameBuff, " ", 30);
-  strncat(stopCodeAndNameBuff, stopArray[0].name, 30);
+  strncat(stopCodeAndNameBuff, firstStopName, 30);
   text_layer_set_text(stopCodeAndName, stopCodeAndNameBuff); // Set the text of the stop
   text_layer_set_text(lineCode, currentLineCode);
   currentWindow = WINDOW_BASIC;
@@ -108,7 +113,7 @@ void show_basic_window() {
 }
 
 void show_3stop_window() {
-  if (currentWindow != WINDOW_3STOP) {
+  if (1){//currentWindow != WINDOW_3STOP) {
     currentWindow = WINDOW_3STOP;
     window_stack_pop(true); // Remove basic window from the'window stack
     window_stack_push(windowArray[WINDOW_3STOP], true); // Push the 3stop window (show it)

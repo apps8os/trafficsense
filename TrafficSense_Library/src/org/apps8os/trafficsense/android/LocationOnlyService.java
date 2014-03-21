@@ -158,7 +158,8 @@ public class LocationOnlyService extends Service implements
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeSegment();
+		// TODO: start the pebble app here (not before)
+		mContainer.getPebbleUiController().update();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
 		this.sendBroadcast(coordsReadyIntent);
 		
@@ -249,11 +250,14 @@ public class LocationOnlyService extends Service implements
 			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+<<<<<<< HEAD
 			if (mSegmentWaypointIndex == 1) {
 				// Update pebble when at first waypoint
 				mContainer.getPebbleUiController().initializeSegment();
 			}
 			//segment had ended
+=======
+>>>>>>> 8840792246686078aa8eda82d0973239d4b7f2b3
 			if(nextWaypoint == null){
 				
 				mRouteSegmentIndex++;
@@ -268,15 +272,11 @@ public class LocationOnlyService extends Service implements
 					sendNextWaypointIntent("");
 					return; //the route has ended
 				}
-				mContainer.getPebbleUiController().initializeSegment();
-				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
-			} else {
-				// If we are not at the last waypoint, only update the list on pebble
-				mContainer.getPebbleUiController().updateList();
 			}
-
+			// Update the pebble UI
+			mContainer.getPebbleUiController().update();
 			
 			//inform clients that the next waypoint has changed. 
 			if(nextWaypoint.getWaypointName()!=null)

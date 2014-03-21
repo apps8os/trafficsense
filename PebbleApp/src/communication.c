@@ -17,6 +17,7 @@ void message_received(DictionaryIterator *iterator) {
   Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
   if (commandTuple) {
     uint8_t command = commandTuple->value->data[0];
+      //TODO: strings seem to be taken from the dictionary in a weird way:w
       if (command == COMMAND_GET_STOP) {
         // Get a single stop to a specified position of hte list
         uint8_t stopPosition = dict_find(iterator, KEY_STOP_NUM)->value->data[0]; // Position of the stop in the list
@@ -53,11 +54,18 @@ void message_received(DictionaryIterator *iterator) {
       }
       else if (command == COMMAND_INIT_SEGMENT) {
         char* lineCode = &dict_find(iterator, KEY_LINE_NUMBER)->value->cstring[0];
+	char* stopName = &dict_find(iterator, KEY_FIRST_STOP_NAME)->value->cstring[0];
+	char* stopCode = &dict_find(iterator, KEY_FIRST_STOP_CODE)->value->cstring[0];
         uint8_t hour = dict_find(iterator, KEY_START_TIME_HOUR)->value->data[0];
         uint8_t min = dict_find(iterator, KEY_START_TIME_MIN)->value->data[0];
         uint8_t sec = dict_find(iterator, KEY_START_TIME_SEC)->value->data[0];
         startTime.hours = hour; startTime.minutes = min; startTime.seconds = sec;
         strncpy(currentLineCode, lineCode, LINE_CODE_LENGTH);
+        strncpy(firstStopName, stopName, STOP_NAME_LENGTH);
+        strncpy(firstStopCode, stopCode, STOP_CODE_LENGTH);
+      }
+      else if (command == COMMAND_SHOW_3STOP_WINDOW) {
+        show_3stop_window();
       }
     }
   }

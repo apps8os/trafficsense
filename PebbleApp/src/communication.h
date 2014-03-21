@@ -19,7 +19,7 @@
 #define KEY_STOP_CODE		3
 #define KEY_STOP_TIME		4
 
-// Receiving an alarm
+// Receiving an alarm NOT USED RIGHT NOW!
 #define COMMAND_ALARM		2
 #define KEY_ALARM		1
 #define ALARM_GET_OFF		0
@@ -30,9 +30,15 @@ be set when the segment has changed */
 #define COMMAND_INIT_SEGMENT		2
 // Key for the line number (e.g. 550, U etc.) of the next vehicle
 #define KEY_LINE_NUMBER			1
-#define KEY_START_TIME_HOUR		2
-#define KEY_START_TIME_MIN		3
-#define KEY_START_TIME_SEC		4
+#define KEY_FIRST_STOP_NAME		2 // Don't confuse these with KEY_STOP_NAME and -_CODE!
+#define KEY_FIRST_STOP_CODE		3
+#define KEY_START_TIME_HOUR		4
+#define KEY_START_TIME_MIN		5
+#define KEY_START_TIME_SEC		6
+
+/*Command for switching out of the basic window, e.g. when the bus arrives early and we are already on the second
+stop of the segment*/
+#define COMMAND_SHOW_3STOP_WINDOW 3
 
 // Initialize AppMessage
 void init_app_message();
