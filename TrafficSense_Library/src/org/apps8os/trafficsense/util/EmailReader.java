@@ -1,6 +1,5 @@
 package org.apps8os.trafficsense.util;
 
-
 import java.util.Properties;
 
 import javax.mail.BodyPart;
@@ -14,57 +13,59 @@ import javax.mail.Store;
 
 
 
-public class GmailReader {
+public class EmailReader {
 	
 	private Folder inbox;
 	private int mailboxMsgCount;
 	private int msgPointer;
 	
 	/**
-	 * Initializes the mailbox. This must be called before the other methods can be used.
-	 *  The email is assumed to be a gmail mailbox. Username is 
-	 * the name of the account and password is the accounts password. The name of the folder
-	 * which email is gotten from is assumed to be INBOX. The protocol used to get the email 
-	 * is imaps and the email is gotten from imap.gmail.com. 
-	 * @param username
-	 * @param password
+	 * Opens a mailbox.
+	 * Opens the INBOX of the given e-mail account.
+	 * Connects to the server using IMAP over SSL (imaps).
+	 * The name of the folder which email is gotten from is assumed to be INBOX.
+	 * 
+	 * @param credential e-mail credential.
+	 * 
 	 * @throws EmailException
 	 */
-	public void initMailbox(String username, String password) throws EmailException{
+	public void initMailbox(EmailCredential credential) throws EmailException {
 		Properties props = new Properties();
-        //set protocol
-        props.setProperty("mail.store.protocol", "imaps");
-        Session session = Session.getInstance(props, null);
-        Store store;
+		props.put("mail.store.protocol", "imaps");
+		Session session = Session.getInstance(props, null);
+		Store store;
 		try {
 			store = session.getStore();
-		} catch (NoSuchProviderException e) {
+		} catch (NoSuchProviderException ex) {
+			System.out.println("DBG initMailbox getStore:"+ex.getMessage());
 			throw new EmailException("Error: No such service provider");
 		}
-        //connect to gmails imap server and logs in with given credentials
-        try {
-			store.connect("imap.gmail.com", username, password);
+		// Connect to the server using IMAP over SSL (imaps).
+		try {
+			store.connect(credential.getImapServer(), credential.getAddress(),
+					credential.getPassword());
 		} catch (MessagingException e) {
+			System.out.println("DBG initMailbox connect(): " + e.getMessage());
 			throw new EmailException("Error: error connecting to mail server");
 		}
-        
-        //specify the folder from which to get email
-        try {
+
+		// specify the folder from which to get email
+		try {
 			inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);
 		} catch (MessagingException e) {
 			throw new EmailException("Error: error opening email folder");
 		}
-        
-        //set the amount of mail in the box. 
-        try {
-        	mailboxMsgCount = inbox.getMessageCount();
+
+		// set the amount of mail in the box.
+		try {
+			mailboxMsgCount = inbox.getMessageCount();
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error retreiving email message count");
+			throw new EmailException(
+					"Error: error retreiving email message count");
 		}
-        msgPointer=mailboxMsgCount;
-      
-       
+		msgPointer = mailboxMsgCount;
+
 	}
 	
 	/**
