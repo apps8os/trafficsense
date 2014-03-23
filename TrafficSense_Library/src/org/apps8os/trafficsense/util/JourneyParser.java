@@ -1,6 +1,5 @@
 package org.apps8os.trafficsense.util;
 
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -15,33 +14,32 @@ import com.google.gson.JsonObject;
 
 /**
  * Class for parsing plain text journey into a Gson JSON object.
+ *
+ * @see #parseString(String)
  */
 public class JourneyParser {
-	/**
-	 * The Gson JSON object for the current journey.
-	 */
+
+	/** The Gson JSON object for the current journey. */
 	private JsonObject _mainObj;
-	/**
-	 * TODO: documentation
-	 */
+
 	private JsonArray _segmentsArray;
-	/**
-	 * TODO: documentation
-	 */
+
+	
 	private ArrayList<String> _textArray = new ArrayList<String>();
+
 	/**
-	 * Number of lines of journey processed.
-	 * TODO: refactor to mNumberOfLines
+	 * Attribute to keep track in which line is the file
 	 */
 	private int _nline = 0;
+
 	/**
-	 * Next non-empty journey text line to be processed.
-	 * TODO: refactor to mCurrentLine
+	 * Next non-empty journey text line to be processed. TODO: refactor to
+	 * mCurrentLine
 	 */
 	private String _txtLine;
 
 	/**
-	 * Constructor
+	 * Class constructor
 	 */
 	public JourneyParser() {
 		_mainObj = new JsonObject();
@@ -49,10 +47,9 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Return the number of lines of journey processed.
+	 * Get the line at this moment 
 	 * 
-	 * TODO: is this necessary?
-	 * @return number of lines of journey processed.
+	 * @return the line at this moment 
 	 */
 	private int getLine() {
 		return _nline;
@@ -77,7 +74,8 @@ public class JourneyParser {
 	/**
 	 * Set the next non-empty journey text line to be processed.
 	 * 
-	 * @param txtLine the journey text line.
+	 * @param txtLine
+	 *            the journey text line.
 	 * @see #parseOneLine(String)
 	 */
 	private void setTxtLine(String txtLine) {
@@ -88,11 +86,11 @@ public class JourneyParser {
 	/**
 	 * TODO: documentation
 	 * 
-	 * TODO: this method is only used internally in this class and
-	 * on most occasion the result is .get()-ed.
-	 * Is this level of abstraction really necessary?
-	 * TODO: Or maybe refactor it to return i-th element directly,
+	 * TODO: this method is only used internally in this class and on most
+	 * occasion the result is .get()-ed. Is this level of abstraction really
+	 * necessary? TODO: Or maybe refactor it to return i-th element directly,
 	 * after some checks?
+	 * 
 	 * @return
 	 */
 	private ArrayList<String> getTextArray() {
@@ -101,7 +99,10 @@ public class JourneyParser {
 	}
 
 	/**
-	 * TODO: documentation
+	 * Clear all the elements of the text array 
+	 * that is a segment of 
+	 * 
+	 * @see #getTextArray()
 	 */
 	private void flushTextArray() {
 
@@ -109,7 +110,6 @@ public class JourneyParser {
 	}
 
 	/**
-	 * TODO: documentation
 	 * 
 	 * @param line
 	 */
@@ -166,62 +166,100 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Add an element for newly encountered journey text line.
+	 * Will add the elements to the JSON object
+	 * 
+	 * General Structure :
+	 * 	line 1 add the time 
+	 * 	line 2 is always the string "Departure" do nothing
+	 * 
+	 * 	line 3 until  second from the last is always segments and have the  
+	 * following struct:
+	 *	Time and location
+	 * 	Transportation mode (e.g Walking Bus etc)
+	 * 	Time location (several lines)
+	 *  Stop condition is through a blank line
+	 * 
+	 * Exception Conditions from the above segments structure:
+	 * 		1) Two first lines can be equal and only third line has the mode
+	 * 			
+	 * Last line always string "Arrival" 
 	 * 
 	 * @see #organizeJson(String)
 	 */
 	private void addJsonObject() {
 
-		System.out.println("DBG addJsonObject nline:"+_nline+" arraySz:"+_textArray.size()+" txtLine:"+_txtLine);
+		System.out.println("DBG addJsonObject nline:" + _nline + " arraySz:"
+				+ _textArray.size() + " txtLine:" + _txtLine);
 		
+		// TODO: Try and catch exception
+		
+		/* temporary array string, store the the line of a segment 
+			from the text array in two parts: time and location */
+			String[] str_split; 
+			int exception = 0 ; // Number of the exception case. 0 Normal case
+
+
 		if (getLine() == 1) {
 			addProperty("date", getTxtLine());
 			return;
 		}
 
+		
 		if (this.getLine() == 3) {
 			String[] parts = getTxtLine().split(" ", 2);
-			// TODO: should check if |parts[]| >= 2 and fail gracefully.
 			addProperty("start", parts[1]);
 			return;
 		}
-
-		// The str has the time and location and will split into two parts
-		String str;
-		String[] str_split;
-
-		/** 
-		 * TODO: refactor!
-		 * 1. Check if _textArray.size() == 0
-		 * 2. If not, .get(0) and split()
-		 * 3. What if split() gives something other than expected??
-		 */
-		try {
-			str = getTextArray().get(0);
-			str_split = str.split(" ", 2); // will just split one time = 2 parts
-			System.out.println("DBG: "+str);
-		} catch (IndexOutOfBoundsException ex) {
-			// this is an extra blank line, just ignore it
-			return;
+		
+		// Exception case number 1
+		if( getTextArray().get(0).equals(getTextArray().get(1))){
+				// split the string in two parts through a " "
+			str_split = getTextArray().get(1).split(" ", 2);
+			exception = 1;
+			
+		
+		}else{
+			// Normal case
+			str_split = getTextArray().get(0).split(" ", 2); 
 		}
+		
+	
+		
+		/**
+		 * TODO: refactor! 1. Check if _textArray.size() == 0 2. If not, .get(0)
+		 * and split() 3. What if split() gives something other than expected??
+		 */
+		
 
 		// TODO: check _textArray.size() >= 2 first!
-		if (!getTextArray().get(1).equals("Arrival") &&
-			!getTextArray().get(1).equals("Perillä") &&
-			!getTextArray().get(1).equals("Ankomst")) {
-
-			//TODO: check str_split[] first!
+		
+		if (!getTextArray().get(1).equals("Arrival")
+				&& !getTextArray().get(1).equals("Perillä")
+				&& !getTextArray().get(1).equals("Ankomst")) {
+			
+				
+			// TODO: check str_split[] first!
+			
 			JsonObject SegmentsObj = new JsonObject();
 			SegmentsObj.addProperty("startTime", str_split[0]);
 			SegmentsObj.addProperty("startPoint", str_split[1]);
-			SegmentsObj.addProperty("mode", getTextArray().get(1));
+			
+			switch(exception) {
+			case 0: SegmentsObj.addProperty("mode", getTextArray().get(1));
+					break;
+			case 1: SegmentsObj.addProperty("mode", getTextArray().get(2)); 
+			
+			default: //TODO Create an exception; 
+					break;
+			}
+		
 
 			setSegmentsArray(SegmentsObj);
 
 			JsonArray waypointsArray = new JsonArray();
 
 			// TODO: what to do if .size() = 0 ?
-			for (int i = 2; i < getTextArray().size(); i++) {
+			for (int i = exception+2; i < getTextArray().size(); i++) {
 
 				JsonObject waypointObj = new JsonObject();
 
@@ -229,9 +267,9 @@ public class JourneyParser {
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
 
-				if (!getTextArray().get(1).contains("Walking") &&
-					!getTextArray().get(1).contains("Kävelyä") &&
-					!getTextArray().get(1).contains("Gång")) {
+				if (!getTextArray().get(1).contains("Walking")
+						&& !getTextArray().get(1).contains("Kävelyä")
+						&& !getTextArray().get(1).contains("Gång")) {
 					// If the user is not walking will have a stopCode for each
 					// point
 					// TODO: This is _NOT_ the case ...
@@ -267,18 +305,18 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Augment journey object with a newly encountered journey text line.
-	 * The newly read encountered line should had been passed to
-	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should
-	 * be called before.
+	 * Augment journey object with a newly encountered journey text line. The
+	 * newly read encountered line should had been passed to
+	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should be called
+	 * before.
 	 * 
-	 * @param line journey text line encountered.
 	 * @see #addJsonObject()
 	 */
 	private void organizeJson() {
 
-		System.out.println("DBG organizeJson nline:"+_nline+" arraySz:"+_textArray.size()+" txtLine:"+_txtLine);
-		
+		System.out.println("DBG organizeJson nline:" + _nline + " arraySz:"
+				+ _textArray.size() + " txtLine:" + _txtLine);
+
 		switch (getLine()) {
 		case 1:
 			addJsonObject();
@@ -288,9 +326,7 @@ public class JourneyParser {
 		case 3:
 			addJsonObject(); // Add to json object the key value "start"
 			break;
-		default:
-			// TODO: what to do here?
-			break;
+		default: break;
 		}
 
 		/*
@@ -308,9 +344,8 @@ public class JourneyParser {
 			addTextArray(getTxtLine());
 		}
 
-		if (getTxtLine().equals("Arrival") ||
-			getTxtLine().equals("Perillä") ||
-			getTxtLine().equals("Ankomst")) {
+		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
+				|| getTxtLine().equals("Ankomst")) {
 
 			addJsonObject();
 			flushTextArray();
@@ -321,38 +356,20 @@ public class JourneyParser {
 	/**
 	 * Return the parsed journey in JSON text.
 	 * 
-	 * @return parsed journey in JSON.
+	 * @return JSON object
 	 */
 	public String getJsonText() {
 		return _mainObj.toString();
 	}
 
-	/**
-	 * Write parsed journey in JSON to a file.
-	 * 
-	 * @param outFileName path to file.
-	 * @deprecated are we going to access sdcard ?
-	 * @see #parsingFile(String)
-	 */
-	public void writeJsonFile(String outFileName) {
-		FileWriter file = null;
-		try {
-			file = new FileWriter(outFileName);
-			file.write(getJsonObj().toString());
-			file.flush();
-			file.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
-	 * Process one line of the journey.
+	 * Parse the current line of the journey.
 	 * 
-	 * @param line the line
+	 * @param line line to be parsed      
 	 */
 	private void parseOneLine(String line) {
-		System.out.println("DBG parseOneLine: "+line);
+		System.out.println("DBG parseOneLine: " + line);
 		setTxtLine(line);
 		incrementLine();
 		organizeJson();
@@ -368,19 +385,23 @@ public class JourneyParser {
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			parseOneLine(line);
-			if (line.equals("Arrival") ||
-				line.equals("Perillä") ||
-				line.equals("Ankomst")) {
+			if (line.equals("Arrival") || line.equals("Perillä")
+					|| line.equals("Ankomst")) {
 				break;
 			}
 		}
 		scanner.close();
 	}
 
+	/**********************************************************************
+	 ***********************	DEPRECATED METHODS	***********************
+	 **********************************************************************/
+	
 	/**
 	 * Read and parse a plain text journey from a file.
+	 * 
 	 * @param fileName path to the file.
-	 * @deprecated are we going to access sdcard ?
+	 * @deprecated replaced by {@link #parseString(String)}
 	 */
 	public void parsingFile(String fileName) {
 		// This will reference one line at a time
@@ -393,9 +414,9 @@ public class JourneyParser {
 					fileName));
 			while ((line = bufferedReader.readLine()) != null) {
 				parseOneLine(line);
-				if (getTxtLine().equals("Arrival") ||
-					getTxtLine().equals("Perillä") ||
-					getTxtLine().equals("Ankomst")) {
+				if (getTxtLine().equals("Arrival")
+						|| getTxtLine().equals("Perillä")
+						|| getTxtLine().equals("Ankomst")) {
 					// Document it was already all parsed
 					break;
 				}
@@ -407,5 +428,24 @@ public class JourneyParser {
 			System.out.println("Error reading file '" + fileName + "'");
 		}
 	}
-
+	
+	/**
+	 * Write parsed journey in JSON to a file.
+	 * 
+	 * @param outFileName
+	 *            path to file.
+	 * @deprecated are we going to access sdcard ?
+	 * @see #parsingFile(String)
+	 */
+	public void writeJsonFile(String outFileName) {
+		FileWriter file = null;
+		try {
+			file = new FileWriter(outFileName);
+			file.write(getJsonObj().toString());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
