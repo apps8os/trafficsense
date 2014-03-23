@@ -250,11 +250,6 @@ public class LocationOnlyService extends Service implements
 			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
-			if (mSegmentWaypointIndex == 1) {
-				// Update pebble when at first waypoint
-				// TODO: check
-				mContainer.getPebbleUiController().update();
-			}
 			//segment had ended
 			if(nextWaypoint == null){
 				
