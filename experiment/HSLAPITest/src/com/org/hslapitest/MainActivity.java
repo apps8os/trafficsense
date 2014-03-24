@@ -2,30 +2,18 @@ package com.org.hslapitest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.util.Calendar;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.util.JsonReader;
 import android.util.SparseArray;
 import android.view.Menu;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -35,16 +23,15 @@ public class MainActivity extends Activity {
 	String key=null;
 	String request;
 	
-	 SparseArray<Group> groups = new SparseArray<Group>();
+	
+	
+	 //SparseArray<Group> groups = new SparseArray<Group>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		/*
-		myButton = (Button) findViewById(R.id.button1);
-		myEditText = (EditText) findViewById(R.id.editText1);
-		myTextView = (TextView) findViewById(R.id.textView2);*/
+		setContentView(R.layout.schematic_main);
+		
 		 String myString = null;
                 try {
 
@@ -78,8 +65,12 @@ public class MainActivity extends Activity {
     		    ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
     		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
     		    listView.setAdapter(adapter);
+    		    myTextView = (TextView) findViewById(R.id.textView1);
+    		    //myTextView.setText("From: ");
+    		   
+    		    myTextView.setText("From: " + route.getStart() + ", to " + route.getDestination());
     		  }
-
+			/*
     		  public void createData() {
     		    for (int j = 0; j < 5; j++) {
     		      Group group = new Group("Test " + j);
@@ -88,7 +79,7 @@ public class MainActivity extends Activity {
     		      }
     		      groups.append(j, group);
     		    }
-    		  }
+    		  }*/
 	
 
 	@Override

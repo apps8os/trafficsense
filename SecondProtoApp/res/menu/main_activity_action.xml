@@ -9,5 +9,8 @@
 		android:title="Stop Journey"
         android:showAsAction="ifRoom"></item>
 		
+	<item android:id="@+id/menu_schematic_view"
+		android:title="Go to Schematic View"
+        android:showAsAction="ifRoom"></item>
 
     </menu>

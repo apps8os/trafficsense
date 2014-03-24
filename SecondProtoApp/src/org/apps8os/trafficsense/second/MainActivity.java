@@ -98,6 +98,7 @@ public class MainActivity extends Activity {
 		super.onPrepareOptionsMenu(menu);
 		MenuItem start = menu.findItem(R.id.menu_start_journey);
 		MenuItem stop = menu.findItem(R.id.menu_stop_journey);
+		MenuItem schematic = menu.findItem(R.id.menu_schematic_view);
 		if(mContainer.isJourneyStarted() == true){
 			start.setVisible(false);
 			stop.setVisible(true);
@@ -121,6 +122,10 @@ public class MainActivity extends Activity {
 	        case R.id.menu_stop_journey:
 	        	stopJourney();
 	            invalidateOptionsMenu();
+	        	return true;
+	        case R.id.menu_schematic_view:
+	        	Intent myIntent = new Intent(MainActivity.this, SchematicView.class);
+	        	MainActivity.this.startActivity(myIntent);
 	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
