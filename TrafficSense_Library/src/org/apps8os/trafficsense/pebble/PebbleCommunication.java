@@ -137,13 +137,18 @@ public class PebbleCommunication {
 	 * @param listIndex the sequence number of this Waypoint in the journey. 
 	 */
 	public void sendWaypoint(Waypoint waypoint, int listIndex) {
+		// If waypoint = null, send empty waypoints to scroll the list
+		String code;
+		String name;
+		String time;
 		if (waypoint == null) {
-			System.out.println("DBG pebbleCommunication sendWaypoint waypoint = null");
-			return;
-		}
-		String name = waypoint.getWaypointName();
-		if (name == null) {
-			name = "null";
+			name = "";
+			code = "";
+			time = "";
+		} else {
+			name = waypoint.getWaypointName();
+			code = waypoint.getWaypointStopCode();
+			time = waypoint.getWaypointTime();
 		}
 		// Maximum 20 characters.
 		int charLimit = Math.min(name.length(), 20);
@@ -152,8 +157,8 @@ public class PebbleCommunication {
 		dictionary.addUint8(KEY_COMMAND, (byte) COMMAND_GET_STOP);
 		dictionary.addUint8(KEY_STOP_NUM, (byte) listIndex);
 		dictionary.addString(KEY_STOP_NAME, name);
-		dictionary.addString(KEY_STOP_CODE, waypoint.getWaypointStopCode());
-		dictionary.addString(KEY_STOP_TIME, waypoint.getWaypointTime());
+		dictionary.addString(KEY_STOP_CODE, code);
+		dictionary.addString(KEY_STOP_TIME, time);
 		/**
 		 * En-queue this message to MessageHandler.
 		 */
@@ -167,6 +172,7 @@ public class PebbleCommunication {
 	 * @param waypoint new waypoint to be added to the list.
 	 */
 	public void updateList(Waypoint waypoint) {
+		// If waypoint = null, send empty waypoints to scroll the list
 		String code;
 		String name;
 		String time;

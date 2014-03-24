@@ -51,6 +51,7 @@ void message_received(DictionaryIterator *iterator) {
         uint8_t alarmType = dict_find(iterator, KEY_ALARM)->value->data[0];
         if (alarmType == ALARM_GET_OFF) {
           alarm_get_off();
+	}
       }
       else if (command == COMMAND_INIT_SEGMENT) {
         char* lineCode = &dict_find(iterator, KEY_LINE_NUMBER)->value->cstring[0];
@@ -65,9 +66,9 @@ void message_received(DictionaryIterator *iterator) {
         strncpy(firstStopCode, stopCode, STOP_CODE_LENGTH);
       }
       else if (command == COMMAND_SHOW_3STOP_WINDOW) {
-        show_3stop_window();
+	show_3stop_window();
       }
-    }
+    
   }
   // Update the menu, otherwise the new stop will not be shown before it's selected
   // Marking dirty means telling the app that the layer has been updated and needs to be refreshed on the screen
