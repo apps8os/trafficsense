@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.PatternSyntaxException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,8 +18,8 @@ import com.google.gson.JsonObject;
  *
  * @see #parseString(String)
  */
-public class JourneyParser {
-
+public class JourneyParser {	
+	
 	/** The Gson JSON object for the current journey. */
 	private JsonObject _mainObj;
 
@@ -188,6 +189,7 @@ public class JourneyParser {
 	 */
 	private void addJsonObject() {
 
+		
 		System.out.println("DBG addJsonObject nline:" + _nline + " arraySz:"
 				+ _textArray.size() + " txtLine:" + _txtLine);
 		
@@ -195,8 +197,9 @@ public class JourneyParser {
 		
 		/* temporary array string, store the the line of a segment 
 			from the text array in two parts: time and location */
-			String[] str_split; 
+			String[] str_split = null; 
 			int exception = 0 ; // Number of the exception case. 0 Normal case
+			String[] temp1, temp2; // Temporaries variables 
 
 
 		if (getLine() == 1) {
@@ -211,20 +214,55 @@ public class JourneyParser {
 			return;
 		}
 		
-		// Exception case number 1
-		if( getTextArray().get(0).equals(getTextArray().get(1))){
-				// split the string in two parts through a " "
-			str_split = getTextArray().get(1).split(" ", 2);
-			exception = 1;
-			
+		System.out.println("************************");
+		System.out.println("************************");
+		System.out.println("*** ADD JSON OBJECT ****");
+		System.out.println("************************");
+		System.out.println("************************");
 		
+		
+		
+		if(getTextArray().get(1).contains(":")){
+			// We are in an exception case
+
+
+
+			temp1 = getTextArray().get(0).split(" ",2) ;
+			temp2 = getTextArray().get(1).split(" ",2);
+			//System.out.println("TEXT ARRAY: " + getTextArray().get(0) );
+
+				System.out.println("TEMP1: " + temp1[1]);
+				System.out.println("TEMP2: " + temp2[1]); 
+				int q = temp1[1].compareTo(temp2[1]) ;
+				System.out.println("Q: " + q);
+			// Exception case number 1
+			if(  q == 0){
+				// split the string in two parts through a " "
+
+				str_split = getTextArray().get(1).split(" ", 2);
+				exception = 1;
+				System.out.println("EXCEPTION: " + exception);
+
+
+			}
 		}else{
-			// Normal case
-			str_split = getTextArray().get(0).split(" ", 2); 
-		}
+				// Normal case
+				System.out.println("ENTREI: " +  getTextArray().get(0));
+				try{
+					str_split = getTextArray().get(0).split(" ", 2); 
+					//System.out.println("NORMAL CASE: " + exception + "->" + str_split[1]);
+
+				}catch(Exception e){
+					System.out.println("Dobtttt");
+					e.printStackTrace();
+				}	
+
+
+
+			}
 		
 	
-		
+		System.out.println("SPLIT");
 		/**
 		 * TODO: refactor! 1. Check if _textArray.size() == 0 2. If not, .get(0)
 		 * and split() 3. What if split() gives something other than expected??
@@ -237,13 +275,16 @@ public class JourneyParser {
 				&& !getTextArray().get(1).equals("Perillä")
 				&& !getTextArray().get(1).equals("Ankomst")) {
 			
-				
+		
 			// TODO: check str_split[] first!
 			
 			JsonObject SegmentsObj = new JsonObject();
 			SegmentsObj.addProperty("startTime", str_split[0]);
 			SegmentsObj.addProperty("startPoint", str_split[1]);
 			
+			System.out.println("vou adicionar a propriedade");
+		
+			System.out.println("CASE:" + exception);
 			switch(exception) {
 			case 0: SegmentsObj.addProperty("mode", getTextArray().get(1));
 					break;
@@ -252,27 +293,34 @@ public class JourneyParser {
 			default: //TODO Create an exception; 
 					break;
 			}
-		
-
+			
+			System.out.println("ADICIONEIIIIIII");
+			
 			setSegmentsArray(SegmentsObj);
 
+			System.out.println("SETTTTTT");
+			
 			JsonArray waypointsArray = new JsonArray();
 
 			// TODO: what to do if .size() = 0 ?
+			System.out.println("ARRAY SIZE: "+ getTextArray().size() + "exception: " + exception );
 			for (int i = exception+2; i < getTextArray().size(); i++) {
-
+				System.out.println("DENTRO DO FOR");
 				JsonObject waypointObj = new JsonObject();
 
 				str_split = getTextArray().get(i).split(" ", 2);
+				System.out.println("oi: " + str_split[0] + " "+ str_split[1]);
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
-
-				if (!getTextArray().get(1).contains("Walking")
-						&& !getTextArray().get(1).contains("Kävelyä")
-						&& !getTextArray().get(1).contains("Gång")) {
+				System.out.println("oi2 ");
+				if (!getTextArray().get(exception + 1).contains("Walking")
+						&& !getTextArray().get(exception + 1).contains("Kävelyä")
+						&& !getTextArray().get(exception + 1).contains("Gång")) {
 					// If the user is not walking will have a stopCode for each
 					// point
 					// TODO: This is _NOT_ the case ...
+					
+					System.out.println("STRING: " + str_split[0] + " "+ str_split[1]);
 					String stopCode;
 					int start, end;
 					start = str_split[1].indexOf("(") + 1;
@@ -302,6 +350,11 @@ public class JourneyParser {
 			addProperty("arrivalTime", str_split[0]);
 			addProperty("segments", this.getSegmentsArray());
 		}
+		System.out.println("*********************");
+		System.out.println("*********************");
+		System.out.println("FIM");
+		System.out.println("*********************");
+		System.out.println("*********************");
 	}
 
 	/**
@@ -381,6 +434,11 @@ public class JourneyParser {
 	 * @param jsonText plain text journey with line breaks.
 	 */
 	public void parseString(String jsonText) {
+		System.out.println("**************************");
+		System.out.println("**************************");
+		System.out.println("I AM HERE");
+		System.out.println("**************************");
+		System.out.println("**************************");
 		Scanner scanner = new Scanner(jsonText);
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
