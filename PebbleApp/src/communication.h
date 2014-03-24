@@ -20,7 +20,7 @@
 #define KEY_STOP_TIME		4
 
 // Receiving an alarm NOT USED RIGHT NOW!
-#define COMMAND_ALARM		2
+#define COMMAND_ALARM		4
 #define KEY_ALARM		1
 #define ALARM_GET_OFF		0
 
