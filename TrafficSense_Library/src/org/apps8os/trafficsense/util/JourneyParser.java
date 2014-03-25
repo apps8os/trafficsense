@@ -356,7 +356,11 @@ public class JourneyParser {
 				JsonObject waypointObj = new JsonObject();
 
 				str_split = getTextArray().get(i).split(" ", 2);
+
 				System.out.println("oi: " + str_split[0] + " "+ str_split[1]);
+
+				System.out.println("DBG: textArray "+ getTextArray().get(i));
+
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
 				System.out.println("oi2 ");
