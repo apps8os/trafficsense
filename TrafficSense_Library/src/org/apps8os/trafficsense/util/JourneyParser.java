@@ -5,10 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.PatternSyntaxException;
+import org.apps8os.trafficsense.exceptions.InvalidCase;
+import org.apps8os.trafficsense.exceptions.StopCodeInvalidParser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -205,12 +205,11 @@ public class JourneyParser {
 	 * 
 	 * @see #organizeJson(String)
 	 */
-	private void addJsonObject() {
+	private void addJsonObject() throws InvalidCase,StopCodeInvalidParser,NullPointerException {
 
 		System.out.println("DBG addJsonObject nline:" + _nline + " arraySz:"
 				+ _textArray.size() + " txtLine:" + _txtLine);
 
-		// TODO: Try and catch exception
 
 		/*
 		 * temporary array string, store the the line of a segment from the text
@@ -236,7 +235,6 @@ public class JourneyParser {
 
 			temp1 = getTextArray().get(0).split(" ", 2);
 			temp2 = getTextArray().get(1).split(" ", 2);
-
 			if ((temp1[1].compareTo(temp2[1])) == 0) {
 				// Exception case number 1
 
@@ -244,7 +242,6 @@ public class JourneyParser {
 				str_split = getTextArray().get(1).split(" ", 2);
 				exception = 1;
 				// System.out.println("EXCEPTION: " + exception);
-
 			}
 		} else {
 			// Normal case
@@ -253,233 +250,246 @@ public class JourneyParser {
 			// str_split[1]);
 		}
 
-		if (!getTextArray().get(1).equals("Arrival")
-				&& !getTextArray().get(1).equals("Perillä")
-				&& !getTextArray().get(1).equals("Ankomst")) {
+	if (!getTextArray().get(1).equals("Arrival")
+			&& !getTextArray().get(1).equals("Perillä")
+			&& !getTextArray().get(1).equals("Ankomst")) {
 
-			JsonObject SegmentsObj = new JsonObject();
-			SegmentsObj.addProperty("startTime", str_split[0]);
-			SegmentsObj.addProperty("startPoint", str_split[1]);
+		JsonObject SegmentsObj = new JsonObject();
+		SegmentsObj.addProperty("startTime", str_split[0]);
+		SegmentsObj.addProperty("startPoint", str_split[1]);
 
-			// System.out.println("CASE:" + exception);
-			switch (exception) {
-			case 0:
-				SegmentsObj.addProperty("mode", getTextArray().get(1));
-				break;
-			case 1:
-				SegmentsObj.addProperty("mode", getTextArray().get(2));
-				break;
-
-			default:throw 
-				break;
-			}
-
-			setSegmentsArray(SegmentsObj);
-
-			JsonArray waypointsArray = new JsonArray();
-
-			// System.out.println("ARRAY SIZE: " + getTextArray().size()
-			// + "exception: " + exception);
-
-			for (int i = exception + 2; i < getTextArray().size(); i++) {
-
-				JsonObject waypointObj = new JsonObject();
-
-				str_split = getTextArray().get(i).split(" ", 2);
-
-				System.out.println("DBG: textArray " + getTextArray().get(i));
-
-				waypointObj.addProperty("time", str_split[0]);
-				waypointObj.addProperty("name", str_split[1]);
-
-				if (!getTextArray().get(exception + 1).contains("Walking")
-						&& !getTextArray().get(exception + 1).contains(
-								"Kävelyä")
-						&& !getTextArray().get(exception + 1).contains("Gång")) {
-
-					// System.out.println("STRING: " + str_split[0] + " "+
-					// str_split[1]);
-					String stopCode;
-					int start, end;
-					start = str_split[1].indexOf("(") + 1;
-					end = str_split[1].indexOf(")");
-
-					if (start == -1 || end == -1) {
-						System.out.println("DBG addJsonObject start/end = -1");
-					}
-					// TODO: So this might crash
-					stopCode = str_split[1].substring(start, end);
-
-					waypointObj.remove("name");
-					waypointObj.addProperty("name",
-							str_split[1].substring(0, start - 1));
-					waypointObj.addProperty("stopCode", stopCode);
-				}
-
-				waypointsArray.add(waypointObj);
-			}
-
-			SegmentsObj.add("waypoints", waypointsArray);
-
-		} else {
-			// Last line of the file, "Arrival" line
-
-			// System.out.println("ARRAY " + this.getSegmentsArray());
-			addProperty("dest", str_split[1]);
-			addProperty("arrivalTime", str_split[0]);
-			addProperty("segments", this.getSegmentsArray());
-		}
-	}
-
-	/**
-	 * Augment journey object with a newly encountered journey text line. The
-	 * newly read encountered line should had been passed to
-	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should be called
-	 * before.
-	 * 
-	 * @see #addJsonObject()
-	 */
-	private void organizeJson() {
-
-		System.out.println("DBG organizeJson nline:" + _nline + " arraySz:"
-				+ _textArray.size() + " txtLine:" + _txtLine);
-
-		switch (getLine()) {
-		case 1:
-			addJsonObject();
-			return; // Add to json object the key value "date"
-		case 2:
-			return; // "Departure" line
-		case 3:
-			addJsonObject(); // Add to json object the key value "start"
+		// System.out.println("CASE:" + exception);
+		switch (exception) {
+		case 0:
+			SegmentsObj.addProperty("mode", getTextArray().get(1));
 			break;
-		default: break;
+		case 1:
+			SegmentsObj.addProperty("mode", getTextArray().get(2));
+			break;
+
+		default:throw new InvalidCase("JourneyParser: Invalid case at the segement structure");
+
 		}
 
-		/*
-		 * isNotBlank - Checks if a String is not empty (""), not null and not
-		 * whitespace only
-		 */
-		if (getTxtLine().trim().equals("")) {
-			// The line is blank
-			addJsonObject();
-			flushTextArray();
-			return;
-		} else {
-			addTextArray(getTxtLine());
-		}
+		setSegmentsArray(SegmentsObj);
 
-		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
-				|| getTxtLine().equals("Ankomst")) {
+		JsonArray waypointsArray = new JsonArray();
 
-			addJsonObject();
-			flushTextArray();
-		}
-	}
+		// System.out.println("ARRAY SIZE: " + getTextArray().size()
+		// + "exception: " + exception);
 
-	/**
-	 * Return the parsed journey in JSON text.
-	 * 
-	 * @return JSON object
-	 */
-	public String getJsonText() {
-		return _mainObj.toString();
-	}
+		for (int i = exception + 2; i < getTextArray().size(); i++) {
 
-	/**
-	 * Parse the current line of the journey.
-	 * 
-	 * @param line
-	 *            line to be parsed
-	 */
-	private void parseOneLine(String line) {
-		System.out.println("DBG parseOneLine: " + line);
-		setTxtLine(line);
-		incrementLine();
-		organizeJson();
-	}
+			JsonObject waypointObj = new JsonObject();
 
-	/**
-	 * Parse a journey supplied in a String with line breaks.
-	 * 
-	 * @param jsonText
-	 *            plain text journey with line breaks.
-	 */
-	public void parseString(String jsonText) {
+			str_split = getTextArray().get(i).split(" ", 2);
 
-		Scanner scanner = new Scanner(jsonText);
+			System.out.println("DBG: textArray " + getTextArray().get(i));
 
-		while (scanner.hasNextLine()) {
+			waypointObj.addProperty("time", str_split[0]);
+			waypointObj.addProperty("name", str_split[1]);
 
-			String line = scanner.nextLine();
-			try {
-				parseOneLine(line);
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
+			if (!getTextArray().get(exception + 1).contains("Walking")
+					&& !getTextArray().get(exception + 1).contains(
+							"Kävelyä")
+							&& !getTextArray().get(exception + 1).contains("Gång")) {
+
+				// System.out.println("STRING: " + str_split[0] + " "+
+				// str_split[1]);
+				String stopCode;
+				int start, end;
+				start = str_split[1].indexOf("(") + 1;
+				end = str_split[1].indexOf(")");
+
+				if (start == -1 || end == -1) {
+					throw new StopCodeInvalidParser("JsonParser: Does not exist a stopCode in the line:" + 
+							"\n"+ getTxtLine() + " (line number:" + getLine() + ")" );
+				}
+				
+				stopCode = str_split[1].substring(start, end);
+
+				waypointObj.remove("name");
+				waypointObj.addProperty("name",
+						str_split[1].substring(0, start - 1));
+				waypointObj.addProperty("stopCode", stopCode);
 			}
-			if (line.equals("Arrival") || line.equals("Perillä")
-					|| line.equals("Ankomst")) {
-				/* Reach the end of the plain text journey */
+
+			waypointsArray.add(waypointObj);
+		}
+
+		SegmentsObj.add("waypoints", waypointsArray);
+
+	} else {
+		// Last line of the file, "Arrival" line
+
+		// System.out.println("ARRAY " + this.getSegmentsArray());
+		addProperty("dest", str_split[1]);
+		addProperty("arrivalTime", str_split[0]);
+		addProperty("segments", this.getSegmentsArray());
+	}
+}
+
+/**
+ * Augment journey object with a newly encountered journey text line. The
+ * newly read encountered line should had been passed to
+ * {@link #setTxtLine(String)} and {@link #incrementLine()} should be called
+ * before.
+ * 
+ * @see #addJsonObject()
+ */
+private void organizeJson() throws InvalidCase,StopCodeInvalidParser {
+
+	System.out.println("DBG organizeJson nline:" + _nline + " arraySz:"
+			+ _textArray.size() + " txtLine:" + _txtLine);
+
+	switch (getLine()) {
+	case 1:
+		addJsonObject();
+		return; // Add to json object the key value "date"
+	case 2:
+		return; // "Departure" line
+	case 3:
+		addJsonObject(); // Add to json object the key value "start"
+		break;
+	default: break;
+	}
+
+	/*
+	 * isNotBlank - Checks if a String is not empty (""), not null and not
+	 * whitespace only
+	 */
+	if (getTxtLine().trim().equals("")) {
+		// The line is blank
+		addJsonObject();
+		flushTextArray();
+		return;
+	} else {
+		addTextArray(getTxtLine());
+	}
+
+	if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
+			|| getTxtLine().equals("Ankomst")) {
+
+		addJsonObject();
+		flushTextArray();
+	}
+}
+
+/**
+ * Return the parsed journey in JSON text.
+ * 
+ * @return JSON object
+ */
+public String getJsonText() {
+	return _mainObj.toString();
+}
+
+/**
+ * Parse the current line of the journey.
+ * 
+ * @param line
+ *            line to be parsed
+ */
+private void parseOneLine(String line) throws InvalidCase,StopCodeInvalidParser {
+	System.out.println("DBG parseOneLine: " + line);
+	setTxtLine(line);
+	incrementLine();
+	organizeJson();
+}
+
+/**
+ * Parse a journey supplied in a String with line breaks.
+ * 
+ * @param jsonText
+ *            plain text journey with line breaks.
+ */
+public void parseString(String jsonText){
+
+	Scanner scanner = new Scanner(jsonText);
+
+	while (scanner.hasNextLine()) {
+
+		String line = scanner.nextLine();
+		try {
+			parseOneLine(line);
+		}catch(InvalidCase e){
+			System.out.println(e.getMessage());
+		} 
+		catch (StopCodeInvalidParser e) {
+			System.out.println(e.getMessage());
+		}
+		catch(NullPointerException e){
+			System.out.println("JsonParser: "+ e.getMessage());
+		}
+		catch (Exception e) {
+			System.out.println("JsonParser: " + e.getMessage());
+		}
+		if (line.equals("Arrival") || line.equals("Perillä")
+				|| line.equals("Ankomst")) {
+			/* Reach the end of the plain text journey */
+			break;
+		}
+	}
+	scanner.close();
+}
+
+/**********************************************************************
+ *********************** DEPRECATED METHODS ***********************
+ **********************************************************************/
+
+/**
+ * Read and parse a plain text journey from a file.
+ * 
+ * @param fileName
+ *            path to the file.
+ * @deprecated replaced by {@link #parseString(String)}
+ */
+public void parsingFile(String fileName) throws InvalidCase {
+	// This will reference one line at a time
+	String line = null;
+
+	try {
+		// FileReader reads text files in the default encoding and wrap
+		// FileReader in BufferedReader.
+		BufferedReader bufferedReader = new BufferedReader(new FileReader(
+				fileName));
+		while ((line = bufferedReader.readLine()) != null) {
+			parseOneLine(line);
+			if (getTxtLine().equals("Arrival")
+					|| getTxtLine().equals("Perillä")
+					|| getTxtLine().equals("Ankomst")) {
+				// Document it was already all parsed
 				break;
 			}
 		}
-		scanner.close();
+		bufferedReader.close(); // Close the file
+	} catch (FileNotFoundException ex) {
+		System.out.println("Unable to open file '" + fileName + "'");
+	} catch (IOException ex) {
+		System.out.println("Error reading file '" + fileName + "'");
+	} catch (StopCodeInvalidParser e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
+}
 
-	/**********************************************************************
-	 *********************** DEPRECATED METHODS ***********************
-	 **********************************************************************/
-
-	/**
-	 * Read and parse a plain text journey from a file.
-	 * 
-	 * @param fileName
-	 *            path to the file.
-	 * @deprecated replaced by {@link #parseString(String)}
-	 */
-	public void parsingFile(String fileName) {
-		// This will reference one line at a time
-		String line = null;
-
-		try {
-			// FileReader reads text files in the default encoding and wrap
-			// FileReader in BufferedReader.
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(
-					fileName));
-			while ((line = bufferedReader.readLine()) != null) {
-				parseOneLine(line);
-				if (getTxtLine().equals("Arrival")
-						|| getTxtLine().equals("Perillä")
-						|| getTxtLine().equals("Ankomst")) {
-					// Document it was already all parsed
-					break;
-				}
-			}
-			bufferedReader.close(); // Close the file
-		} catch (FileNotFoundException ex) {
-			System.out.println("Unable to open file '" + fileName + "'");
-		} catch (IOException ex) {
-			System.out.println("Error reading file '" + fileName + "'");
-		}
+/**
+ * Write parsed journey in JSON to a file.
+ * 
+ * @param outFileName
+ *            path to file.
+ * @deprecated not need anymore
+ * @see #parsingFile(String)
+ */
+public void writeJsonFile(String outFileName) {
+	FileWriter file = null;
+	try {
+		file = new FileWriter(outFileName);
+		file.write(getJsonObj().toString());
+		file.flush();
+		file.close();
+	} catch (IOException e) {
+		e.printStackTrace();
 	}
-
-	/**
-	 * Write parsed journey in JSON to a file.
-	 * 
-	 * @param outFileName
-	 *            path to file.
-	 * @deprecated not need anymore
-	 * @see #parsingFile(String)
-	 */
-	public void writeJsonFile(String outFileName) {
-		FileWriter file = null;
-		try {
-			file = new FileWriter(outFileName);
-			file.write(getJsonObj().toString());
-			file.flush();
-			file.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+}
 }
