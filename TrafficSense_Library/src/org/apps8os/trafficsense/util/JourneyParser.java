@@ -17,6 +17,26 @@ import com.google.gson.JsonObject;
 /**
  * Class for parsing plain text journey into a Gson JSON object.
  *
+ * JSON object is organize as follow :
+ * 
+ *"_mainObj"(JsonObject) contains :
+ *	Property "date"
+ * 	Property "start"
+ *	Property "dest"
+ *	Property "arrivalTime"
+ *	
+ *	Property "segments" that is JsonArray called "_segmentsArray" containing:
+ * 		"SegmentsObj"(JsonObject) contains:	
+ * 			Property "startTime"
+ * 			Property "startPoint"
+ *			Property "mode"			
+ *			
+ *			Property "waypoints" that is JsonArray called "waypointsArray" containing:
+ *				"waypointObj"(JsonObject ) contains:
+ *					Property "time"
+ *					Property "name"					
+ *					Property "stopCode" (!walking) 
+ *
  * @see #parseString(String)
  */
 
@@ -479,7 +499,7 @@ public class JourneyParser {
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			parseOneLine(line);
-			if (line.equals("Arrival") || line.equals("Perill√§")
+			if (line.equals("Arrival") || line.equals("Perillä")
 					|| line.equals("Ankomst")) {
 				break;
 			}
@@ -509,7 +529,7 @@ public class JourneyParser {
 			while ((line = bufferedReader.readLine()) != null) {
 				parseOneLine(line);
 				if (getTxtLine().equals("Arrival")
-						|| getTxtLine().equals("Perill√§")
+						|| getTxtLine().equals("Perillä")
 						|| getTxtLine().equals("Ankomst")) {
 					// Document it was already all parsed
 					break;
