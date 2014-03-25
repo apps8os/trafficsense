@@ -26,7 +26,8 @@ public class SchematicView extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.schematic_main);
+		mContainer = TrafficsenseContainer.getInstance();
 		route = mContainer.getRoute();
 		
        ExpandableListView listView = (ExpandableListView) findViewById(R.id.listview);
