@@ -272,6 +272,7 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationService.class);
 		mContext.stopService(serviceIntent);
+		
 		// TODO: add some code here if a new Service is introduced.
 	}
 	

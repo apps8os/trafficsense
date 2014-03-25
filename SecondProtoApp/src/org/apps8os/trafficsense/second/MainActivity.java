@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
 	private void startJourney(){
 		//TODO: check for network connectivity
         EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
-		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
+		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);  
 		
 	}
 	
@@ -160,19 +160,19 @@ public class MainActivity extends Activity {
 		 }
 		 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		 listview.setAdapter(adapter);
-		 listview.setVisibility(View.VISIBLE); 
+		 listview.setVisibility(View.VISIBLE);  
 	}
 	
 	/**
 	 * draws the route on the map using lines that dont follow roads. Also zooms to first waypoint with location. 
 	 */
-	public void drawRoute() {
+	public void drawRoute() {  
 		map.clear();
 		Route r = mContainer.getRoute();
 		boolean zoomed = false;
-		PolylineOptions o = new PolylineOptions().geodesic(true);
+		PolylineOptions o = new PolylineOptions().geodesic(true); 
 		for (Segment s : r.getSegmentList()) {
-			if (s.isWalking()) {
+			if (s.isWalking()) { 
 				// Don't draw walking segments because they don't have coordinates
 				continue;
 			}
