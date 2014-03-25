@@ -1,41 +1,27 @@
-Friday 21.3.2014
-Departure
-16:23 Hopeatie 2, Helsinki 
-    Walking 0,2 km 
-    16:24 Hopeatie 
-    16:24 Paunakuja 
-    16:24 Kaupintie 
-    16:25 Lassila 
+Tiistai 25.3.2014
+L√§ht√∂
+16:07 Konemies, Esbo 
+    K√§vely√§ 0,2 km 
+    16:08 Tietotie 
+    16:09 Otaniementie 
+    16:10 Konemies 
  
-16:25 Lassila 
-    51 
-    16:25 Lassila (1623) 
-    16:27 Vaakatie (1621) 
-    16:28 Marttila (1619) 
-    16:29 Meijeritie (1617) 
-    16:30 Atomitie (1615) 
-    16:32 Pitäjänmäen asema (1525) 
- 
-16:32 Pitäjänmäen asema 
-16:38 Pitäjänmäen asema 
+16:10 Konemies 
     550 
-    16:38 Pitäjänmäen asema (1525) 
-    16:41 Vermo (E1979) 
-    16:42 Mäkkylä (E1133) 
-    16:43 Puustellinmäki (E1052) 
-    16:45 Leppävaara (E1116) 
-    16:46 Säterinmetsä (E1118) 
-    16:48 Laajalahdenristi (E1215) 
-    16:50 Turvesuontie (E1217) 
-    16:52 Maarinsilta (E2073) 
-    16:55 Innopoli (E2221) 
-    16:57 Konemies (E2213) 
+    16:10 Konemies (E2217) 
+    16:13 Innopoli (E2220) 
+    16:14 Maarinsilta (E2227) 
+    16:17 Turvesuontie (E1216) 
+    16:18 Laajalahdenristi (E1201) 
+    16:20 S√§terinmets√§ (E1162) 
+    16:21 Lepp√§vaara (E1117) 
  
-16:57 Konemies 
-    Walking 0,2 km 
-    16:57 Konemies 
-    16:57 Tietotie 
-    16:58 Konemiehentie 
+16:21 Lepp√§vaara 
+    K√§vely√§ 0,4 km 
+    16:21 Lepp√§vaara 
+    16:21 Lepp√§vaarantie 
+    16:21 Turuntie 
  
-16:59 Konemiehentie 2, Espoo 
-Arrival
+16:26 Lepp√§vaara, Esbo 
+Perill√§
+

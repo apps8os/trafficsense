@@ -227,7 +227,7 @@ public class JourneyParser {
 	 * Exception Conditions from the above segments structure:
 	 * 		1) Two first lines can be equal and only third line has the mode
 	 * 			
-	 * Last line always string "Arrival" || "Perillä"(FIN lang) || "Ankomst"(SWE lang)
+	 * Last line always string "Arrival" || "Perill√§"(FIN lang) || "Ankomst"(SWE lang)
 	 * 
 	 * @see #organizeJson(String)
 	 */
@@ -320,7 +320,7 @@ public class JourneyParser {
 //				&& !getTextArray().get(1).equals("Ankomst")) {
 			
 		if ( (! this.areEqual(getTextArray().get(1), "Arrival")) &&
-			 (!this.areEqual(getTextArray().get(1), "Perillä")) &&
+			 (!this.areEqual(getTextArray().get(1), "Perill√§")) &&
 			 (!this.areEqual(getTextArray().get(1), "Ankomst")) ){
 		
 			// TODO: check str_split[] first!
@@ -371,7 +371,7 @@ public class JourneyParser {
 					
 				if (!getTextArray().get(exception + 1).contains("Walking")
 						&& !getTextArray().get(exception + 1).contains("K√§vely√§")
-						&& !getTextArray().get(exception + 1).contains("Gång")) {
+						&& !getTextArray().get(exception + 1).contains("G√•ng")) {
 					
 					
 					
@@ -457,7 +457,7 @@ public class JourneyParser {
 			addTextArray(getTxtLine());
 		}
 
-		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
+		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perill√§")
 				|| getTxtLine().equals("Ankomst")) {
 
 			addJsonObject();
@@ -503,7 +503,7 @@ public class JourneyParser {
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			parseOneLine(line);
-			if (line.equals("Arrival") || line.equals("Perillä")
+			if (line.equals("Arrival") || line.equals("Perill√§")
 					|| line.equals("Ankomst")) {
 				break;
 			}
@@ -533,7 +533,7 @@ public class JourneyParser {
 			while ((line = bufferedReader.readLine()) != null) {
 				parseOneLine(line);
 				if (getTxtLine().equals("Arrival")
-						|| getTxtLine().equals("Perillä")
+						|| getTxtLine().equals("Perill√§")
 						|| getTxtLine().equals("Ankomst")) {
 					// Document it was already all parsed
 					break;
