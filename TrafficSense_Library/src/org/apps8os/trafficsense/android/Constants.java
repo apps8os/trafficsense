@@ -39,6 +39,7 @@ public class Constants {
 	 */
 	final public static int SERVICE_TIME_ONLY = 1;
 	final public static int SERVICE_LOCATION_ONLY = 2;
+	final public static int LOCATION_SERVICE = 3;
 	/**
 	 * Magic stopCode for those stops without one.
 	 */
@@ -64,4 +65,9 @@ public class Constants {
 	 * how long the phone vibrates on alerts
 	 */
 	final public int VIBRATION_TIME = 4000;
+	
+	/**
+	 * the time offset that can be passed timeOnlyService
+	 */
+	final public static String OFFSET = "offset";
 }

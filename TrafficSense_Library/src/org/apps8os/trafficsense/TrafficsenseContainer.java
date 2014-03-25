@@ -2,16 +2,17 @@ package org.apps8os.trafficsense;
 
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.android.LocationOnlyService;
+import org.apps8os.trafficsense.android.LocationService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
 import org.apps8os.trafficsense.pebble.PebbleUiController;
 import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.EmailCredential;
-import org.apps8os.trafficsense.util.GmailReader;
+import org.apps8os.trafficsense.util.EmailReader;
 import org.apps8os.trafficsense.util.JourneyInfoResolver;
 import org.apps8os.trafficsense.util.JourneyParser;
-import org.apps8os.trafficsense.util.GmailReader.EmailException;
+import org.apps8os.trafficsense.util.EmailReader.EmailException;
 
 import com.google.gson.JsonObject;
 
@@ -269,6 +270,8 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
+		serviceIntent = new Intent(mContext, LocationService.class);
+		mContext.stopService(serviceIntent);
 		// TODO: add some code here if a new Service is introduced.
 	}
 	
@@ -388,6 +391,9 @@ public class TrafficsenseContainer {
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
+		case Constants.LOCATION_SERVICE:
+			serviceIntent = new Intent(mContext, LocationService.class);
+			break;
 		default:
 			System.out.println("DBG invalid serviceType");
 			break;
@@ -415,10 +421,10 @@ public class TrafficsenseContainer {
 	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
 		String journeyText = null;
 		Email email = null;
-		GmailReader reader = new GmailReader();
+		EmailReader reader = new EmailReader();
 
 		try {
-			reader.initMailbox(credential.getAddress(), credential.getPassword());
+			reader.initMailbox(credential);
 			/**
 			 * The first invocation gets the last (newest) message.
 			 */

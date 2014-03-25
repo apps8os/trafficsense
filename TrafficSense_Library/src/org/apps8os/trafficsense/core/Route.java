@@ -18,6 +18,7 @@ public class Route {
 	private String departure;
 	private int currentSegment=0;
 	private boolean coordsReady = false;
+	private boolean journeyEnded = false;
 	
 	
 	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
@@ -59,6 +60,13 @@ public class Route {
 
 	}
 	
+	public void setJourneyEnded(boolean state){
+		journeyEnded = state;
+	}
+	
+	public boolean isJourneyEnded(){
+		return journeyEnded;
+	}
 	//gets the last segment on the route
 	public Segment getLastSegment(){
 		return segmentList.get(segmentList.size()-1);

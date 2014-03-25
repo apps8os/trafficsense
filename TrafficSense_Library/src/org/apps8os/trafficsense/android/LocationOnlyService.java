@@ -84,6 +84,7 @@ public class LocationOnlyService extends Service implements
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//successfully connecting to the client also adds all the geofences
 		// TODO: should check return value!!
+
 		mContainer.serviceAttach(getApplicationContext());
 		mLocationClient.connect();
 		// TODO: check that we can indeed handle service restart.
@@ -147,7 +148,6 @@ public class LocationOnlyService extends Service implements
 			.build();
 	}
 	
-
 	
 	@Override
 	/**
@@ -158,7 +158,8 @@ public class LocationOnlyService extends Service implements
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		mContainer.getPebbleUiController().initializeSegment();
+		// TODO: start the pebble app here (not before)
+		mContainer.getPebbleUiController().update();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
 		this.sendBroadcast(coordsReadyIntent);
 		
@@ -176,7 +177,6 @@ public class LocationOnlyService extends Service implements
 			if(currentSegment == null){
 				break;
 			}
-			//TODO: check if the segment is a walking segment and if it is only set the last waypoint in it 
 			
 			//skip the first waypoint because it it also the last one in the last segment
 			for(int waypointIndex=0;;waypointIndex++){
@@ -250,32 +250,26 @@ public class LocationOnlyService extends Service implements
 			
 			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
-			if (mSegmentWaypointIndex == 1) {
-				// Update pebble when at first waypoint
-				mContainer.getPebbleUiController().initializeSegment();
-			}
+			//segment had ended
 			if(nextWaypoint == null){
 				
 				mRouteSegmentIndex++;
 				currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
 				
-				
+				//journey has ended
 				if(currentSegment==null){
 					mRouteSegmentIndex=-1;
 					mSegmentWaypointIndex=-1;
+					mContainer.getRoute().setJourneyEnded(true);
 					//inform clients that waypoint has changed
 					sendNextWaypointIntent("");
 					return; //the route has ended
 				}
-				mContainer.getPebbleUiController().initializeSegment();
-				mContainer.getPebbleUiController().alarmGetOff();
 				mSegmentWaypointIndex=0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
-			} else {
-				// If we are not at the last waypoint, only update the list on pebble
-				mContainer.getPebbleUiController().updateList();
 			}
-
+			// Update the pebble UI
+			mContainer.getPebbleUiController().update();
 			
 			//inform clients that the next waypoint has changed. 
 			if(nextWaypoint.getWaypointName()!=null)
@@ -309,7 +303,7 @@ public class LocationOnlyService extends Service implements
 	protected void makeNotificationAndAlert(){
 		
 		//display last notification
-		String msg = OutputLogic.getOutput();                 //TODO: I think we need to add an icon here to make this work. 
+		String msg = OutputLogic.getOutput();             
 		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
 		
 		Notification noti = new Notification.Builder(mContext)

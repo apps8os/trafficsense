@@ -50,7 +50,7 @@ public class MapActivity extends Activity implements OnLocationChangedListener {
         );
         mMap.setMyLocationEnabled(true);
         mContainer = TrafficsenseContainer.getInstance();
-        EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P");
+        EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
 		mContainer.startJourneyTracker(Constants.SERVICE_TIME_ONLY, cred);
         /*/mPointerOverlay = mMap.addGroundOverlay(new GroundOverlayOptions()
 	    	.image(BitmapDescriptorFactory.defaultMarker())
