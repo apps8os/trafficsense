@@ -236,10 +236,6 @@ public class JourneyParser {
 
 			temp1 = getTextArray().get(0).split(" ", 2);
 			temp2 = getTextArray().get(1).split(" ", 2);
-			// System.out.println("TEXT ARRAY: " + getTextArray().get(0) );
-
-			System.out.println("TEMP1: " + temp1[1]);
-			System.out.println("TEMP2: " + temp2[1]);
 
 			if ((temp1[1].compareTo(temp2[1])) == 0) {
 				// Exception case number 1
@@ -272,8 +268,9 @@ public class JourneyParser {
 				break;
 			case 1:
 				SegmentsObj.addProperty("mode", getTextArray().get(2));
+				break;
 
-			default: // TODO Create an exception;
+			default:throw 
 				break;
 			}
 
@@ -356,8 +353,7 @@ public class JourneyParser {
 		case 3:
 			addJsonObject(); // Add to json object the key value "start"
 			break;
-		default:
-			break;
+		default: break;
 		}
 
 		/*
@@ -414,10 +410,16 @@ public class JourneyParser {
 		Scanner scanner = new Scanner(jsonText);
 
 		while (scanner.hasNextLine()) {
+
 			String line = scanner.nextLine();
-			parseOneLine(line);
+			try {
+				parseOneLine(line);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
 			if (line.equals("Arrival") || line.equals("Perillä")
 					|| line.equals("Ankomst")) {
+				/* Reach the end of the plain text journey */
 				break;
 			}
 		}
