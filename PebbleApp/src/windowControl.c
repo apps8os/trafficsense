@@ -8,6 +8,7 @@ TextLayer* alarmText;
 int viewMode;
 
 // Bassic window related variables
+AppTimer* timerHandle;
 TextLayer* lineCode;
 TextLayer* timeUnit;
 TextLayer* timeAmount;
@@ -95,7 +96,7 @@ void basic_window_loop() {
     timeout_ms = 60000 * 60;
     set_time_text_by_unit(UNIT_HOURS);
   }
-  app_timer_register(timeout_ms, (AppTimerCallback)basic_window_loop, NULL);
+  timerHandle = app_timer_register(timeout_ms, (AppTimerCallback)basic_window_loop, NULL);
 }
 
 void show_basic_window() {
@@ -106,9 +107,14 @@ void show_basic_window() {
   strncat(stopCodeAndNameBuff, firstStopName, 30);
   text_layer_set_text(stopCodeAndName, stopCodeAndNameBuff); // Set the text of the stop
   text_layer_set_text(lineCode, currentLineCode);
-  currentWindow = WINDOW_BASIC;
-  window_stack_pop(true); // Remove 3stop-window from the'window stack
-  window_stack_push(windowArray[WINDOW_BASIC], true); // Push the basic window (show it)
+  if (currentWindow != WINDOW_BASIC) {
+    currentWindow = WINDOW_BASIC;
+    window_stack_pop(true); // Remove 3stop-window from the'window stack
+    window_stack_push(windowArray[WINDOW_BASIC], true); // Push the basic window (show it)
+  } else {
+    // If for some reason the basic window is still active, stop the current timer
+    app_timer_cancel(timerHandle);
+  }
   basic_window_loop();
 }
 
