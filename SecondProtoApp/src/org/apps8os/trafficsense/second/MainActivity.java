@@ -102,10 +102,12 @@ public class MainActivity extends Activity {
 		if(mContainer.isJourneyStarted() == true){
 			start.setVisible(false);
 			stop.setVisible(true);
+			schematic.setVisible(true);
 		}
 		else{
 			start.setVisible(true);
 			stop.setVisible(false);
+			schematic.setVisible(false);
 		}
 		return(true);
 	}
@@ -125,10 +127,10 @@ public class MainActivity extends Activity {
 	        	return true;
 	        case R.id.menu_schematic_view:
 	        	Intent myIntent = new Intent(MainActivity.this, SchematicView.class);
-	        	MainActivity.this.startActivity(myIntent);
+	        	this.startActivity(myIntent);
 	        	return true;
 	        default:
-	            return super.onOptionsItemSelected(item);
+	            return super.onOptionsItemSelected(item); 
 	    }
 	}
 	

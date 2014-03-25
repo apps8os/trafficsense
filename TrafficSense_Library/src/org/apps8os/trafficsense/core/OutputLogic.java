@@ -29,13 +29,13 @@ public class OutputLogic {
 		
 		//if the next stop is the last stop on a segment
 		if(curWaypointIndex == waypointList.size()-1){
-			String message = String.format("Next stop is %s. Get off here", waypointList.get(curWaypointIndex).getWaypointName());
+			String message = String.format("Next stop is %s. Get off there.", waypointList.get(curWaypointIndex).getWaypointName());
 			return message;
 		}
 		
 		//if the current segment is a walking one
 		if(curSegment.isWalking() == true){
-			String message = "Walk to next stop"; 
+			String message = "Walk to the next stop."; 
 			return message;
 		}
 		
