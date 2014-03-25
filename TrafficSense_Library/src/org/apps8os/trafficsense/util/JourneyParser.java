@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.PatternSyntaxException;
@@ -18,6 +19,7 @@ import com.google.gson.JsonObject;
  *
  * @see #parseString(String)
  */
+
 public class JourneyParser {	
 	
 	/** The Gson JSON object for the current journey. */
@@ -166,6 +168,28 @@ public class JourneyParser {
 		_segmentsArray.add(value);
 	}
 
+	/** 
+	 * 
+	 * 
+	 * 
+	 * */
+	
+	private boolean areEqual(String s1,String s2){
+		
+		Collator collator = Collator.getInstance();
+		collator.setStrength(Collator.SECONDARY);
+		
+		if(collator.compare(s1, s2) == 0){
+			System.out.println("EQUAL: " + s1 +" = " + s2);
+			return true;
+		}
+		else{
+			System.out.println("NOT EQUAL: " + s1 +" != " + s2);
+			return false;
+		}
+	}
+	
+	
 	/**
 	 * Will add the elements to the JSON object
 	 * 
@@ -183,7 +207,7 @@ public class JourneyParser {
 	 * Exception Conditions from the above segments structure:
 	 * 		1) Two first lines can be equal and only third line has the mode
 	 * 			
-	 * Last line always string "Arrival" 
+	 * Last line always string "Arrival" || "Perill�"(FIN lang) || "Ankomst"(SWE lang)
 	 * 
 	 * @see #organizeJson(String)
 	 */
@@ -271,10 +295,13 @@ public class JourneyParser {
 
 		// TODO: check _textArray.size() >= 2 first!
 		
-		if (!getTextArray().get(1).equals("Arrival")
-				&& !getTextArray().get(1).equals("Perillä")
-				&& !getTextArray().get(1).equals("Ankomst")) {
+//		if (!getTextArray().get(1).equals("Arrival")
+//				&& !getTextArray().get(1).equals("Perillä")
+//				&& !getTextArray().get(1).equals("Ankomst")) {
 			
+		if ( (! this.areEqual(getTextArray().get(1), "Arrival")) &&
+			 (!this.areEqual(getTextArray().get(1), "Perill�")) &&
+			 (!this.areEqual(getTextArray().get(1), "Ankomst")) ){
 		
 			// TODO: check str_split[] first!
 			
@@ -313,9 +340,17 @@ public class JourneyParser {
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
 				System.out.println("oi2 ");
+				
+//				if (!getTextArray().get(exception + 1).contains("Walking")
+//						&& !getTextArray().get(exception + 1).contains("Kävelyä")
+//						&& !getTextArray().get(exception + 1).contains("Gång")) {
+					
 				if (!getTextArray().get(exception + 1).contains("Walking")
 						&& !getTextArray().get(exception + 1).contains("Kävelyä")
-						&& !getTextArray().get(exception + 1).contains("Gång")) {
+						&& !getTextArray().get(exception + 1).contains("G�ng")) {
+					
+					
+					
 					// If the user is not walking will have a stopCode for each
 					// point
 					// TODO: This is _NOT_ the case ...
@@ -325,6 +360,7 @@ public class JourneyParser {
 					int start, end;
 					start = str_split[1].indexOf("(") + 1;
 					end = str_split[1].indexOf(")");
+					
 					if (start == -1 || end == -1) {
 						System.out.println("DBG addJsonObject start/end = -1");
 					}
@@ -397,7 +433,7 @@ public class JourneyParser {
 			addTextArray(getTxtLine());
 		}
 
-		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
+		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perill�")
 				|| getTxtLine().equals("Ankomst")) {
 
 			addJsonObject();
