@@ -16,38 +16,36 @@ import com.google.gson.JsonObject;
 
 /**
  * Class for parsing plain text journey into a Gson JSON object.
- *
+ * 
+ * The parser accepts the languages english, finnish and swedish
+ * 
  * JSON object is organize as follow :
  * 
- *"_mainObj"(JsonObject) contains :
- *	Property "date"
- * 	Property "start"
- *	Property "dest"
- *	Property "arrivalTime"
- *	
- *	Property "segments" that is JsonArray called "_segmentsArray" containing:
- * 		"SegmentsObj"(JsonObject) contains:	
- * 			Property "startTime"
- * 			Property "startPoint"
- *			Property "mode"			
- *			
- *			Property "waypoints" that is JsonArray called "waypointsArray" containing:
- *				"waypointObj"(JsonObject ) contains:
- *					Property "time"
- *					Property "name"					
- *					Property "stopCode" (!walking) 
- *
+ * "_mainObj"(JsonObject) contains : Property "date" Property "start" Property
+ * "dest" Property "arrivalTime"
+ * 
+ * Property "segments" that is JsonArray called "_segmentsArray" containing:
+ * "SegmentsObj"(JsonObject) contains: Property "startTime" Property
+ * "startPoint" Property "mode"
+ * 
+ * Property "waypoints" that is JsonArray called "waypointsArray" containing:
+ * "waypointObj"(JsonObject ) contains: Property "time" Property "name" Property
+ * "stopCode" (!walking)
+ * 
  * @see #parseString(String)
  */
 
-public class JourneyParser {	
-	
+public class JourneyParser {
+
 	/** The Gson JSON object for the current journey. */
 	private JsonObject _mainObj;
 
 	private JsonArray _segmentsArray;
 
-	
+	/*
+	 * Temporary Array stores the values of each segment
+	 * (startTime,startPoint,mode,waypoints)
+	 */
 	private ArrayList<String> _textArray = new ArrayList<String>();
 
 	/**
@@ -70,9 +68,9 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Get the line at this moment 
+	 * Get the number of the line at this moment
 	 * 
-	 * @return the line at this moment 
+	 * @return the line number
 	 */
 	private int getLine() {
 		return _nline;
@@ -86,35 +84,30 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Return the next non-empty journey text line to be processed.
+	 * Return text line of the moment
 	 * 
-	 * @return next non-empty journey text line to be processed.
+	 * @return text line
 	 */
 	private String getTxtLine() {
 		return _txtLine;
 	}
 
 	/**
-	 * Set the next non-empty journey text line to be processed.
+	 * Set the text line of the moment
 	 * 
 	 * @param txtLine
 	 *            the journey text line.
 	 * @see #parseOneLine(String)
 	 */
 	private void setTxtLine(String txtLine) {
-		// TODO: should we check if the line is empty here?
 		_txtLine = txtLine;
 	}
 
 	/**
-	 * TODO: documentation
+	 * Temporary array that stores one information segment at time one segment
+	 * has startTime,startPoint,mode,waypoints
 	 * 
-	 * TODO: this method is only used internally in this class and on most
-	 * occasion the result is .get()-ed. Is this level of abstraction really
-	 * necessary? TODO: Or maybe refactor it to return i-th element directly,
-	 * after some checks?
-	 * 
-	 * @return
+	 * @return array of strings carrying the information of one segment
 	 */
 	private ArrayList<String> getTextArray() {
 
@@ -122,8 +115,7 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Clear all the elements of the text array 
-	 * that is a segment of 
+	 * Clear all the elements of the text array
 	 * 
 	 * @see #getTextArray()
 	 */
@@ -133,8 +125,11 @@ public class JourneyParser {
 	}
 
 	/**
+	 * Add a line of the segment to the temporary TextArray
 	 * 
 	 * @param line
+	 * 
+	 * @see #getTextArray()
 	 */
 	private void addTextArray(String line) {
 		// trim removes the white space at the beginning and end
@@ -153,8 +148,10 @@ public class JourneyParser {
 	/**
 	 * Add a String property field to journey object.
 	 * 
-	 * @param key key as a String.
-	 * @param value value as a String.
+	 * @param key
+	 *            key as a String.
+	 * @param value
+	 *            value as a String.
 	 */
 	private void addProperty(String key, String value) {
 		_mainObj.addProperty(key, value);
@@ -163,228 +160,153 @@ public class JourneyParser {
 	/**
 	 * Add a JsonElement property field to journey object.
 	 * 
-	 * @param key key as a String.
-	 * @param element value as a JsonElement.
+	 * @param key
+	 *            key as a String.
+	 * @param element
+	 *            value as a JsonElement.
 	 */
 	private void addProperty(String key, JsonElement element) {
 		_mainObj.add(key, element);
 	}
 
 	/**
-	 * TODO: documentation
+	 * Contains all the segments of the parser
 	 * 
-	 * @return
+	 * @return segments of the parser
 	 */
 	private JsonArray getSegmentsArray() {
 		return _segmentsArray;
 	}
 
 	/**
-	 * TODO: documentation
+	 * Set the each segment of the parser One segment is arranged:
+	 * "startTime","startPoint","mode","waypoints"
 	 * 
-	 * @param value
 	 */
 	private void setSegmentsArray(JsonElement value) {
 		_segmentsArray.add(value);
 	}
 
-	/** 
-	 * 
-	 * 
-	 * 
-	 * */
-	
-	private boolean areEqual(String s1,String s2){
-		
-		Collator collator = Collator.getInstance();
-		collator.setStrength(Collator.SECONDARY);
-		
-		if(collator.compare(s1, s2) == 0){
-			System.out.println("EQUAL: " + s1 +" = " + s2);
-			return true;
-		}
-		else{
-			System.out.println("NOT EQUAL: " + s1 +" != " + s2);
-			return false;
-		}
-	}
-	
-	
 	/**
 	 * Will add the elements to the JSON object
 	 * 
-	 * General Structure :
-	 * 	line 1 add the time 
-	 * 	line 2 is always the string "Departure" do nothing
+	 * General Structure : line 1 add the time line 2 is always the string
+	 * "Departure" do nothing
 	 * 
-	 * 	line 3 until  second from the last is always segments and have the  
-	 * following struct:
-	 *	Time and location
-	 * 	Transportation mode (e.g Walking Bus etc)
-	 * 	Time location (several lines)
-	 *  Stop condition is through a blank line
+	 * line 3 until second from the last is always segments and have the
+	 * following struct: Time and location Transportation mode (e.g Walking Bus
+	 * etc) Time location (several lines) Stop condition is through a blank line
 	 * 
-	 * Exception Conditions from the above segments structure:
-	 * 		1) Two first lines can be equal and only third line has the mode
-	 * 			
-	 * Last line always string "Arrival" || "Perill�"(FIN lang) || "Ankomst"(SWE lang)
+	 * Exception Conditions from the above segments structure: 1) Two first
+	 * lines can be equal and only third line has the mode
+	 * 
+	 * Last line always string "Arrival" || "Perillä"(FIN lang) || "Ankomst"(SWE
+	 * lang)
 	 * 
 	 * @see #organizeJson(String)
 	 */
 	private void addJsonObject() {
 
-		
 		System.out.println("DBG addJsonObject nline:" + _nline + " arraySz:"
 				+ _textArray.size() + " txtLine:" + _txtLine);
-		
-		// TODO: Try and catch exception
-		
-		/* temporary array string, store the the line of a segment 
-			from the text array in two parts: time and location */
-			String[] str_split = null; 
-			int exception = 0 ; // Number of the exception case. 0 Normal case
-			String[] temp1, temp2; // Temporaries variables 
 
+		// TODO: Try and catch exception
+
+		/*
+		 * temporary array string, store the the line of a segment from the text
+		 * array in two parts: time and location
+		 */
+		String[] str_split = null;
+		int exception = 0; // Number of the exception case. 0 Normal case
+		String[] temp1, temp2; // Temporaries variables
 
 		if (getLine() == 1) {
 			addProperty("date", getTxtLine());
 			return;
 		}
 
-		
 		if (this.getLine() == 3) {
 			String[] parts = getTxtLine().split(" ", 2);
 			addProperty("start", parts[1]);
 			return;
 		}
-		
-		System.out.println("************************");
-		System.out.println("************************");
-		System.out.println("*** ADD JSON OBJECT ****");
-		System.out.println("************************");
-		System.out.println("************************");
-		
-		
-		
-		if(getTextArray().get(1).contains(":")){
+
+		if (getTextArray().get(1).contains(":")) {
 			// We are in an exception case
 
+			temp1 = getTextArray().get(0).split(" ", 2);
+			temp2 = getTextArray().get(1).split(" ", 2);
+			// System.out.println("TEXT ARRAY: " + getTextArray().get(0) );
 
+			System.out.println("TEMP1: " + temp1[1]);
+			System.out.println("TEMP2: " + temp2[1]);
 
-			temp1 = getTextArray().get(0).split(" ",2) ;
-			temp2 = getTextArray().get(1).split(" ",2);
-			//System.out.println("TEXT ARRAY: " + getTextArray().get(0) );
+			if ((temp1[1].compareTo(temp2[1])) == 0) {
+				// Exception case number 1
 
-				System.out.println("TEMP1: " + temp1[1]);
-				System.out.println("TEMP2: " + temp2[1]); 
-				int q = temp1[1].compareTo(temp2[1]) ;
-				System.out.println("Q: " + q);
-			// Exception case number 1
-			if(  q == 0){
 				// split the string in two parts through a " "
-
 				str_split = getTextArray().get(1).split(" ", 2);
 				exception = 1;
-				System.out.println("EXCEPTION: " + exception);
-
-
-			}
-		}else{
-				// Normal case
-				System.out.println("ENTREI: " +  getTextArray().get(0));
-				try{
-					str_split = getTextArray().get(0).split(" ", 2); 
-					//System.out.println("NORMAL CASE: " + exception + "->" + str_split[1]);
-
-				}catch(Exception e){
-					System.out.println("Dobtttt");
-					e.printStackTrace();
-				}	
-
-
+				// System.out.println("EXCEPTION: " + exception);
 
 			}
-		
-	
-		System.out.println("SPLIT");
-		/**
-		 * TODO: refactor! 1. Check if _textArray.size() == 0 2. If not, .get(0)
-		 * and split() 3. What if split() gives something other than expected??
-		 */
-		
+		} else {
+			// Normal case
+			str_split = getTextArray().get(0).split(" ", 2);
+			// System.out.println("NORMAL CASE: " + exception + "->" +
+			// str_split[1]);
+		}
 
-		// TODO: check _textArray.size() >= 2 first!
-		
-//		if (!getTextArray().get(1).equals("Arrival")
-//				&& !getTextArray().get(1).equals("Perillä")
-//				&& !getTextArray().get(1).equals("Ankomst")) {
-			
-		if ( (! this.areEqual(getTextArray().get(1), "Arrival")) &&
-			 (!this.areEqual(getTextArray().get(1), "Perill�")) &&
-			 (!this.areEqual(getTextArray().get(1), "Ankomst")) ){
-		
-			// TODO: check str_split[] first!
-			
+		if (!getTextArray().get(1).equals("Arrival")
+				&& !getTextArray().get(1).equals("Perillä")
+				&& !getTextArray().get(1).equals("Ankomst")) {
+
 			JsonObject SegmentsObj = new JsonObject();
 			SegmentsObj.addProperty("startTime", str_split[0]);
 			SegmentsObj.addProperty("startPoint", str_split[1]);
-			
-			System.out.println("vou adicionar a propriedade");
-		
-			System.out.println("CASE:" + exception);
-			switch(exception) {
-			case 0: SegmentsObj.addProperty("mode", getTextArray().get(1));
-					break;
-			case 1: SegmentsObj.addProperty("mode", getTextArray().get(2)); 
-			
-			default: //TODO Create an exception; 
-					break;
+
+			// System.out.println("CASE:" + exception);
+			switch (exception) {
+			case 0:
+				SegmentsObj.addProperty("mode", getTextArray().get(1));
+				break;
+			case 1:
+				SegmentsObj.addProperty("mode", getTextArray().get(2));
+
+			default: // TODO Create an exception;
+				break;
 			}
-			
-			System.out.println("ADICIONEIIIIIII");
-			
+
 			setSegmentsArray(SegmentsObj);
 
-			System.out.println("SETTTTTT");
-			
 			JsonArray waypointsArray = new JsonArray();
 
-			// TODO: what to do if .size() = 0 ?
-			System.out.println("ARRAY SIZE: "+ getTextArray().size() + "exception: " + exception );
-			for (int i = exception+2; i < getTextArray().size(); i++) {
-				System.out.println("DENTRO DO FOR");
+			// System.out.println("ARRAY SIZE: " + getTextArray().size()
+			// + "exception: " + exception);
+
+			for (int i = exception + 2; i < getTextArray().size(); i++) {
+
 				JsonObject waypointObj = new JsonObject();
 
 				str_split = getTextArray().get(i).split(" ", 2);
 
-				System.out.println("oi: " + str_split[0] + " "+ str_split[1]);
-
-				System.out.println("DBG: textArray "+ getTextArray().get(i));
+				System.out.println("DBG: textArray " + getTextArray().get(i));
 
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
-				System.out.println("oi2 ");
-				
-//				if (!getTextArray().get(exception + 1).contains("Walking")
-//						&& !getTextArray().get(exception + 1).contains("Kävelyä")
-//						&& !getTextArray().get(exception + 1).contains("Gång")) {
-					
+
 				if (!getTextArray().get(exception + 1).contains("Walking")
-						&& !getTextArray().get(exception + 1).contains("Kävelyä")
-						&& !getTextArray().get(exception + 1).contains("G�ng")) {
-					
-					
-					
-					// If the user is not walking will have a stopCode for each
-					// point
-					// TODO: This is _NOT_ the case ...
-					
-					System.out.println("STRING: " + str_split[0] + " "+ str_split[1]);
+						&& !getTextArray().get(exception + 1).contains(
+								"Kävelyä")
+						&& !getTextArray().get(exception + 1).contains("Gång")) {
+
+					// System.out.println("STRING: " + str_split[0] + " "+
+					// str_split[1]);
 					String stopCode;
 					int start, end;
 					start = str_split[1].indexOf("(") + 1;
 					end = str_split[1].indexOf(")");
-					
+
 					if (start == -1 || end == -1) {
 						System.out.println("DBG addJsonObject start/end = -1");
 					}
@@ -410,11 +332,6 @@ public class JourneyParser {
 			addProperty("arrivalTime", str_split[0]);
 			addProperty("segments", this.getSegmentsArray());
 		}
-		System.out.println("*********************");
-		System.out.println("*********************");
-		System.out.println("FIM");
-		System.out.println("*********************");
-		System.out.println("*********************");
 	}
 
 	/**
@@ -439,7 +356,8 @@ public class JourneyParser {
 		case 3:
 			addJsonObject(); // Add to json object the key value "start"
 			break;
-		default: break;
+		default:
+			break;
 		}
 
 		/*
@@ -449,21 +367,18 @@ public class JourneyParser {
 		if (getTxtLine().trim().equals("")) {
 			// The line is blank
 			addJsonObject();
-			// System.out.println("ARRAY: " + text);
-			// System.out.println("FLUSH ********");
 			flushTextArray();
 			return;
 		} else {
 			addTextArray(getTxtLine());
 		}
 
-		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perill�")
+		if (getTxtLine().equals("Arrival") || getTxtLine().equals("Perillä")
 				|| getTxtLine().equals("Ankomst")) {
 
 			addJsonObject();
 			flushTextArray();
 		}
-
 	}
 
 	/**
@@ -475,11 +390,11 @@ public class JourneyParser {
 		return _mainObj.toString();
 	}
 
-
 	/**
 	 * Parse the current line of the journey.
 	 * 
-	 * @param line line to be parsed      
+	 * @param line
+	 *            line to be parsed
 	 */
 	private void parseOneLine(String line) {
 		System.out.println("DBG parseOneLine: " + line);
@@ -491,19 +406,17 @@ public class JourneyParser {
 	/**
 	 * Parse a journey supplied in a String with line breaks.
 	 * 
-	 * @param jsonText plain text journey with line breaks.
+	 * @param jsonText
+	 *            plain text journey with line breaks.
 	 */
 	public void parseString(String jsonText) {
-		System.out.println("**************************");
-		System.out.println("**************************");
-		System.out.println("I AM HERE");
-		System.out.println("**************************");
-		System.out.println("**************************");
+
 		Scanner scanner = new Scanner(jsonText);
+
 		while (scanner.hasNextLine()) {
 			String line = scanner.nextLine();
 			parseOneLine(line);
-			if (line.equals("Arrival") || line.equals("Perill�")
+			if (line.equals("Arrival") || line.equals("Perillä")
 					|| line.equals("Ankomst")) {
 				break;
 			}
@@ -512,13 +425,14 @@ public class JourneyParser {
 	}
 
 	/**********************************************************************
-	 ***********************	DEPRECATED METHODS	***********************
+	 *********************** DEPRECATED METHODS ***********************
 	 **********************************************************************/
-	
+
 	/**
 	 * Read and parse a plain text journey from a file.
 	 * 
-	 * @param fileName path to the file.
+	 * @param fileName
+	 *            path to the file.
 	 * @deprecated replaced by {@link #parseString(String)}
 	 */
 	public void parsingFile(String fileName) {
@@ -533,7 +447,7 @@ public class JourneyParser {
 			while ((line = bufferedReader.readLine()) != null) {
 				parseOneLine(line);
 				if (getTxtLine().equals("Arrival")
-						|| getTxtLine().equals("Perill�")
+						|| getTxtLine().equals("Perillä")
 						|| getTxtLine().equals("Ankomst")) {
 					// Document it was already all parsed
 					break;
@@ -546,13 +460,13 @@ public class JourneyParser {
 			System.out.println("Error reading file '" + fileName + "'");
 		}
 	}
-	
+
 	/**
 	 * Write parsed journey in JSON to a file.
 	 * 
 	 * @param outFileName
 	 *            path to file.
-	 * @deprecated are we going to access sdcard ?
+	 * @deprecated not need anymore
 	 * @see #parsingFile(String)
 	 */
 	public void writeJsonFile(String outFileName) {
