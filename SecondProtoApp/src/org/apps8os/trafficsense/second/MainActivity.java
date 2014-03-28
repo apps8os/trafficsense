@@ -12,20 +12,26 @@ import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
 
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -93,6 +99,9 @@ public class MainActivity extends Activity {
 	    return super.onCreateOptionsMenu(menu);
 	}
 	
+	/**
+	 * Makes the options menu. 
+	 */
 	public boolean onPrepareOptionsMenu(Menu menu){
 
 		super.onPrepareOptionsMenu(menu);
@@ -144,11 +153,16 @@ public class MainActivity extends Activity {
 		
 	}
 	
+	
+	
 	/**
 	 * Stops the journey.
 	 */
 	private void stopJourney(){
 		mContainer.stopJourney();
+		map.clear();
+		String msg[] = {"Welcome"};
+		showList(msg);
 	}
 	
 	private void showList(String[] messages){
@@ -170,6 +184,9 @@ public class MainActivity extends Activity {
 		map.clear();
 		Route r = mContainer.getRoute();
 		boolean zoomed = false;
+		//Get the image that will be used as the bus stop icon
+		int resID = getResources().getIdentifier("bus_stop_marker" , "drawable", getPackageName());
+		Bitmap icon = resizeIcon(resID);	
 		PolylineOptions o = new PolylineOptions().geodesic(true); 
 		for (Segment s : r.getSegmentList()) {
 			if (s.isWalking()) { 
@@ -183,6 +200,10 @@ public class MainActivity extends Activity {
 				}
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 				
+				map.addMarker(new MarkerOptions()
+								.position(coord)
+								.title(w.getWaypointName())
+								.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 				o.add(coord);
 				
 				if(zoomed == false){
@@ -192,6 +213,38 @@ public class MainActivity extends Activity {
 			}
 		}
 		map.addPolyline(o);
+	
+	}
+	/**
+	 * Zooms the map to the current waypoint. 
+	 */
+	public void zoomToCurrentWaypoint(){
+		ArrayList<Segment> segments = mContainer.getRoute().getSegmentList();
+		int index = mContainer.getRoute().getCurrentIndex();
+		Waypoint curWay;
+		//if the current segment is a walking one then the location of waypoints will be (0,0)
+		//so we need to get the next index which is always not walking. 
+		if(segments.get(index).isWalking()){
+			curWay = segments.get(index+1).getWaypoint(0);
+		}
+		else{
+			curWay = segments.get(index).getCurrentWaypoint();
+		}
+		LatLng loc = new LatLng(curWay.getLatitude(), curWay.getLongitude());
+		map.animateCamera(CameraUpdateFactory.newLatLng(loc));
+	}
+	
+	
+	
+	/**
+	 * resize the icon used in the map for busstops. 
+	 * @param resID
+	 * @return
+	 */
+	public Bitmap resizeIcon(int resID){
+		Bitmap origIcon = BitmapFactory.decodeResource(getResources(),resID);
+		Bitmap newIcon = Bitmap.createScaledBitmap(origIcon, 25, 25, false);
+		return newIcon;
 	}
 	
 	/**
