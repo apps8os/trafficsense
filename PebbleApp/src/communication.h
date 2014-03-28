@@ -40,6 +40,11 @@ be set when the segment has changed */
 stop of the segment*/
 #define COMMAND_SHOW_3STOP_WINDOW 3
 
+/* Commands that can be sent from pebble to android
+*/
+#define PEBBLE_COMMAND_GET 	0 // Request for currently required data from the Android app
+
+
 // Initialize AppMessage
 void init_app_message();
 // Function to send a command with value cmd to Android. Currently not used.

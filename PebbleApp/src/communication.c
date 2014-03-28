@@ -79,6 +79,14 @@ void message_dropped(DictionaryIterator *iterator) {
 	// TODO: do something
 }
 
+void message_failed(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  
+}
+
+void message_sent(DictionaryIterator *iterator, void *context) {
+
+}
+
 void init_app_message() {
 	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
 	app_message_open(APP_MESSAGE_INBOX_SIZE_MINIMUM, 16);
@@ -88,6 +96,6 @@ void init_app_message() {
 	app_message_register_inbox_dropped((AppMessageInboxDropped)message_dropped);
 	
 	//and for messages to phone (outbox)
-	//app_message_register_outbox_sent(message_sent);
-	//app_message_register_outbox_failed(message_failed);
+	app_message_register_outbox_sent((AppMessageOutboxSent)message_sent);
+	app_message_register_outbox_failed((AppMessageOutboxFailed)message_failed);
 }

@@ -7,7 +7,7 @@ Window* alarmWindow;
 TextLayer* alarmText;
 int viewMode;
 
-// Bassic window related variables
+// Basic window related variables
 AppTimer* timerHandle;
 TextLayer* lineCode;
 TextLayer* timeUnit;
@@ -15,6 +15,10 @@ TextLayer* timeAmount;
 TextLayer* stopCodeAndName;
 static char timeAmountStr[4];
 char stopCodeAndNameBuff[30];
+
+// No connection window related variables
+char errorStrArray[10][200]; 
+TextLayer* errorText;
 
 void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context) {
   //Called when the MIDDLE button is clicked once.
@@ -126,11 +130,31 @@ void show_3stop_window() {
   }
 }
 
+void show_error_window(int error_code) {
+  window_stack_push(windowArray[WINDOW_ERROR], true);
+  text_layer_set_text(errorText, errorStrArray[error_code]);
+}
+
+void init_error_window() {
+  // Initialize the error strings TODO: define them elsewhere
+  strncpy(errorStrArray[ERROR_WAITING], "Waiting for route information from the Android application...", 200);
+  strncpy(errorStrArray[ERROR_NO_CONNECTION], "Could not connect to the TrafficSense Android application. Make sure that your phone is connected and has Bluetooth on and that the application is running.", 200);
+  strncpy(errorStrArray[ERROR_NOT_READY], "The Android application has not finished loading the route. Make sure that you have started the route and wait until the application is ready", 200);
+
+  windowArray[WINDOW_ERROR] = window_create();
+  Layer *window_layer = window_get_root_layer(windowArray[WINDOW_ERROR]);
+  GRect bounds = layer_get_frame(window_layer);
+
+  // Initialize the line code text layer
+  errorText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+  layer_add_child(window_layer, text_layer_get_layer(lineCode));
+}
+
 void init_basic_window() {
   // Initialize the time units
 
   windowArray[WINDOW_BASIC] = window_create();
-  window_stack_push(windowArray[WINDOW_BASIC], true);
+  //window_stack_push(windowArray[WINDOW_BASIC], true);
   window_set_click_config_provider(windowArray[WINDOW_BASIC], (ClickConfigProvider)click_config_provider);
   Layer *window_layer = window_get_root_layer(windowArray[WINDOW_BASIC]);
   GRect bounds = layer_get_frame(window_layer);
@@ -162,6 +186,7 @@ void init_basic_window() {
 void init_windows() {
   currentWindow = WINDOW_BASIC;
   init_basic_window();
+  init_error_window();
 
   windowArray[WINDOW_3STOP] = window_create();
   //window_stack_push(windowArray[WINDOW_3STOP], true /* Animated */);
@@ -169,4 +194,5 @@ void init_windows() {
   // The click config for sending the test command to Android
   window_set_click_config_provider(windowArray[WINDOW_3STOP], (ClickConfigProvider)click_config_provider);
   init_menu(windowArray[WINDOW_3STOP]);
+  show_error_window(ERROR_WAITING); // Tell the user to wait
 }
