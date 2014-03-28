@@ -2,6 +2,8 @@ package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 

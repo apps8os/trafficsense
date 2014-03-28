@@ -12,20 +12,26 @@ import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
 
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -93,6 +99,9 @@ public class MainActivity extends Activity {
 	    return super.onCreateOptionsMenu(menu);
 	}
 	
+	/**
+	 * Makes the options menu. 
+	 */
 	public boolean onPrepareOptionsMenu(Menu menu){
 
 		super.onPrepareOptionsMenu(menu);
@@ -144,11 +153,16 @@ public class MainActivity extends Activity {
 		
 	}
 	
+	
+	
 	/**
 	 * Stops the journey.
 	 */
 	private void stopJourney(){
 		mContainer.stopJourney();
+		map.clear();
+		String msg[] = {"Welcome"};
+		showList(msg);
 	}
 	
 	private void showList(String[] messages){
@@ -176,15 +190,15 @@ public class MainActivity extends Activity {
 				// Don't draw walking segments because they don't have coordinates
 				continue;
 			}
-			
+
 			for (Waypoint w : s.getWaypointList()) {
 				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
 					continue;
 				}
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-				
+
 				o.add(coord);
-				
+
 				if(zoomed == false){
 					centerLocationOnMap(coord);
 					zoomed = true;
@@ -192,6 +206,20 @@ public class MainActivity extends Activity {
 			}
 		}
 		map.addPolyline(o);
+	}
+	
+	
+	
+	
+	/**
+	 * resize the icon used in the map for busstops. 
+	 * @param resID
+	 * @return
+	 */
+	public Bitmap resizeIcon(int resID){
+		Bitmap origIcon = BitmapFactory.decodeResource(getResources(),resID);
+		Bitmap newIcon = Bitmap.createScaledBitmap(origIcon, 25, 25, false);
+		return newIcon;
 	}
 	
 	/**
