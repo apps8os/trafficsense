@@ -12,10 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="left"
-        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textAppearance="?android:attr/textAppearanceMedium"
          />
 
     <ExpandableListView
+        android:groupIndicator="@drawable/ic_launcher"
         android:id="@+id/listView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

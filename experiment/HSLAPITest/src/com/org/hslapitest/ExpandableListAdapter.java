@@ -99,6 +99,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 		   // Group group = (Group) getGroup(groupPosition);
 		    
 		    ((CheckedTextView) convertView).setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
+		    //((CheckedTextView) convertView).setCheckMarkDrawable(R.drawable.ic_launcher);
 		    ((CheckedTextView) convertView).setChecked(isExpanded);
 		    return convertView;
 		  }
