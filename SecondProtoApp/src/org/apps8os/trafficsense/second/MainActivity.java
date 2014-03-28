@@ -161,7 +161,7 @@ public class MainActivity extends Activity {
 	private void stopJourney(){
 		mContainer.stopJourney();
 		map.clear();
-		String msg[] = {"Welcome"};
+		String msg[] = {"Welcome"}; 
 		showList(msg);
 	}
 	

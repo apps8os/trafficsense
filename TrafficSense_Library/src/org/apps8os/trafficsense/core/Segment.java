@@ -167,7 +167,7 @@ public class Segment {
 				transportType = RouteConstants.METRO;
 			} else	if (mode.equals("ferry")) {
 				transportType = RouteConstants.FERRY;
-			} else	if(mode.startsWith("Walking")) {
+			} else	if(mode.startsWith("Walking") | mode.startsWith("Kävelyä") | mode.startsWith("Gång")) {
 				isWalking = true;
 				transportType = RouteConstants.WALKING;
 			} else {
