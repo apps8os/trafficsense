@@ -1,27 +1,52 @@
-Tiistai 25.3.2014
-Lähtö
-16:07 Konemies, Esbo 
-    Kävelyä 0,2 km 
-    16:08 Tietotie 
-    16:09 Otaniementie 
-    16:10 Konemies 
+Friday 28.3.2014
+Departure
+18:01 Konemies, Espoo 
+    Walking 0,1 km 
+    18:01 Konemies 
  
-16:10 Konemies 
-    550 
-    16:10 Konemies (E2217) 
-    16:13 Innopoli (E2220) 
-    16:14 Maarinsilta (E2227) 
-    16:17 Turvesuontie (E1216) 
-    16:18 Laajalahdenristi (E1201) 
-    16:20 Säterinmetsä (E1162) 
-    16:21 Leppävaara (E1117) 
+18:01 Konemies 
+    103 
+    18:01 Konemies (E2213) 
+    18:02 Alvar Aallon puisto (E2226) 
+    18:03 Dipoli (E2204) 
+    18:04 Miestenmetsä (E2215) 
+    18:06 Keilaniemi (E2024) 
+    18:07 Itämetsä (E2022) 
+    18:07 Karhusaari (E2310) 
+    18:09 Hanasaari (E2332) 
+    18:13 Länsiväylä (1014) 
+    18:15 Lapinrinne (1233) 
+    18:16 Kamppi, tulolaituri () 
  
-16:21 Leppävaara 
-    Kävelyä 0,4 km 
-    16:21 Leppävaara 
-    16:21 Leppävaarantie 
-    16:21 Turuntie 
- 
-16:26 Leppävaara, Esbo 
-Perillä
+18:16 Kamppi, tulolaituri 
+    Walking 0,1 km 
+    18:16 Kamppi, tulolaituri 
+    18:16 Fredrikinkatu 
+    18:16 Kamppi (M) 
 
+18:16 Kamppi (M)
+18:21 Kamppi (M) 
+    2 
+    18:21 Kamppi (M) (0234) 
+    18:23 Simonkatu (0232) 
+    18:25 Rautatieasema (0301) 
+    18:27 Mikonkatu (0424) 
+    18:29 Aleksanterinkatu (0403) 
+    18:31 Senaatintori (0405) 
+    18:32 Kauppatori (0430) 
+ 
+18:32 Kauppatori 
+    Walking 0,3 km 
+    18:32 Kauppatori 
+ 
+18:40 Kauppatori 
+    ferry 
+    18:40 Kauppatori (0099) 
+    18:55 Suomenlinna (0098) 
+ 
+18:55 Suomenlinna 
+    Walking 1 km 
+    18:55 Suomenlinna 
+ 
+19:08 Suomenlinna open-air theatre, Helsinki 
+Arrival
