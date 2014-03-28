@@ -8,9 +8,11 @@ import com.google.gson.JsonParser;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
@@ -65,7 +67,9 @@ public class MainActivity extends Activity {
     		    ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
     		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
     		    listView.setAdapter(adapter);
-    		    myTextView = (TextView) findViewById(R.id.textView1);
+    		   
+    		    ((ExpandableListView) listView).setGroupIndicator(getResources().getDrawable(R.drawable.bus_icon));
+    		    myTextView = (TextView) findViewById(R.id.textView1); 
     		    //myTextView.setText("From: ");
     		   
     		    myTextView.setText("From: " + route.getStart() + ", to " + route.getDestination());

@@ -69,8 +69,8 @@ public class Waypoint{
 		System.out.println(coords);
 		System.out.println(coords.substring(0, 8));
 		System.out.println(coords.substring(9, 17));*/
-		longCord = coords.substring(9, 17);
-		latCord = coords.substring(0, 8);
+		//longCord = coords.substring(9, 17);
+		//latCord = coords.substring(0, 8);
 	}
 	
 	public String getLongitude(){
