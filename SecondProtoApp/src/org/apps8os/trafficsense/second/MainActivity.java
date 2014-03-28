@@ -184,21 +184,28 @@ public class MainActivity extends Activity {
 		map.clear();
 		Route r = mContainer.getRoute();
 		boolean zoomed = false;
+		//Get the image that will be used as the bus stop icon
+		int resID = getResources().getIdentifier("bus_stop_marker" , "drawable", getPackageName());
+		Bitmap icon = resizeIcon(resID);	
 		PolylineOptions o = new PolylineOptions().geodesic(true); 
 		for (Segment s : r.getSegmentList()) {
 			if (s.isWalking()) { 
 				// Don't draw walking segments because they don't have coordinates
 				continue;
 			}
-
+			
 			for (Waypoint w : s.getWaypointList()) {
 				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
 					continue;
 				}
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-
+				
+				map.addMarker(new MarkerOptions()
+								.position(coord)
+								.title(w.getWaypointName())
+								.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 				o.add(coord);
-
+				
 				if(zoomed == false){
 					centerLocationOnMap(coord);
 					zoomed = true;
@@ -206,8 +213,26 @@ public class MainActivity extends Activity {
 			}
 		}
 		map.addPolyline(o);
-	}
 	
+	}
+	/**
+	 * Zooms the map to the current waypoint. 
+	 */
+	public void zoomToCurrentWaypoint(){
+		ArrayList<Segment> segments = mContainer.getRoute().getSegmentList();
+		int index = mContainer.getRoute().getCurrentIndex();
+		Waypoint curWay;
+		//if the current segment is a walking one then the location of waypoints will be (0,0)
+		//so we need to get the next index which is always not walking. 
+		if(segments.get(index).isWalking()){
+			curWay = segments.get(index+1).getWaypoint(0);
+		}
+		else{
+			curWay = segments.get(index).getCurrentWaypoint();
+		}
+		LatLng loc = new LatLng(curWay.getLatitude(), curWay.getLongitude());
+		map.animateCamera(CameraUpdateFactory.newLatLng(loc));
+	}
 	
 	
 	
