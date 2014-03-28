@@ -121,8 +121,7 @@ public class Segment {
 		return startTime;
 	}
 
-	public String getSegmentSrivate String arrivaltime;
-	private String departure;tartPoint() {
+	public String getSegmentStartPoint() {
 		return startPoint;
 	}
 
