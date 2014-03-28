@@ -14,6 +14,10 @@
 
 #define TEXT_GET_OFF		"Get off!"
 
+#define ERROR_WAITING		0 // Not really an error.. just tell the user to wait.
+#define ERROR_NO_CONNECTION	1
+#define ERROR_NOT_READY		2
+
 struct Stop {
 	char name[STOP_NAME_LENGTH];
 	char code[STOP_CODE_LENGTH];

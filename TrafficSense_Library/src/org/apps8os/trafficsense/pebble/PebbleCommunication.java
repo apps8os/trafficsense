@@ -47,7 +47,15 @@ public class PebbleCommunication {
 	private static final int COMMAND_SHOW_3STOP_WINDOW = 3;
 	//private static final int MAX_DICT_SIZE = 124;
 	public static final int NUM_STOPS = 3;
-
+	
+	/**
+	 * Commands that can be sent from pebble to android
+	 */
+	// Command for getting required data, stop names etc. e.g. when the user starts
+	// the pebble app in the middle of the journey
+	private static final int PEBBLE_COMMAND_GET = 0;
+	
+	
 	/**
 	 * The Context in which we works.
 	 */

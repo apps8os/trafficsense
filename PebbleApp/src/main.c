@@ -53,6 +53,7 @@ void init(void) {
   init_stopArray();
   init_windows();
   init_app_message();
+  send_cmd(PEBBLE_COMMAND_GET); // Get currently required information from the Android app
 }
 
 void deinit(void) {
