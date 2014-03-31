@@ -288,6 +288,11 @@ public class MainActivity extends Activity {
 				invalidateOptionsMenu();
 				return;
 			}
+			if(intent.hasExtra(Constants.ERROR)){
+				String msg[] = {intent.getStringExtra(Constants.ERROR)};
+				showList(msg);
+				return;
+			}
 			System.out.println("DBG: Main activity: Waypoint changed");
 			String msg[] = {OutputLogic.getOutput()};
 			showList(msg);

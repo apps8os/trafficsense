@@ -209,7 +209,14 @@ public class LocationOnlyService extends Service implements
 		for(int i=0;i<geofenceRequestIds.length; i++){
 			dbg= dbg + " " + geofenceRequestIds[i];
 		}
+		
 		System.out.println("DBG: geofences added: " + dbg);
+		if(statusCode == 1000){
+			sendErrorAndExit("Error: some android setting prevents usage");
+		}
+		else if(statusCode != 0){
+			sendErrorAndExit("Error: error adding geofences");
+		}
 	}
 	
 	@Override
@@ -217,7 +224,7 @@ public class LocationOnlyService extends Service implements
 	 * called if we fail to connect to googlplay client
 	 */
 	public void onConnectionFailed(ConnectionResult result) {
-		// TODO Auto-generated method stub
+		sendErrorAndExit("Error: error connecting to google play client");
 	}
 
 	@Override
@@ -225,7 +232,7 @@ public class LocationOnlyService extends Service implements
 	 * called if locationClient is disconnected
 	 */
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
+		sendErrorAndExit("Error: gps signal lost");
 	}
 	
 	/**
@@ -334,6 +341,18 @@ public class LocationOnlyService extends Service implements
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	/**
+	 * Send an error intent to listening services and stop the service.
+	 * @param msg
+	 */
+	public void sendErrorAndExit(String msg){
+		Intent vi = new Intent();
+		vi.putExtra(Constants.ERROR, msg);
+		vi.setAction(Constants.ACTION_ROUTE_EVENT);
+		sendBroadcast(vi);
+		this.stopSelf();
 	}
 
 }

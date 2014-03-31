@@ -27,6 +27,8 @@ public class Constants {
 	final public static String ACTION_ROUTE_EVENT_EXTRA_MESSAGE = "trafficsense.RouteEventUpdateUi.Extras.Message";
 	final public static String ACTION_COORDS_READY = "trafficsense.CoordsReady";
 	final public static String ROUTE_STOPPED = "route_stopped";
+	final public static String ERROR = "route_error";
+	
 	/**
 	 * Interval of time-based events in development mode. (ms)
 	 */
