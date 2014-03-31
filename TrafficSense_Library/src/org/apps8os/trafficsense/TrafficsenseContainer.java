@@ -92,6 +92,7 @@ public class TrafficsenseContainer {
 	 */
 	private volatile int mRunningServices = 0;
 
+	private volatile boolean isLoading = false;
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
 	 */
@@ -163,6 +164,13 @@ public class TrafficsenseContainer {
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * returns a boolean value indicating whether info (email, coords) is being loaded. 
+	 * @return
+	 */
+	public boolean isLoading(){
+		return(isLoading);
 	}
 	
 	/**
@@ -273,6 +281,8 @@ public class TrafficsenseContainer {
 		serviceIntent = new Intent(mContext, LocationService.class);
 		mContext.stopService(serviceIntent);
 		
+		
+		
 		// TODO: add some code here if a new Service is introduced.
 	}
 	
@@ -341,6 +351,7 @@ public class TrafficsenseContainer {
 	 * @see #startTrackerService(int) for supported serviceTypes.
 	 */
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
+		isLoading = true;
 		new Thread(new Runnable() {
 			public void run() {
 				activityAttach(mContext.getApplicationContext());
@@ -357,6 +368,7 @@ public class TrafficsenseContainer {
 				}
 				startTrackerService(serviceType);
 				activityDetach();
+				isLoading = false;
 			}
 		}).start();
 	}
@@ -528,6 +540,7 @@ public class TrafficsenseContainer {
 		JourneyParser parser = new JourneyParser();
 		parser.parseString(mJourneyText);
 		mJourneyJsonObject = parser.getJsonObj();
+		mRoute = new Route();
 		mRoute.setRoute(parser.getJsonObj());
 	}
 	

@@ -113,6 +113,12 @@ public class MainActivity extends Activity {
 			stop.setVisible(true);
 			schematic.setVisible(true);
 		}
+		else if(mContainer.isLoading()){
+			start.setVisible(true);
+            start.setActionView(R.layout.progressbar); 
+			stop.setVisible(false);
+			schematic.setVisible(false);
+		}
 		else{
 			start.setVisible(true);
 			stop.setVisible(false);
@@ -278,6 +284,10 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			if(intent.hasExtra(Constants.ROUTE_STOPPED)){
+				invalidateOptionsMenu();
+				return;
+			}
 			System.out.println("DBG: Main activity: Waypoint changed");
 			String msg[] = {OutputLogic.getOutput()};
 			showList(msg);

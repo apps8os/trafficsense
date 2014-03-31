@@ -105,6 +105,11 @@ public class LocationOnlyService extends Service implements
 	    mNotificationManager.cancel(Constants.NOTIFICATION_ID);
 		//need to unregister receivers
 		unregisterReceiver(mEnteredWaypointAlertReceiver);
+		//tell anyone listening that the route has ended
+		Intent vi = new Intent();
+		vi.putExtra(Constants.ROUTE_STOPPED, "");
+		vi.setAction(Constants.ACTION_ROUTE_EVENT);
+		sendBroadcast(vi);
 	}
 
 	/**

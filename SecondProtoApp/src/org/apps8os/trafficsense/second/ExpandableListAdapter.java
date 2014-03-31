@@ -25,7 +25,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  public ExpandableListAdapter(Activity act, Route route) {
 	    activity = act;
 	    this.route = route;
-	    inflater = act.getLayoutInflater();
+	    inflater = act.getLayoutInflater(); 
 	    this.SegmentList = route.getSegmentList();
 	  }
 
