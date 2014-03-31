@@ -296,9 +296,16 @@ public class JourneyParser {
 					// str_split[1]);
 					String stopCode;
 					int start, end;
-					start = str_split[1].indexOf("(") + 1;
-					end = str_split[1].indexOf(")");
-
+//					start = str_split[1].indexOf("(") + 1;
+//					end = str_split[1].indexOf(")");
+					
+					/*  Getting the last parentheses from the string
+					 *  because usually is where is the stop code
+					 */
+			
+					start = str_split[1].lastIndexOf("(") + 1;
+					end = str_split[1].lastIndexOf(")");
+					
 					if (start == -1 || end == -1) {
 						throw new StopCodeInvalidParser(
 								"JsonParser: Does not exist a stopCode in the line:"
