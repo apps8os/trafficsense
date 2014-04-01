@@ -68,8 +68,8 @@ public class MainActivity extends Activity {
     		    ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
     		    listView.setAdapter(adapter);
     		   
-    		    ((ExpandableListView) listView).setGroupIndicator(getResources().getDrawable(R.drawable.bus_icon));
-    		    myTextView = (TextView) findViewById(R.id.textView1); 
+    		    //((ExpandableListView) listView).setGroupIndicator(getResources().getDrawable(R.drawable.bus_icon));
+    		    myTextView = (TextView) findViewById(R.id.checkedTextView); 
     		    //myTextView.setText("From: ");
     		   
     		    myTextView.setText("From: " + route.getStart() + ", to " + route.getDestination());

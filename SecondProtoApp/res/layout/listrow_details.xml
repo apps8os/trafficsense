@@ -1,24 +1,25 @@
-<LinearLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="40dp"
-    android:clickable="true"
-    android:orientation="vertical"
-    android:paddingLeft="40dp"
-    tools:context=".MainActivity" >
-
+<RelativeLayout 
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:orientation="horizontal"
+android:weightSum="1" >
+    
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         
-        android:drawablePadding="5dp"
-        android:gravity="center_vertical"
+        android:id="@+id/checkedTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:drawableLeft="@drawable/bus_stop_marker_small"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
         android:text="@string/hello_world"
+        android:textAlignment="center"
+        android:drawablePadding="10dp"
         android:textSize="14sp"
-        android:textStyle="bold" >
-    </TextView>
+        android:textStyle="bold"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="20dp" />
 
-
-</LinearLayout> 
+</RelativeLayout> 
