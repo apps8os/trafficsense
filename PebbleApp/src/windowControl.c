@@ -147,7 +147,7 @@ void init_error_window() {
 
   // Initialize the line code text layer
   errorText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
-  layer_add_child(window_layer, text_layer_get_layer(lineCode));
+  layer_add_child(window_layer, text_layer_get_layer(errorText));
 }
 
 void init_basic_window() {
@@ -184,7 +184,7 @@ void init_basic_window() {
 }
 
 void init_windows() {
-  currentWindow = WINDOW_BASIC;
+  currentWindow = WINDOW_ERROR;
   init_basic_window();
   init_error_window();
 

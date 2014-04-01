@@ -129,7 +129,7 @@ public class PebbleCommunication {
 		HashMap<String, String> payload = new HashMap<String, String>();
 		payload.put("title", title);
 		payload.put("body", message);
-		String notificationPayload = gson.toJson(payload);
+		String notificationPayload = "[" + gson.toJson(payload) + "]";
 		i.putExtra("messageType", "PEBBLE_ALERT");
 		i.putExtra("sender", "TrafficSense");
 		i.putExtra("notificationData", notificationPayload);

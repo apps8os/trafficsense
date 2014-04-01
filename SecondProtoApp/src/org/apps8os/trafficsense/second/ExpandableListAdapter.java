@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 
+
+
+
 import android.app.Activity;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -13,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +52,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    if (convertView == null) {
 	      convertView = inflater.inflate(R.layout.listrow_details, null);
 	    }
-	    text = (TextView) convertView.findViewById(R.id.textView1);
+	    text = (TextView) convertView.findViewById(R.id.checkedTextView);
 	    text.setText(children);
 	    convertView.setOnClickListener(new OnClickListener() {
 	      @Override
@@ -99,10 +103,24 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    if (convertView == null) {
 	      convertView = inflater.inflate(R.layout.listrow_group, null);
 	    }
-	   // Group group = (Group) getGroup(groupPosition);
+	   int mode = SegmentList.get(groupPosition).getSegmentType();
 	    
 	    ((CheckedTextView) convertView).setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
 	    ((CheckedTextView) convertView).setChecked(isExpanded);
+	    ImageView imageView = (ImageView) convertView.findViewById(R.id.GroupImage);
+	    
+	    if(mode == 0){
+	    	 imageView.setImageResource(R.drawable.walking_icon_small);
+	    }else
+	    if(mode == 7){
+	    	 imageView.setImageResource(R.drawable.ferry_icon_small);
+	    }else
+	    if(mode == 2){
+	    	 imageView.setImageResource(R.drawable.tram_icon_small);
+	    }else
+	    	 if(mode == 1 || mode == 3 || mode == 4 || mode == 5 || mode== 22){
+		    	 imageView.setImageResource(R.drawable.bus_icon_small);
+		    }
 	    return convertView;
 	  }
 

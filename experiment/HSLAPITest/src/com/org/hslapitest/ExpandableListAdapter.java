@@ -10,6 +10,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,7 +19,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  private final ArrayList<Segment> SegmentList;
 	  public LayoutInflater inflater;
 	  public Activity activity;
-
+	  private boolean isInFront = false;
 	  public ExpandableListAdapter(Activity act, Route route) {
 		    activity = act;
 		    this.route = route;
@@ -45,7 +46,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 		    if (convertView == null) {
 		      convertView = inflater.inflate(R.layout.listrow_details, null);
 		    }
-		    text = (TextView) convertView.findViewById(R.id.textView1);
+		    text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		    text.setText(children);
 		    convertView.setOnClickListener(new OnClickListener() {
 		      @Override
@@ -96,12 +97,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 		    if (convertView == null) {
 		      convertView = inflater.inflate(R.layout.listrow_group, null);
 		    }
-		   // Group group = (Group) getGroup(groupPosition);
-		    
-		    ((CheckedTextView) convertView).setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
-		    //((CheckedTextView) convertView).setCheckMarkDrawable(R.drawable.ic_launcher);
-		    ((CheckedTextView) convertView).setChecked(isExpanded);
-		    return convertView;
+		   	    
+		    TextView lblListHeader = (TextView) convertView
+                    .findViewById(R.id.checkedTextView);
+           
+            lblListHeader.setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime() + "                                            ");
+
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.GroupImage);
+            imageView.setImageResource(R.drawable.walking_icon_small);
+
+            return convertView;
 		  }
 
 		  @Override
@@ -113,5 +118,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 		  public boolean isChildSelectable(int groupPosition, int childPosition) {
 		    return false;
 		  }
+		  
+		  
+		  public void ChangeColor() {
+			    isInFront = true;
+			}
 		} 
 

@@ -2,13 +2,13 @@
     "versionLabel": "1.0",
     "uuid": "83eef382-21a4-473a-a189-ceffa42f86b1",
     "appKeys": {},
-    "longName": "testisdk2",
+    "longName": "TrafficSense",
     "versionCode": 1,
     "capabilities": [
         ""
     ],
-    "shortName": "testisdk2",
-    "companyName": "attes",
+    "shortName": "TrafficSense",
+    "companyName": "TrafficSense",
     "watchapp": {
         "watchface": false
     },

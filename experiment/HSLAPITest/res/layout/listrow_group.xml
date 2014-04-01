@@ -1,15 +1,35 @@
-<CheckedTextView 
+<LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/textView1"
-    android:layout_width="wrap_content"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:layout_marginLeft="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
     
+     <ImageView 
+    android:padding="5dp"     
+    android:id="@+id/GroupImage"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"   
+    android:contentDescription="segment image"   
+    android:src="@drawable/ferry_icon_small"
+
+        />
+
+<CheckedTextView
+ 
+    android:id="@+id/checkedTextView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   
     android:gravity="left"
-    android:paddingLeft="50dp"
-    android:paddingTop="8dp"
-    android:text="Metro, 15:40"
+   
+    android:paddingTop="10dp"
+    android:text="  Metro, 15:40"
+    android:textAlignment="viewStart"
     android:textSize="14sp"
-    android:textAlignment="textEnd"
-    android:textStyle="bold" /> 
+    android:textStyle="bold" >
+    
+    </CheckedTextView> 
+
+   
+</LinearLayout>
+ 
