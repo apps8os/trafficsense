@@ -43,7 +43,7 @@ public class OutputLogic {
 		if(curSegment.isWalking() == false){
 			String transportId = curSegment.getSegmentMode();
 			String destination = curSegment.getLastWaypoint().getWaypointName();
-			String message = new String();
+			String message;
 			if(transportId.equals("metro")){
 				message = String.format("Take metro to %s",destination);
 			}

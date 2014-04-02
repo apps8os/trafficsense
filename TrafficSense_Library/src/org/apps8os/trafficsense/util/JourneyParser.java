@@ -245,6 +245,10 @@ public class JourneyParser {
 			// System.out.println("NORMAL CASE: " + exception + "->" +
 			// str_split[1]);
 		}
+		
+		if (str_split == null) {
+			// TODO: this is an error: malformed journey text.
+		}
 
 		if (!getTextArray().get(1).equals("Arrival")
 				&& !getTextArray().get(1).equals("Perillä")

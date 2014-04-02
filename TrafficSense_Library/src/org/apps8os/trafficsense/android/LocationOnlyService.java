@@ -191,7 +191,7 @@ public class LocationOnlyService extends Service implements
 					break;
 				}
 				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
-				String id = (new Integer(segmentIndex)).toString()+","+(new Integer(waypointIndex)).toString();
+				String id = Integer.toString(segmentIndex)+","+Integer.toString(waypointIndex);
 				mNextBusStopGeofence = createGeofence(nextWaypoint, id, GEOFENCE_RADIUS,
 						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 				listOfFences.add(mNextBusStopGeofence);
@@ -205,10 +205,13 @@ public class LocationOnlyService extends Service implements
 	//TODO: add check to status code
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
 		System.out.println("DBG: geofence status code: "+ statusCode);
-		String dbg="";
+
+		StringBuffer dbgBuf = new StringBuffer();
 		for(int i=0;i<geofenceRequestIds.length; i++){
-			dbg= dbg + " " + geofenceRequestIds[i];
+			dbgBuf.append(" ");
+			dbgBuf.append(geofenceRequestIds[i]);
 		}
+		String dbg = dbgBuf.toString();
 		
 		System.out.println("DBG: geofences added: " + dbg);
 		if(statusCode == 1000){

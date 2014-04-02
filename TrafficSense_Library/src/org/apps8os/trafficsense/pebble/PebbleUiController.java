@@ -155,7 +155,9 @@ public class PebbleUiController {
 		if (segmentStart == null) System.out.println("DBG Date segmentStart was null");
 		
 		Calendar cal = Calendar.getInstance();
-		if (cal == null) System.out.println("DBG Calendar cal was null");
+		if (cal == null) {
+			System.out.println("DBG Calendar cal was null");
+		}
 		cal.setTime(segmentStart);
 		int seconds = cal.get(Calendar.SECOND);
 		int minutes = cal.get(Calendar.MINUTE);

@@ -255,7 +255,7 @@ public class JourneyInfoResolver {
 		}
 		// Parse longitude and latitude coordinates from the result string
 		String coords = stop[0].wgs_coords;
-		if (coords.isEmpty()) {
+		if (coords == null || coords.isEmpty()) {
 			System.out.println("DBG lookupWaypointCoordinate coords empty");
 			// TODO error handling.
 			errorOccurred = true;
@@ -285,6 +285,7 @@ public class JourneyInfoResolver {
 			if (statusLine.getStatusCode() == HttpStatus.SC_OK &&
 					responseBody != null) {
 				response.getEntity().writeTo(mByteOutStream);
+				// TODO: Encoding
 				responseString = mByteOutStream.toString();
 				// Clear the buffer
 				mByteOutStream.reset();

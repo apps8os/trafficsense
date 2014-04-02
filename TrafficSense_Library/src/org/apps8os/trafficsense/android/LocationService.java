@@ -127,7 +127,7 @@ public class LocationService extends Service implements
 					break;
 				}
 				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
-				String id = (new Integer(segmentIndex)).toString()+","+(new Integer(waypointIndex)).toString();
+				String id = Integer.toString(segmentIndex)+","+Integer.toString(waypointIndex);
 				Geofence nextBusStopGeofence = createGeofence(nextWaypoint, id, GEOFENCE_RADIUS,
 						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 				listOfFences.add(nextBusStopGeofence);	

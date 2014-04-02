@@ -67,7 +67,7 @@ public class Constants {
 	/**
 	 * how long the phone vibrates on alerts
 	 */
-	final public int VIBRATION_TIME = 4000;
+	final public static int VIBRATION_TIME = 4000;
 	
 	/**
 	 * the time offset that can be passed timeOnlyService
