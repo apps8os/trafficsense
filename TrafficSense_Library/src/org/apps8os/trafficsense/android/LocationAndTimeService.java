@@ -34,7 +34,12 @@ import android.os.IBinder;
 import android.os.Vibrator;
 
 
-public class LocationService extends Service implements	
+/**
+ * This service tracks a journey using both location and time information.
+ * 
+ * @deprecated This has not been fully tested yet.
+ */
+public class LocationAndTimeService extends Service implements	
 	ConnectionCallbacks,OnConnectionFailedListener,OnAddGeofencesResultListener{
 	
 	private static final float GEOFENCE_RADIUS = 30;
@@ -52,12 +57,15 @@ public class LocationService extends Service implements
 	private NextWaypointLocationAlertReceiver mNextWaypointLocationAlert = new NextWaypointLocationAlertReceiver();
 	private NextWaypointTimerReceiver mNextWaypointTimerAlert = new NextWaypointTimerReceiver();
 
+	/**
+	 * No binding to this service.
+	 */
 	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	
+	@Override
 	public void onCreate(){
 		super.onCreate();
 		System.out.println("DBG: service created");
@@ -66,6 +74,7 @@ public class LocationService extends Service implements
 
 	}
 	
+	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		System.out.println("DBG: service started");
 		mContainer.serviceAttach(getApplicationContext());
@@ -75,6 +84,7 @@ public class LocationService extends Service implements
 		return START_NOT_STICKY;
 	}
 	
+	@Override
 	public void onDestroy(){
 		super.onDestroy();
 		unregisterReceiver(mNextWaypointLocationAlert);
@@ -84,7 +94,7 @@ public class LocationService extends Service implements
 	}
 	
 	/**
-	 * Starts teh location client
+	 * Starts the location client
 	 */
 	public void startLocationClient(){
 		mLocationClient = new LocationClient(this, this, this);
@@ -94,6 +104,7 @@ public class LocationService extends Service implements
 	/**
 	 * called when the location client is connected. Set all the geofences for the route.
 	 */
+	@Override
 	public void onConnected(Bundle connectionHint) {
 		if(timeOnlyServiceStarted == true){
 			stopTimeOnlyService();
@@ -326,10 +337,10 @@ public class LocationService extends Service implements
 		 */
 		public void onReceive(Context arg0, Intent arg1) {
 			//the intent could also have been sent to indicate an error
-			if(mLocationClient.hasError(arg1)==true){
+			if(LocationClient.hasError(arg1)==true){
 				return; //TODO: again figure out what happens on error
 			}
-			Geofence curGeofence = mLocationClient.getTriggeringGeofences(arg1).get(0);
+			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1).get(0);
 			//get the id of the geofence that triggered the alert and increment it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
@@ -342,7 +353,7 @@ public class LocationService extends Service implements
 			
 			if(mContainer.getRoute().isJourneyEnded()==true){
 				System.out.println("DBG LocServ: Journey has ended");
-				((LocationService)mContext).stopSelf();
+				((LocationAndTimeService)mContext).stopSelf();
 				return;
 			}
 			System.out.println("DBG LocServ: Next position is " + mContainer.getRoute().getCurrentSegment().getCurrentWaypoint().getWaypointName());
@@ -385,7 +396,7 @@ public class LocationService extends Service implements
 			 * Stop the service when the journey ends.
 			 */
 			if (mContainer.getRoute().isJourneyEnded() == true) {
-				((LocationService)mContext).stopSelf();
+				((LocationAndTimeService)mContext).stopSelf();
 			}
 		}
 
@@ -403,7 +414,7 @@ public class LocationService extends Service implements
 				.setSmallIcon(resID)
 				.build();
 		
-		NotificationManager mNotificationManager =(NotificationManager) getSystemService(mContext.NOTIFICATION_SERVICE);
+		NotificationManager mNotificationManager =(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
 		
 		//vibrate if user needs to get off at next waypoint
@@ -412,7 +423,7 @@ public class LocationService extends Service implements
 		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
 		
 		if((curWaypointIndex == waypointList.size() -1) & !curSegment.isWalking()){
-			Vibrator vib = (Vibrator) getSystemService(mContext.VIBRATOR_SERVICE);
+			Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 			vib.vibrate(Constants.VIBRATOR_DURATION);
 		}
 	}

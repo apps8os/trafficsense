@@ -1,8 +1,8 @@
 package org.apps8os.trafficsense;
 
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.android.LocationAndTimeService;
 import org.apps8os.trafficsense.android.LocationOnlyService;
-import org.apps8os.trafficsense.android.LocationService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
@@ -278,10 +278,8 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
-		serviceIntent = new Intent(mContext, LocationService.class);
+		serviceIntent = new Intent(mContext, LocationAndTimeService.class);
 		mContext.stopService(serviceIntent);
-		
-		
 		
 		// TODO: add some code here if a new Service is introduced.
 	}
@@ -356,7 +354,14 @@ public class TrafficsenseContainer {
 			public void run() {
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
-				parseJourney();
+				/*
+				 * If the parseJourney() returns false means that the
+				 * JourneyParser had an error parsing, should stop the activity
+				 */
+				if (parseJourney() == false) {
+					activityDetach();
+					return;
+				}
 				System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
 				if (serviceType != Constants.SERVICE_TIME_ONLY) {
 					/**
@@ -404,8 +409,8 @@ public class TrafficsenseContainer {
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
-		case Constants.LOCATION_SERVICE:
-			serviceIntent = new Intent(mContext, LocationService.class);
+		case Constants.SERVICE_LOCATION_AND_TIME:
+			serviceIntent = new Intent(mContext, LocationAndTimeService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
@@ -530,18 +535,27 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Parse plain text journey and set up internal Route object.
-	 * Do nothing if the journey is empty.
+	 * Parse plain text journey and set up internal Route object. Do nothing if
+	 * the journey is empty.
+	 * 
+	 * @return true if the JourneyParser parsed correctly false if had an error
 	 */
-	public void parseJourney() {
+	public boolean parseJourney() {
 		if (mJourneyText == null) {
-			return;
+			return false;
 		}
 		JourneyParser parser = new JourneyParser();
-		parser.parseString(mJourneyText);
+		int parserStatus = parser.parseString(mJourneyText);
+
 		mJourneyJsonObject = parser.getJsonObj();
 		mRoute = new Route();
 		mRoute.setRoute(parser.getJsonObj());
+
+		if (parserStatus == 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**

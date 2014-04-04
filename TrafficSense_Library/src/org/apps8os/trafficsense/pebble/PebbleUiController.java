@@ -93,6 +93,16 @@ public class PebbleUiController {
 	}
 	
 	/**
+	 * Updates everything in Pebble
+	 */
+	public void totalUpdate() {
+		int newSegmentIndex = mRoute.getCurrentIndex();
+		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
+		int nonWalkingSeg = getFirstNonWalkingSegmentIndex(newSegmentIndex);
+		initializeSegment(nonWalkingSeg);
+	}
+	
+	/**
 	 * Gets the index of the first non-walking segment in the route
 	 * starting from index currentIndex. Returns -1 if not found or with -1
 	 * as input.
@@ -152,6 +162,12 @@ public class PebbleUiController {
 		// do things to get the seconds of minute, minute of hour and hour of day
 		System.out.println("DBG segment time: " + currentSegment.getSegmentStartTime());
 		Date segmentStart = timeStringToDate(currentSegment.getSegmentStartTime());
+		
+		Date currentDate = new Date(); // Current time
+		Calendar currentDateCal = Calendar.getInstance();
+		currentDateCal.setTime(currentDate);
+		
+		// Check if the route has already started
 		if (segmentStart == null) System.out.println("DBG Date segmentStart was null");
 		
 		Calendar cal = Calendar.getInstance();
@@ -159,6 +175,16 @@ public class PebbleUiController {
 			System.out.println("DBG Calendar cal was null");
 		}
 		cal.setTime(segmentStart);
+		
+		long diffMs = cal.getTimeInMillis() - currentDateCal.getTimeInMillis();
+		long diffHours = diffMs / 1000 / 3600;
+		if (diffHours > 23) {
+			// Don't send anything to pebble if the route starts after 24h because pebble app can't handle that
+			System.out.println("DBG PebbleUiController segment start time was over 23h after current time");
+			return;
+		}
+		
+		
 		int seconds = cal.get(Calendar.SECOND);
 		int minutes = cal.get(Calendar.MINUTE);
 		int hours = cal.get(Calendar.HOUR_OF_DAY);
@@ -168,6 +194,10 @@ public class PebbleUiController {
 		
 		// Then, send the stops
 		updateList(currentSegment);
+		// If the segment start time has already passed, switch to the 3stop screen
+		if (segmentStart.before(currentDate)) {
+			mPblCom.switchTo3stopScreen();
+		}
 	}
 	
 	/**

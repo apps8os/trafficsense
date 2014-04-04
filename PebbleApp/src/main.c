@@ -24,10 +24,22 @@ TimeOfDay getCurrentTime() {
 
 TimeOfDay getTimeToStart() {
   TimeOfDay currentTime = getCurrentTime();
-  uint32_t seconds = 0;
-  seconds += (startTime.hours - currentTime.hours) * 3600;
-  seconds += (startTime.minutes - currentTime.minutes) * 60;
-  seconds += (startTime.seconds - currentTime.seconds);
+  int startTimeSec = 0;
+  startTimeSec += startTime.hours * 3600;
+  startTimeSec += startTime.minutes * 60;
+  startTimeSec += startTime.seconds;
+
+  int currentTimeSec = 0;
+  currentTimeSec += currentTime.hours * 3600;
+  currentTimeSec += currentTime.minutes * 60;
+  currentTimeSec += currentTime.seconds;
+
+  int seconds = startTimeSec - currentTimeSec;
+  if (seconds < 0) {
+    // Goes over midnight
+    int midnightSec = 24 * 3600;
+    seconds = midnightSec - currentTimeSec + startTimeSec;
+  }
   uint8_t hours = seconds / 3600;
   seconds -= hours * 3600;
   uint8_t minutes = seconds / 60;

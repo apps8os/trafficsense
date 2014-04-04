@@ -2,7 +2,6 @@ package org.apps8os.trafficsense.second;
 
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
@@ -12,17 +11,14 @@ import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
 
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -31,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,6 +34,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+/**
+ * TODO: Documentation.
+ */
 public class MainActivity extends Activity {
 	
 	CoordsReadyReceiver mCoordsReadyReceiver;
@@ -277,8 +275,6 @@ public class MainActivity extends Activity {
 	
 	/**
 	 * Class that receives an intent when current waypoint has changed. 
-	 * @author traffisense
-	 *
 	 */
 	class WaypointChanged extends BroadcastReceiver {
 
