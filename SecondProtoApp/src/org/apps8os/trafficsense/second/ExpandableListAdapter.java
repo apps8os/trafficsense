@@ -25,6 +25,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  private final ArrayList<Segment> SegmentList;
 	  public LayoutInflater inflater;
 	  public Activity activity;
+	  
+	  private ArrayList <View> segment_Views = new ArrayList <View>();
+	  private ArrayList <ArrayList<View>> waypoint_Views = new ArrayList <ArrayList<View>>();
 
 	  public ExpandableListAdapter(Activity act, Route route) {
 	    activity = act;
@@ -36,7 +39,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  @Override
 	  public Object getChild(int groupPosition, int childPosition) {
 		 return SegmentList.get(groupPosition).getWaypointList().get(childPosition).getWaypointName()+ ", " + SegmentList.get(groupPosition).getWaypointList().get(childPosition).getWaypointTime();
-	   // return groups.get(groupPosition).children.get(childPosition);
 	  }
 
 	  @Override
@@ -47,11 +49,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  @Override
 	  public View getChildView(int groupPosition, final int childPosition,
 	      boolean isLastChild, View convertView, ViewGroup parent) {
+		  
 	    final String children = (String) getChild(groupPosition, childPosition);
 	    TextView text = null;
 	    if (convertView == null) {
-	      convertView = inflater.inflate(R.layout.listrow_details, null);
+	      convertView = inflater.inflate(R.layout.waypoint_layout, null);
 	    }
+	    //waypoint_Views.add(index, object);
 	    text = (TextView) convertView.findViewById(R.id.checkedTextView);
 	    text.setText(children);
 	    convertView.setOnClickListener(new OnClickListener() {
@@ -100,13 +104,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  @Override
 	  public View getGroupView(int groupPosition, boolean isExpanded,
 	      View convertView, ViewGroup parent) {
+		  
 	    if (convertView == null) {
-	      convertView = inflater.inflate(R.layout.listrow_group, null);
+	      convertView = inflater.inflate(R.layout.segment_layout, null);
 	    }
+	    segment_Views.add(convertView);
 	   int mode = SegmentList.get(groupPosition).getSegmentType();
+	   CheckedTextView textview = (CheckedTextView) convertView.findViewById(R.id.checkedTextView);
 	    
-	    ((CheckedTextView) convertView).setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
-	    ((CheckedTextView) convertView).setChecked(isExpanded);
+	    textview.setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
+	    textview.setChecked(isExpanded);
 	    ImageView imageView = (ImageView) convertView.findViewById(R.id.GroupImage);
 	    
 	    if(mode == 0){
@@ -133,5 +140,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  public boolean isChildSelectable(int groupPosition, int childPosition) {
 	    return false;
 	  }
+	  /*
+	  public ArrayList<View> getSegmentViewList(){
+		  return segment_Views;
+	  }
+	  
+	  public ArrayList<View> getWaypointViewList(){
+		  return waypoint_Views;
+	  }*/
 	} 
 
