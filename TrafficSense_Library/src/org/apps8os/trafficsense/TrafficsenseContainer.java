@@ -354,7 +354,14 @@ public class TrafficsenseContainer {
 			public void run() {
 				activityAttach(mContext.getApplicationContext());
 				mJourneyText = retrieveJourneyBlockingPart(credential);
-				parseJourney();
+				/*
+				 * If the parseJourney() returns false means that the
+				 * JourneyParser had an error parsing, should stop the activity
+				 */
+				if (parseJourney() == false) {
+					activityDetach();
+					return;
+				}
 				System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
 				if (serviceType != Constants.SERVICE_TIME_ONLY) {
 					/**
@@ -528,18 +535,27 @@ public class TrafficsenseContainer {
 	}
 	
 	/**
-	 * Parse plain text journey and set up internal Route object.
-	 * Do nothing if the journey is empty.
+	 * Parse plain text journey and set up internal Route object. Do nothing if
+	 * the journey is empty.
+	 * 
+	 * @return true if the JourneyParser parsed correctly false if had an error
 	 */
-	public void parseJourney() {
+	public boolean parseJourney() {
 		if (mJourneyText == null) {
-			return;
+			return false;
 		}
 		JourneyParser parser = new JourneyParser();
-		parser.parseString(mJourneyText);
+		int parserStatus = parser.parseString(mJourneyText);
+
 		mJourneyJsonObject = parser.getJsonObj();
 		mRoute = new Route();
 		mRoute.setRoute(parser.getJsonObj());
+
+		if (parserStatus == 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**
