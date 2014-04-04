@@ -3,7 +3,7 @@
     
 
     <item android:id="@+id/menu_map_view"
-		android:title="Go to map view"
+		android:title="Map journey"
         android:showAsAction="ifRoom"></item>
     
     

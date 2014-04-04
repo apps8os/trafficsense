@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SecondPrototype</string>
+    <string name="app_name">TrafficSense</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="waypoint">waypoint</string>
 
     <string name="default_pipeline">
         {"@type":"org.apps8os.contextlogger3.android.pipeline.MainPipeline",

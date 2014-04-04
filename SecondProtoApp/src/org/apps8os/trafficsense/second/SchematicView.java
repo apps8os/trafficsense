@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -58,9 +59,22 @@ public class SchematicView extends Activity{
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.schematic_activity_action, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	
+	/**
+	 * Makes the options menu. 
+	 */
+	public boolean onPrepareOptionsMenu(Menu menu){
+
 		super.onPrepareOptionsMenu(menu);
-		MenuItem map = menu.findItem(R.id.menu_map_view);
-		return true;
+		MenuItem map_view = menu.findItem(R.id.menu_map_view);
+		map_view.setVisible(true);
+		return(true);
 	}
 	
 	
