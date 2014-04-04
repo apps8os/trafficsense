@@ -3,18 +3,7 @@ package org.apps8os.trafficsense.android;
 /**
  * Shared constants.
  */
-/**
- * @author catarinamoura
- *
- */
-/**
- * @author catarinamoura
- *
- */
-/**
- * @author catarinamoura
- *
- */
+
 public class Constants {
 
 	/**
