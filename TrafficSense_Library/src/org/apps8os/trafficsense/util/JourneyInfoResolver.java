@@ -95,10 +95,6 @@ public class JourneyInfoResolver {
 	 */
 	private int mLang;
 	/**
-	 * Flag indicating an error status in a long process.
-	 */
-	private boolean errorOccurred;
-	/**
 	 * API access base URL.
 	 * Initialized by the constructor.
 	 * Language parameter updated by {@link #setLanguage(int)}
@@ -157,16 +153,14 @@ public class JourneyInfoResolver {
 	 * 
 	 * Invokes thread-unsafe private methods which make HTTP requests.
 	 * Thus, this method is also thread-unsafe and is synchronized.
+	 *
+	 *  TODO: should throw JourneyInfoResolverException
 	 *  
 	 * @param journey the journey for which GPS coordinates shall be retrieved.
-	 * @return true on success, false otherwise.
+	 * @throws JourneyInfoResolverException
 	 */
-	public boolean retrieveCoordinatesFromHsl(Route journey) {
-		if (journey == null) {
-			return false;
-		}
+	public void retrieveCoordinatesFromHsl(Route journey) {
 		synchronized (this) {
-			errorOccurred = false;
 			ArrayList<Segment> segments = journey.getSegmentList();
 			for (Segment segment : segments) {
 				lookupSegmentTransportType(segment);
@@ -175,13 +169,7 @@ public class JourneyInfoResolver {
 					lookupWaypointCoordinate(waypoint);
 				}
 			}
-			if (errorOccurred) {
-				System.out.println("DBG retrieveCoordinatesFromHsl errorOccurred = true");
-				// TODO error handling
-				return false;
-			}
 			journey.setCoordsReady(true);
-			return true;
 		}
 	}
 	
@@ -192,30 +180,24 @@ public class JourneyInfoResolver {
 	 * Makes HTTP request, not thread-safe.
 	 * 
 	 * @param segment the segment.
+	 * @throws JourneyInfoResolverException
 	 */
-	private void lookupSegmentTransportType(Segment segment) {
+	private void lookupSegmentTransportType(Segment segment) throws JourneyInfoResolverException {
 		if (segment == null) {
-			// TODO: error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("null segment");
 		}
 		if (segment.getSegmentType() != RouteConstants.UNKNOWN) {
-			// Determined by Segment.setSegmentType() already.
+			// Already determined
 			return;
 		}
 		String url = buildGetLineInfoUrl(lineResponseLimit, segment.getSegmentMode());
 		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
-			// TODO: error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("HTTP result is empty");
 		}
 		LineInfo[] info = mGson.fromJson(result, LineInfo[].class);
 		if (info.length == 0) {
-			System.out.println("DBG lookupSegmentTransportType info[] size = 0");
-			// TODO: error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("info[] size = 0");
 		}
 		segment.setSegmentType(info[0].transport_type_id);
 	}
@@ -227,39 +209,32 @@ public class JourneyInfoResolver {
 	 * Makes HTTP request, not thread-safe.
 	 * 
 	 * @param waypoint waypoint to query for
+	 * @throws JourneyInfoResolverException
 	 */
-	private void lookupWaypointCoordinate(Waypoint waypoint) {
+	private void lookupWaypointCoordinate(Waypoint waypoint) throws JourneyInfoResolverException {
 		if (waypoint == null) {
-			// TODO: error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("null waypoint");
 		}
 		String stopCode = waypoint.getWaypointStopCode();
-		if (stopCode == null || stopCode.isEmpty() || stopCode.equals(Constants.NO_STOP_CODE)) {
-			// TODO: Actually, the first two cases should be error if they get to this point.
+		if (stopCode == null || stopCode.isEmpty()) {
+			throw new JourneyInfoResolverException("unfilled stopCode");
+		}
+		if (stopCode.equals(Constants.NO_STOP_CODE)) {
 			return;
 		}
 		String url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
 		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
-			// TODO error handling
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("HTTP response is empty");
 		}
 		StopInfo[] stop = mGson.fromJson(result, StopInfo[].class);
 		if (stop.length == 0) {
-			System.out.println("DBG lookupWaypointCoordinate stop[] size = 0");
-			// TODO error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("stop[] size = 0");
 		}
 		// Parse longitude and latitude coordinates from the result string
 		String coords = stop[0].wgs_coords;
 		if (coords == null || coords.isEmpty()) {
-			System.out.println("DBG lookupWaypointCoordinate coords empty");
-			// TODO error handling.
-			errorOccurred = true;
-			return;
+			throw new JourneyInfoResolverException("coords empty");
 		}
 		
 		double longCord = Double.parseDouble(coords.substring(9, 17));
@@ -274,47 +249,35 @@ public class JourneyInfoResolver {
 	 * 
 	 * @param url url to GET.
 	 * @return response body. empty on error.
+	 * @throws JourneyInfoResolverException
 	 */
-	private String doHttpGetRequest(String url) {
+	private String doHttpGetRequest(String url) throws JourneyInfoResolverException {
 		String responseString = "";
 		System.out.println("DBG doHttpGetRequest url=" + url);
 		try {
 			HttpResponse response = mHttpClient.execute(new HttpGet(url));
 			StatusLine statusLine = response.getStatusLine();
-			HttpEntity responseBody = response.getEntity();
-			if (statusLine.getStatusCode() == HttpStatus.SC_OK &&
-					responseBody != null) {
+			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 				response.getEntity().writeTo(mByteOutStream);
 				// TODO: Encoding
 				responseString = mByteOutStream.toString();
-				// Clear the buffer
-				mByteOutStream.reset();
-				responseBody.consumeContent();
 			} else {
-				System.out.println("DBG doHttpGetRequest status="
+				throw new JourneyInfoResolverException("HTTP status:"
 						+ statusLine.getStatusCode() + " : "
 						+ statusLine.getReasonPhrase());
-				// TODO error handling
-				errorOccurred = true;
 			}
-			// Close the connection
+			HttpEntity responseBody = response.getEntity();
 			if (responseBody == null) {
-				if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-					System.out.println("DBG doHttpGetRequest responseBody/Entity = null");
-					// TODO error handling
-				}
-			} else {
-				responseBody.consumeContent();
+				throw new JourneyInfoResolverException("responseBody is null");
 			}
+			// Clear the buffer
+			mByteOutStream.reset();
+			responseBody.consumeContent();
 		} catch (ClientProtocolException ex) {
-			System.out.println("DBG doHttpGetRequest ClientProtocolEx: "
+			throw new JourneyInfoResolverException("ClientProtocolEx: "
 					+ ex.getMessage());
-			// TODO error handling.
-			errorOccurred = true;
 		} catch (IOException ex) {
-			System.out.println("DBG doHttpGetRequest IOEx: " + ex.getMessage());
-			// TODO error handling.
-			errorOccurred = true;
+			throw new JourneyInfoResolverException("IOEx: " + ex.getMessage());
 		}
 		System.out.println("DBG doHttpGetRequest response: " + responseString);
 		return responseString;
@@ -390,4 +353,14 @@ public class JourneyInfoResolver {
 		return url;
 	}
 
+	/**
+	 *A generic exception for possible errors that could happen in this class. 
+	 */
+	static public class JourneyInfoResolverException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		public JourneyInfoResolverException() { super(); }
+		public JourneyInfoResolverException(String message) { super(message); }
+		public JourneyInfoResolverException(String message, Throwable cause) { super(message, cause); }
+		public JourneyInfoResolverException(Throwable cause) { super(cause); }
+	}
 }

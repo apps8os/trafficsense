@@ -28,13 +28,7 @@ public class Route {
 	 * returns next segment or a null if on last segment
 	 */
 	public Segment getNextSegment(){
-		if(currentSegment+1 < segmentList.size()){
-			return(segmentList.get(currentSegment+1));
-		}
-		else{
-			return null;
-		}
-		
+		return segmentList.get(currentSegment+1);
 	}
 
 	public Segment setNextSegment(int nextSegment){

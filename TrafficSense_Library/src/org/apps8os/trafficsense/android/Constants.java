@@ -85,6 +85,7 @@ public class Constants {
 	/**
 	 * JourneyParser codes
 	 */
+	final public static int PARSER_FAILURE = -1;
 	final public static int PARSER_SUCCESS = 0 ;
 	final public static int MALFORMED_JOURNEY_TEXT = 1;
 	final public static int PARSER_INVALIDCASE = 2;

@@ -1,7 +1,8 @@
 package org.apps8os.trafficsense;
 
+import java.text.ParseException;
+
 import org.apps8os.trafficsense.android.Constants;
-import org.apps8os.trafficsense.android.LocationAndTimeService;
 import org.apps8os.trafficsense.android.LocationOnlyService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
@@ -278,8 +279,6 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
-		serviceIntent = new Intent(mContext, LocationAndTimeService.class);
-		mContext.stopService(serviceIntent);
 		
 		// TODO: add some code here if a new Service is introduced.
 	}
@@ -352,28 +351,32 @@ public class TrafficsenseContainer {
 		isLoading = true;
 		new Thread(new Runnable() {
 			public void run() {
-				activityAttach(mContext.getApplicationContext());
-				mJourneyText = retrieveJourneyBlockingPart(credential);
-				/*
-				 * If the parseJourney() returns false means that the
-				 * JourneyParser had an error parsing, should stop the activity
-				 */
-				if (parseJourney() == false) {
-					activityDetach();
+				try {
+					activityAttach(mContext.getApplicationContext());
+					mJourneyText = retrieveJourneyBlockingPart(credential);
+					parseJourney();
+					System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
+					if (serviceType != Constants.SERVICE_TIME_ONLY) {
+						/**
+						 * TODO: Check its return value!
+						 * false is returned on error.
+						 * Maybe send an Intent?
+						 */
+						retrieveCoordinatesForStopsBlockingPart(mRoute);
+					}
+					startTrackerService(serviceType);
+				} catch (ParseException e) {
+					// Unable to parse journey.
+					System.out.println("DBG startJourneyTracker parse:"+e.getMessage());
 					return;
+				} catch (EmailException e) {
+					// Unable to retrieve journey text.
+					System.out.println("DBG startJourneyTracker email:"+e.getMessage());
+					return;
+				} finally {
+					activityDetach();
+					isLoading = false;
 				}
-				System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
-				if (serviceType != Constants.SERVICE_TIME_ONLY) {
-					/**
-					 * TODO: Check its return value!
-					 * false is returned on error.
-					 * Maybe send an Intent?
-					 */
-					retrieveCoordinatesForStopsBlockingPart(mRoute);
-				}
-				startTrackerService(serviceType);
-				activityDetach();
-				isLoading = false;
 			}
 		}).start();
 	}
@@ -396,7 +399,7 @@ public class TrafficsenseContainer {
 			return;
 		}
 		/**
-		 * TODO: Currently only one service at a time is allowed.
+		 * Currently only one service at a time is allowed.
 		 */
 		if (mRunningServices != 0) {
 			System.out.println("DBG startTrackerService: trying to start multiple services?");
@@ -409,13 +412,12 @@ public class TrafficsenseContainer {
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
-		case Constants.SERVICE_LOCATION_AND_TIME:
-			serviceIntent = new Intent(mContext, LocationAndTimeService.class);
-			break;
 		default:
+			// TODO: throw InvalidParameterException
 			System.out.println("DBG invalid serviceType");
 			break;
 		}
+		// TODO: remove after throwing exception
 		if (serviceIntent == null) {
 			return;
 		}
@@ -435,28 +437,26 @@ public class TrafficsenseContainer {
 	 * 
 	 * @param credential the e-mail account to be accessed.
 	 * @return the journey text as a String.
+	 * @throws EmailException
 	 */
-	public static String retrieveJourneyBlockingPart(EmailCredential credential) {
+	public static String retrieveJourneyBlockingPart(EmailCredential credential)
+			throws EmailException {
 		String journeyText = null;
 		Email email = null;
 		EmailReader reader = new EmailReader();
 
-		try {
-			reader.initMailbox(credential);
-			/**
-			 * The first invocation gets the last (newest) message.
-			 */
-			email = reader.getNextEmail();
-		} catch (EmailException e) {
-			// TODO: do something here?
-			System.out.println("DBG EmailException: " + e.getMessage());
-		} finally {
-			if (email != null) {
-				journeyText = email.getContent();
-				// TODO: filter out trailing HTML text
-				// TODO: check for other error / format ?
-			}
+		reader.initMailbox(credential);
+		/**
+		 * The first invocation gets the last (newest) message.
+		 */
+		email = reader.getNextEmail();
+
+		if (email != null) {
+			journeyText = email.getContent();
+			// TODO: filter out trailing HTML text
+			// TODO: check for other error / format ?
 		}
+
 		return journeyText;
 	}
 	
@@ -478,9 +478,12 @@ public class TrafficsenseContainer {
 
 		new Thread(new Runnable() {
 			public void run() {
-				
-				mJourneyText =
-						TrafficsenseContainer.retrieveJourneyBlockingPart(credential);
+				try {
+					mJourneyText = TrafficsenseContainer
+							.retrieveJourneyBlockingPart(credential);
+				} catch (EmailException e) {
+					mJourneyText = "Error: " + e.getMessage();
+				}
 				
 				if (update != null && after != null) {
 					update.post(after);
@@ -497,20 +500,12 @@ public class TrafficsenseContainer {
 	 * @return true on success, false otherwise.
 	 */
 	public static boolean retrieveCoordinatesForStopsBlockingPart(Route route) {
-		if (route == null) {
-			// TODO error handling ?
-			System.out.println("DBG retrieveCoordinatesForStopsBlockingPart null mRoute");
-			return false;
-		}
 		JourneyInfoResolver resolver = new JourneyInfoResolver();
 		/**
 		 * Access HSL API to retrieve GPS coordinates for each Waypoint (if stopCode is available).
 		 */
-		if (resolver.retrieveCoordinatesFromHsl(route) == false) {
-			// TODO: error handling.
-			return false;
-		}
-		// TODO: what about those who do not have a stopCode (= NO_STOP_CODE) ?
+		resolver.retrieveCoordinatesFromHsl(route);
+
 		return true;
 	}
 	
@@ -539,23 +534,14 @@ public class TrafficsenseContainer {
 	 * the journey is empty.
 	 * 
 	 * @return true if the JourneyParser parsed correctly false if had an error
+	 * @throws java.text.ParseException from JourneyParser.parseString(String).
 	 */
-	public boolean parseJourney() {
-		if (mJourneyText == null) {
-			return false;
-		}
+	public void parseJourney() throws ParseException {
 		JourneyParser parser = new JourneyParser();
-		int parserStatus = parser.parseString(mJourneyText);
-
+		parser.parseString(mJourneyText);
 		mJourneyJsonObject = parser.getJsonObj();
 		mRoute = new Route();
 		mRoute.setRoute(parser.getJsonObj());
-
-		if (parserStatus == 0) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 	
 	/**

@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 
 public class MainActivity extends Activity {
 
@@ -154,7 +155,11 @@ public class MainActivity extends Activity {
 		/* Debug switch: use hard-coded journey */
 		//mContainer.setJourneyText(getHardCodedJourneyText());
 		
-		mContainer.parseJourney();
+		try {
+			mContainer.parseJourney();
+		} catch (ParseException e) {
+			view.setText(e.getMessage());
+		}
 		if (mContainer.getJourneyObject() != null) {
 			view.setText(mContainer.getJourneyObject().toString());
 		}

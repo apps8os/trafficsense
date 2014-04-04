@@ -1,5 +1,6 @@
 package org.apps8os.trafficsense.util;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.BodyPart;
@@ -38,7 +39,7 @@ public class EmailReader {
 			store = session.getStore();
 		} catch (NoSuchProviderException ex) {
 			System.out.println("DBG initMailbox getStore:"+ex.getMessage());
-			throw new EmailException("Error: No such service provider");
+			throw new EmailException("No such service provider:"+ex.getMessage());
 		}
 		// Connect to the server using IMAP over SSL (imaps).
 		try {
@@ -46,7 +47,7 @@ public class EmailReader {
 					credential.getPassword());
 		} catch (MessagingException e) {
 			System.out.println("DBG initMailbox connect(): " + e.getMessage());
-			throw new EmailException("Error: error connecting to mail server");
+			throw new EmailException("Error connecting to mail server:"+e.getMessage());
 		}
 
 		// specify the folder from which to get email
@@ -54,7 +55,7 @@ public class EmailReader {
 			inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error opening email folder");
+			throw new EmailException("Error opening email folder:"+e.getMessage());
 		}
 
 		// set the amount of mail in the box.
@@ -62,7 +63,7 @@ public class EmailReader {
 			mailboxMsgCount = inbox.getMessageCount();
 		} catch (MessagingException e) {
 			throw new EmailException(
-					"Error: error retreiving email message count");
+					"Error retreiving email message count:"+e.getMessage());
 		}
 		msgPointer = mailboxMsgCount;
 
@@ -85,7 +86,7 @@ public class EmailReader {
 		try {
 			msg = inbox.getMessage(msgPointer);
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error retreiving email"); 
+			throw new EmailException("Error retreiving e-mail:"+e.getMessage()); 
 		}
 		System.out.println(msg.toString());
          //create a email object and put the current emails information into it. 
@@ -94,18 +95,17 @@ public class EmailReader {
 			email.setSender(msg.getFrom()[0].toString());
 			
 		} catch (Exception e) {
-			throw new EmailException("Error: error parsing sender");
+			throw new EmailException("Error parsing sender:"+e.getMessage());
 		}
 		try {
 			email.setSendTime(msg.getSentDate().toString());
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new EmailException("Error parsing send date:"+e.getMessage());
 		}
 		try {
 			email.setSubject(msg.getSubject().toString());
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error parsing subject");
+			throw new EmailException("Error parsing subject:"+e.getMessage());
 		}
         Multipart mp;
 		try {
@@ -124,10 +124,10 @@ public class EmailReader {
 				email.setContent((String) obj);
 			}
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new EmailException("Error: error 1 parsing content");
-			
+		} catch (MessagingException e) {
+			throw new EmailException("Error parsing content:"+e.getMessage());
+		} catch (IOException e) {
+			throw new EmailException("IO error:"+e.getMessage());
 		}
 		        
 		//decrease the msgPointer by one so the next getNextEmail call returns the next email. 
@@ -170,7 +170,7 @@ public class EmailReader {
         try {
         	mailboxMsgCount = inbox.getMessageCount();
 		} catch (MessagingException e) {
-			throw new EmailException("Error: error retreiving email message count");
+			throw new EmailException("Error retreiving email message count:"+e.getMessage());
 		}
         msgPointer=mailboxMsgCount;
 	}
@@ -178,7 +178,7 @@ public class EmailReader {
 	/**
 	 *A generic exception for possible errors that could happen in this class. 
 	 */
-	static public class EmailException extends Exception {
+	static public class EmailException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		public EmailException() { super(); }
 		public EmailException(String message) { super(message); }
