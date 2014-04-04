@@ -144,7 +144,8 @@ void init_error_window() {
   GRect bounds = layer_get_frame(window_layer);
 
   // Initialize the line code text layer
-  errorText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+  errorText = text_layer_create((GRect){ .origin = { 0, 0 }, .size = bounds.size });
+  text_layer_set_font(errorText, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   layer_add_child(window_layer, text_layer_get_layer(errorText));
 }
 
