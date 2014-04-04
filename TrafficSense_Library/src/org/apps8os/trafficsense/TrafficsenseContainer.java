@@ -1,8 +1,8 @@
 package org.apps8os.trafficsense;
 
 import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.android.LocationAndTimeService;
 import org.apps8os.trafficsense.android.LocationOnlyService;
-import org.apps8os.trafficsense.android.LocationService;
 import org.apps8os.trafficsense.android.TimeOnlyService;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.pebble.PebbleCommunication;
@@ -92,6 +92,7 @@ public class TrafficsenseContainer {
 	 */
 	private volatile int mRunningServices = 0;
 
+	private volatile boolean isLoading = false;
 	/**
 	 * Singleton class, invoke {@link #getInstance()} instead.
 	 */
@@ -163,6 +164,13 @@ public class TrafficsenseContainer {
 			return true;
 		}
 		return false;
+	}
+	/**
+	 * returns a boolean value indicating whether info (email, coords) is being loaded. 
+	 * @return
+	 */
+	public boolean isLoading(){
+		return(isLoading);
 	}
 	
 	/**
@@ -270,7 +278,7 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
-		serviceIntent = new Intent(mContext, LocationService.class);
+		serviceIntent = new Intent(mContext, LocationAndTimeService.class);
 		mContext.stopService(serviceIntent);
 		
 		// TODO: add some code here if a new Service is introduced.
@@ -341,6 +349,7 @@ public class TrafficsenseContainer {
 	 * @see #startTrackerService(int) for supported serviceTypes.
 	 */
 	public void startJourneyTracker(final int serviceType, final EmailCredential credential) {
+		isLoading = true;
 		new Thread(new Runnable() {
 			public void run() {
 				activityAttach(mContext.getApplicationContext());
@@ -357,6 +366,7 @@ public class TrafficsenseContainer {
 				}
 				startTrackerService(serviceType);
 				activityDetach();
+				isLoading = false;
 			}
 		}).start();
 	}
@@ -392,8 +402,8 @@ public class TrafficsenseContainer {
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
-		case Constants.LOCATION_SERVICE:
-			serviceIntent = new Intent(mContext, LocationService.class);
+		case Constants.SERVICE_LOCATION_AND_TIME:
+			serviceIntent = new Intent(mContext, LocationAndTimeService.class);
 			break;
 		default:
 			System.out.println("DBG invalid serviceType");
@@ -528,6 +538,7 @@ public class TrafficsenseContainer {
 		JourneyParser parser = new JourneyParser();
 		parser.parseString(mJourneyText);
 		mJourneyJsonObject = parser.getJsonObj();
+		mRoute = new Route();
 		mRoute.setRoute(parser.getJsonObj());
 	}
 	

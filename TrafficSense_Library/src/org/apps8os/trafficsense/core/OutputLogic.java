@@ -8,7 +8,6 @@ import org.apps8os.trafficsense.TrafficsenseContainer;
 /**
  * Class for implementing any output logic. For example what strings the mainactivity should present
  * to the user at a particular stop. 
- * @author traffisense
  *
  */
 public class OutputLogic {
@@ -18,7 +17,7 @@ public class OutputLogic {
 		
 		TrafficsenseContainer mContainer= TrafficsenseContainer.getInstance();
 		Segment curSegment = mContainer.getRoute().getCurrentSegment();
-		int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
+		//int curSegmentIndex = mContainer.getRoute().getCurrentIndex();
 		int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
 		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
 		
@@ -43,7 +42,7 @@ public class OutputLogic {
 		if(curSegment.isWalking() == false){
 			String transportId = curSegment.getSegmentMode();
 			String destination = curSegment.getLastWaypoint().getWaypointName();
-			String message = new String();
+			String message;
 			if(transportId.equals("metro")){
 				message = String.format("Take metro to %s",destination);
 			}

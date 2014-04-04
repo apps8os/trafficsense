@@ -131,12 +131,16 @@ public class Segment {
 	}
 
 	public String getSegmentMode() {
-		return mode;
+		synchronized (this) {
+			return mode;
+		}
 	}
 
 	public String setSegmentMode(String nMode) {
-		mode = nMode;
-		return mode;
+		synchronized (this) {
+			mode = nMode;
+			return mode;
+		}
 	}
 
 	public ArrayList<Waypoint> getWaypointList() {
@@ -167,7 +171,7 @@ public class Segment {
 				transportType = RouteConstants.METRO;
 			} else	if (mode.equals("ferry")) {
 				transportType = RouteConstants.FERRY;
-			} else	if(mode.startsWith("Walking") | mode.startsWith("Kävelyä") | mode.startsWith("Gång")) {
+			} else	if(mode.startsWith("Walking") || mode.startsWith("Kävelyä") || mode.startsWith("Gång")) {
 				isWalking = true;
 				transportType = RouteConstants.WALKING;
 			} else {

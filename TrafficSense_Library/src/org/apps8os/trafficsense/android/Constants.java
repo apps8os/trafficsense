@@ -26,6 +26,9 @@ public class Constants {
 	final public static String ACTION_ROUTE_EVENT = "trafficsense.RouteEventUpdateUi";
 	final public static String ACTION_ROUTE_EVENT_EXTRA_MESSAGE = "trafficsense.RouteEventUpdateUi.Extras.Message";
 	final public static String ACTION_COORDS_READY = "trafficsense.CoordsReady";
+	final public static String ROUTE_STOPPED = "route_stopped";
+	final public static String ERROR = "route_error";
+	
 	/**
 	 * Interval of time-based events in development mode. (ms)
 	 */
@@ -39,7 +42,7 @@ public class Constants {
 	 */
 	final public static int SERVICE_TIME_ONLY = 1;
 	final public static int SERVICE_LOCATION_ONLY = 2;
-	final public static int LOCATION_SERVICE = 3;
+	final public static int SERVICE_LOCATION_AND_TIME = 3;
 	/**
 	 * Magic stopCode for those stops without one.
 	 */
@@ -64,7 +67,7 @@ public class Constants {
 	/**
 	 * how long the phone vibrates on alerts
 	 */
-	final public int VIBRATION_TIME = 4000;
+	final public static int VIBRATION_TIME = 4000;
 	
 	/**
 	 * the time offset that can be passed timeOnlyService
