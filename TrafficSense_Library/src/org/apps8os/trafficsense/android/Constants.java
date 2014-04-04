@@ -3,18 +3,6 @@ package org.apps8os.trafficsense.android;
 /**
  * Shared constants.
  */
-/**
- * @author catarinamoura
- *
- */
-/**
- * @author catarinamoura
- *
- */
-/**
- * @author catarinamoura
- *
- */
 public class Constants {
 
 	/**
@@ -94,7 +82,6 @@ public class Constants {
 	 */
 	final public static String OFFSET = "offset";
 
-	
 	/**
 	 * JourneyParser codes
 	 */
@@ -102,9 +89,6 @@ public class Constants {
 	final public static int MALFORMED_JOURNEY_TEXT = 1;
 	final public static int PARSER_INVALIDCASE = 2;
 	final public static int PARSER_STOPCODEINVALID =3;
-	
-
-
 
 }
 

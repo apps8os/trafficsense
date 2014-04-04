@@ -434,6 +434,7 @@ public class JourneyParser {
 	public int parseString(String jsonText) {
 
 		Scanner scanner = new Scanner(jsonText);
+		int errorStatus = Constants.PARSER_SUCCESS;
 
 		while (scanner.hasNextLine()) {
 
@@ -442,15 +443,16 @@ public class JourneyParser {
 				parseOneLine(line);
 			} catch (InvalidCaseParser e) {
 				System.out.println(e.getMessage());
-				return Constants.PARSER_INVALIDCASE;
-
+				errorStatus = Constants.PARSER_INVALIDCASE;
+				break;
 			} catch (StopCodeInvalidParser e) {
 				System.out.println(e.getMessage());
-				return Constants.PARSER_STOPCODEINVALID;
-
+				errorStatus = Constants.PARSER_STOPCODEINVALID;
+				break;
 			} catch (MalformedJourneyText e) {
 				System.out.println(e.getMessage());
-				return Constants.MALFORMED_JOURNEY_TEXT;
+				errorStatus = Constants.MALFORMED_JOURNEY_TEXT;
+				break;
 			}
 			if (line.equals("Arrival") || line.equals("Perillä")
 					|| line.equals("Ankomst")) {
@@ -459,7 +461,7 @@ public class JourneyParser {
 			}
 		}
 		scanner.close();
-		return Constants.PARSER_SUCCESS;
+		return errorStatus;
 	}
 
 	/**********************************************************************
