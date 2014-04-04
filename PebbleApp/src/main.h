@@ -11,6 +11,8 @@
 #define TIME_STR_LENGTH		6
 
 #define LINE_CODE_LENGTH	5	// Max length of a public transport line code
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 #define TEXT_GET_OFF		"Get off!"
 
