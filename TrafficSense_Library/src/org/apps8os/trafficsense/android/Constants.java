@@ -3,6 +3,18 @@ package org.apps8os.trafficsense.android;
 /**
  * Shared constants.
  */
+/**
+ * @author catarinamoura
+ *
+ */
+/**
+ * @author catarinamoura
+ *
+ */
+/**
+ * @author catarinamoura
+ *
+ */
 public class Constants {
 
 	/**
@@ -73,4 +85,18 @@ public class Constants {
 	 * the time offset that can be passed timeOnlyService
 	 */
 	final public static String OFFSET = "offset";
+
+	
+	/**
+	 * JourneyParser codes
+	 */
+	final public static int PARSER_SUCCESS = 0 ;
+	final public static int MALFORMED_JOURNEY_TEXT = 1;
+	final public static int PARSER_INVALIDCASE = 2;
+	final public static int PARSER_STOPCODEINVALID =3;
+	
+
+
+
 }
+
