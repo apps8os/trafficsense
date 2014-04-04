@@ -89,17 +89,15 @@ void basic_window_loop() {
         show_3stop_window();
         return; // stop the loop when time has run out 
       } else {
-        timeout_ms = 1000;
         set_time_text_by_unit(UNIT_SECONDS);
       }
     } else {
-      timeout_ms = 60000;
       set_time_text_by_unit(UNIT_MINUTES);
     }
   } else {
-    timeout_ms = 60000 * 60;
     set_time_text_by_unit(UNIT_HOURS);
   }
+  timeout_ms = 1000;
   timerHandle = app_timer_register(timeout_ms, (AppTimerCallback)basic_window_loop, NULL);
 }
 
@@ -146,7 +144,8 @@ void init_error_window() {
   GRect bounds = layer_get_frame(window_layer);
 
   // Initialize the line code text layer
-  errorText = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+  errorText = text_layer_create((GRect){ .origin = { 0, 0 }, .size = bounds.size });
+  text_layer_set_font(errorText, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   layer_add_child(window_layer, text_layer_get_layer(errorText));
 }
 
@@ -160,24 +159,29 @@ void init_basic_window() {
   GRect bounds = layer_get_frame(window_layer);
 
   // Initialize the line code text layer
-  lineCode = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
+  lineCode = text_layer_create((GRect){ .origin = { 0, 0 }, .size = bounds.size });
   text_layer_set_text(lineCode, currentLineCode);
   layer_add_child(window_layer, text_layer_get_layer(lineCode));
 
   // Initialize the text layer which shows the amount of time left
-  timeAmount = text_layer_create((GRect){ .origin = { 0, 60 }, .size = bounds.size });
+  timeAmount = text_layer_create((GRect){ .origin = { 0, 30 }, .size = bounds.size });
   layer_add_child(window_layer, text_layer_get_layer(timeAmount));
   
   // Initialize the text layer which shows the units for the shown time
-  timeUnit = text_layer_create((GRect){ .origin = { 30, 60 }, .size = bounds.size });
+  timeUnit = text_layer_create((GRect){ .origin = { 30, 30 }, .size = bounds.size });
   text_layer_set_text(timeUnit, timeUnitsStr[0]);
   layer_add_child(window_layer, text_layer_get_layer(timeUnit));
 
   // Initialize the text layer which shows the first stop name and code
-  stopCodeAndName = text_layer_create((GRect){ .origin = { 0, 90 }, .size = bounds.size });
+  stopCodeAndName = text_layer_create((GRect){ .origin = { 0, 60 }, .size = bounds.size });
   text_layer_set_text(stopCodeAndName, "E9999 Some stop");
   layer_add_child(window_layer, text_layer_get_layer(stopCodeAndName));
 
+  // Set the fonts
+  text_layer_set_font(lineCode, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_font(timeAmount, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_font(timeUnit, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  text_layer_set_font(stopCodeAndName, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   // Start the window loop, which updates the amount of time each second/minute
   basic_window_loop();
   

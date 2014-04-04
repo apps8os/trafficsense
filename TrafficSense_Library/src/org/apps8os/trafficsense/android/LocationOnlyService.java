@@ -16,7 +16,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
 
-import android.R;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,12 +29,16 @@ import android.os.IBinder;
 import android.os.Vibrator;
 
 
+/**
+ * TODO: Documentation.
+ */
 public class LocationOnlyService extends Service implements 
 		ConnectionCallbacks,
 		OnConnectionFailedListener,
 		OnAddGeofencesResultListener{
 
-	private int GEOFENCE_RADIUS = 100;
+	// TODO: Move to Constants
+	private final static int GEOFENCE_RADIUS = 100;
 	//container that contains route information and else-
 	private TrafficsenseContainer mContainer; 
 	//index of which segment we are in
@@ -47,7 +50,8 @@ public class LocationOnlyService extends Service implements
 	//holds a locationClient
 	private LocationClient mLocationClient;
 	//action that happens when geofence tranistion detected by locationClient
-	private String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
+	// TODO: Move to Constants
+	private static final String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
 	private Context mContext;
 	//callbacks by geofence will be made to these classes 
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
@@ -253,10 +257,10 @@ public class LocationOnlyService extends Service implements
 		 */
 		public void onReceive(Context arg0, Intent arg1) {
 			//the intent could also have been sent to indicate an error
-			if(mLocationClient.hasError(arg1)==true){
+			if(LocationClient.hasError(arg1)==true){
 				return; //TODO: again figure out what happens on error
 			}
-			Geofence curGeofence = mLocationClient.getTriggeringGeofences(arg1).get(0);
+			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1).get(0);
 			//get the id of the geofence that triggered the alert and increment it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
@@ -327,7 +331,7 @@ public class LocationOnlyService extends Service implements
 				.setSmallIcon(resID)
 				.build();
 		
-		NotificationManager mNotificationManager =(NotificationManager) getSystemService(mContext.NOTIFICATION_SERVICE);
+		NotificationManager mNotificationManager =(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
 		
 		//vibrate if user needs to get off at next waypoint
@@ -336,13 +340,16 @@ public class LocationOnlyService extends Service implements
 		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
 		
 		if((curWaypointIndex == waypointList.size() -1) & !curSegment.isWalking()){
-			Vibrator vib = (Vibrator) getSystemService(mContext.VIBRATOR_SERVICE);
+			Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 			vib.vibrate(Constants.VIBRATOR_DURATION);
 		}
 	}
+	
+	/**
+	 * No bind to this service.
+	 */
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

@@ -54,7 +54,7 @@ public class Constants {
 	 */
 	final public static int SERVICE_TIME_ONLY = 1;
 	final public static int SERVICE_LOCATION_ONLY = 2;
-	final public static int LOCATION_SERVICE = 3;
+	final public static int SERVICE_LOCATION_AND_TIME = 3;
 	/**
 	 * Magic stopCode for those stops without one.
 	 */

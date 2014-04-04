@@ -57,8 +57,6 @@
         <!-- Location-based Journey Tracker -->
         <service android:name="org.apps8os.trafficsense.android.LocationOnlyService" />
         
-        <service android:name="org.apps8os.trafficsense.android.LocationService" />
-        
         <!-- ContextLogger3 related services -->
         <service android:name="edu.mit.media.funf.FunfManager" >
             <meta-data
