@@ -19,6 +19,10 @@ public class Constants {
 	 */
 	final public static boolean useWallClock = false;
 	/**
+	 * Radius of GeoFence regions (meters?).
+	 */
+	final public static int GEOFENCE_RADIUS = 100;
+	/**
 	 * Action strings of Intents.
 	 */
 	final public static String ACTION_NEXT_WAYPOINT = "trafficsense.NextWaypointAlarm";
@@ -26,6 +30,10 @@ public class Constants {
 	final public static String ACTION_ROUTE_EVENT = "trafficsense.RouteEventUpdateUi";
 	final public static String ACTION_ROUTE_EVENT_EXTRA_MESSAGE = "trafficsense.RouteEventUpdateUi.Extras.Message";
 	final public static String ACTION_COORDS_READY = "trafficsense.CoordsReady";
+	/**
+	 * Action/Intent when GeoFence transition is detected by LocationClient.
+	 */
+	final public static String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
 	final public static String ROUTE_STOPPED = "route_stopped";
 	final public static String ERROR = "route_error";
 	
@@ -73,4 +81,14 @@ public class Constants {
 	 * the time offset that can be passed timeOnlyService
 	 */
 	final public static String OFFSET = "offset";
+
+	/**
+	 * JourneyParser codes
+	 */
+	final public static int PARSER_SUCCESS = 0 ;
+	final public static int MALFORMED_JOURNEY_TEXT = 1;
+	final public static int PARSER_INVALIDCASE = 2;
+	final public static int PARSER_STOPCODEINVALID =3;
+
 }
+

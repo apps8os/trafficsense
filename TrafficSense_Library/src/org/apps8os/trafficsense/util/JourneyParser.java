@@ -7,8 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-import org.apps8os.trafficsense.exceptions.InvalidCase;
+
+import org.apps8os.trafficsense.exceptions.InvalidCaseParser;
+import org.apps8os.trafficsense.exceptions.MalformedJourneyText;
 import org.apps8os.trafficsense.exceptions.StopCodeInvalidParser;
+
+import org.apps8os.trafficsense.android.Constants;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -199,10 +203,13 @@ public class JourneyParser {
 	 * Last line always string "Arrival" || "Perillä"(FIN lang) || "Ankomst"(SWE
 	 * lang)
 	 * 
+	 * @throws MalformedJourneyText
+	 *             InvalidCase StopCodeInvalidParser
+	 * 
 	 * @see #organizeJson(String)
 	 */
-	private void addJsonObject() throws InvalidCase, StopCodeInvalidParser,
-	NullPointerException {
+	private void addJsonObject() throws InvalidCaseParser,
+			StopCodeInvalidParser, NullPointerException, MalformedJourneyText {
 
 		System.out.println("DBG addJsonObject nline:" + _nline + " arraySz:"
 				+ _textArray.size() + " txtLine:" + _txtLine);
@@ -245,9 +252,11 @@ public class JourneyParser {
 			// System.out.println("NORMAL CASE: " + exception + "->" +
 			// str_split[1]);
 		}
-		
+
 		if (str_split == null) {
-			// TODO: this is an error: malformed journey text.
+
+			throw new MalformedJourneyText(
+					"JourneyParser: The journey text is malformed");
 		}
 
 		if (!getTextArray().get(1).equals("Arrival")
@@ -268,8 +277,8 @@ public class JourneyParser {
 				break;
 
 			default:
-				throw new InvalidCase(
-						"JourneyParser: Invalid case at the segement structure");
+				throw new InvalidCaseParser(
+						"JourneyParser: Invalid case at the segment structure");
 
 			}
 
@@ -294,22 +303,23 @@ public class JourneyParser {
 				if (!getTextArray().get(exception + 1).contains("Walking")
 						&& !getTextArray().get(exception + 1).contains(
 								"Kävelyä")
-								&& !getTextArray().get(exception + 1).contains("Gång")) {
+						&& !getTextArray().get(exception + 1).contains("Gång")) {
 
 					// System.out.println("STRING: " + str_split[0] + " "+
 					// str_split[1]);
 					String stopCode;
 					int start, end;
-//					start = str_split[1].indexOf("(") + 1;
-//					end = str_split[1].indexOf(")");
-					
-					/*  Getting the last parentheses from the string
-					 *  because usually is where is the stop code
+					// start = str_split[1].indexOf("(") + 1;
+					// end = str_split[1].indexOf(")");
+
+					/*
+					 * Getting the last parentheses from the string because
+					 * usually is where is the stop code
 					 */
-			
+
 					start = str_split[1].lastIndexOf("(") + 1;
 					end = str_split[1].lastIndexOf(")");
-					
+
 					if (start == -1 || end == -1) {
 						throw new StopCodeInvalidParser(
 								"JsonParser: Does not exist a stopCode in the line:"
@@ -348,7 +358,8 @@ public class JourneyParser {
 	 * 
 	 * @see #addJsonObject()
 	 */
-	private void organizeJson() throws InvalidCase, StopCodeInvalidParser {
+	private void organizeJson() throws InvalidCaseParser,
+			StopCodeInvalidParser, MalformedJourneyText {
 
 		System.out.println("DBG organizeJson nline:" + _nline + " arraySz:"
 				+ _textArray.size() + " txtLine:" + _txtLine);
@@ -402,8 +413,8 @@ public class JourneyParser {
 	 * @param line
 	 *            line to be parsed
 	 */
-	private void parseOneLine(String line) throws InvalidCase,
-	StopCodeInvalidParser {
+	private void parseOneLine(String line) throws InvalidCaseParser,
+			StopCodeInvalidParser, MalformedJourneyText {
 		System.out.println("DBG parseOneLine: " + line);
 		setTxtLine(line);
 		incrementLine();
@@ -415,24 +426,33 @@ public class JourneyParser {
 	 * 
 	 * @param jsonText
 	 *            plain text journey with line breaks.
+	 * @return a constant indicating if the parser: parsed with success
+	 *         (PARSER_SUCCESS) or had any problem when was parsing
+	 *         (MALFORMED_JOURNEY_TEXT PARSER_INVALIDCASE PARSER_STOPCODEINVALID
+	 *         )
 	 */
-	public void parseString(String jsonText) {
+	public int parseString(String jsonText) {
 
 		Scanner scanner = new Scanner(jsonText);
+		int errorStatus = Constants.PARSER_SUCCESS;
 
 		while (scanner.hasNextLine()) {
 
 			String line = scanner.nextLine();
 			try {
 				parseOneLine(line);
-			} catch (InvalidCase e) {
+			} catch (InvalidCaseParser e) {
 				System.out.println(e.getMessage());
+				errorStatus = Constants.PARSER_INVALIDCASE;
+				break;
 			} catch (StopCodeInvalidParser e) {
 				System.out.println(e.getMessage());
-			} catch (NullPointerException e) {
-				System.out.println("JsonParser: " + e.getMessage());
-			} catch (Exception e) {
-				System.out.println("JsonParser: " + e.getMessage());
+				errorStatus = Constants.PARSER_STOPCODEINVALID;
+				break;
+			} catch (MalformedJourneyText e) {
+				System.out.println(e.getMessage());
+				errorStatus = Constants.MALFORMED_JOURNEY_TEXT;
+				break;
 			}
 			if (line.equals("Arrival") || line.equals("Perillä")
 					|| line.equals("Ankomst")) {
@@ -441,6 +461,7 @@ public class JourneyParser {
 			}
 		}
 		scanner.close();
+		return errorStatus;
 	}
 
 	/**********************************************************************
@@ -452,9 +473,11 @@ public class JourneyParser {
 	 * 
 	 * @param fileName
 	 *            path to the file.
+	 * @throws MalformedJourneyText
 	 * @deprecated replaced by {@link #parseString(String)}
 	 */
-	public void parsingFile(String fileName) throws InvalidCase {
+	public void parsingFile(String fileName) throws InvalidCaseParser,
+			MalformedJourneyText {
 		// This will reference one line at a time
 		String line = null;
 
@@ -478,7 +501,7 @@ public class JourneyParser {
 		} catch (IOException ex) {
 			System.out.println("Error reading file '" + fileName + "'");
 		} catch (StopCodeInvalidParser e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 	}
