@@ -1,8 +1,7 @@
 #include "communication.h"
 
 void send_cmd(uint8_t cmd) {
-	//Sends the value cmd to the phone as a tuple with key 0.
-	Tuplet value = TupletInteger(0, cmd);
+	Tuplet value = TupletInteger(KEY_COMMAND, cmd);
 	DictionaryIterator *iter;
 	app_message_outbox_begin(&iter); // returns AppMessageResult
 	if (iter == NULL) // if app_message_outbox_begin fails, iter == NULL

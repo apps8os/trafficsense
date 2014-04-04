@@ -93,6 +93,16 @@ public class PebbleUiController {
 	}
 	
 	/**
+	 * Updates everything in Pebble
+	 */
+	public void totalUpdate() {
+		int newSegmentIndex = mRoute.getCurrentIndex();
+		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
+		int nonWalkingSeg = getFirstNonWalkingSegmentIndex(newSegmentIndex);
+		initializeSegment(nonWalkingSeg);
+	}
+	
+	/**
 	 * Gets the index of the first non-walking segment in the route
 	 * starting from index currentIndex. Returns -1 if not found or with -1
 	 * as input.

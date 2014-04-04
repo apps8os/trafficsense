@@ -69,7 +69,7 @@ public class TimeOnlyService extends Service {
 	 * This would be true if the service is automatically restarted
 	 * by Android.
 	 */
-	boolean errorOnStart;
+	private boolean errorOnStart;
 
 	/**
 	 * Create common resources for the service.

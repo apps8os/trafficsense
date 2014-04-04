@@ -4,6 +4,8 @@ package org.apps8os.trafficsense.pebble;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.apps8os.trafficsense.TrafficsenseContainer;
+
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.Waypoint;
 
@@ -76,7 +78,9 @@ public class PebbleCommunication {
 	 * Handle Pebble messaging NACKs.
 	 */
 	private PebbleKit.PebbleNackReceiver nackReceiver;
-
+	
+	private TrafficsenseContainer mContainer;
+	
 	/**
 	 * Constructor.
 	 * 
@@ -85,7 +89,23 @@ public class PebbleCommunication {
 	public PebbleCommunication(Context applicationContext) {
 		mContext = applicationContext;
 		messageManager = new MessageManager(mContext, APP_UUID);
+		mContainer = TrafficsenseContainer.getInstance();
 		// The thread is started in startAppOnPebble()
+		PebbleKit.registerReceivedDataHandler(mContext, new PebbleKit.PebbleDataReceiver(APP_UUID) {
+			@Override
+			public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
+				if (data.getUnsignedInteger(KEY_COMMAND) == PEBBLE_COMMAND_GET) {
+					// Information requested from Pebble
+					if (mContainer.getPebbleUiController() != null && mContainer.isJourneyStarted()) {
+						mContainer.getPebbleUiController().totalUpdate();
+					}
+					PebbleKit.sendAckToPebble(mContext, transactionId);
+				} else {
+					// Not ready to send anything, send nack
+					PebbleKit.sendNackToPebble(mContext, transactionId);
+				}
+			}
+		});
 		mMessageManagerThread = new Thread(messageManager);
 	}
 
