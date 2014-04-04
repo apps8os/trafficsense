@@ -1,7 +1,5 @@
 package org.apps8os.trafficsense.core;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * TODO: move them somewhere else. 
