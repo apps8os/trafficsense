@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
@@ -37,93 +38,140 @@ public class LocationOnlyService extends Service implements
 		OnConnectionFailedListener,
 		OnAddGeofencesResultListener{
 
-	// TODO: Move to Constants
-	private final static int GEOFENCE_RADIUS = 100;
-	//container that contains route information and else-
+	/**
+	 * The TrafficSense service container. 
+	 */
 	private TrafficsenseContainer mContainer; 
-	//index of which segment we are in
+	/**
+	 * Index of the segment we are currently in.
+	 */
 	private int mRouteSegmentIndex=0;
-	//index of which waypoint we are on
+	/**
+	 * Index of the waypoint we are currently at.
+	 */
 	private int mSegmentWaypointIndex=0;
-	//holds a geofrence
+	/**
+	 * The GeoFence of our next stop.
+	 */
 	private Geofence mNextBusStopGeofence;
-	//holds a locationClient
+	/**
+	 * Google Location Service client instance.
+	 */
 	private LocationClient mLocationClient;
-	//action that happens when geofence tranistion detected by locationClient
-	// TODO: Move to Constants
-	private static final String ACTION_NEXT_GEOFENCE_REACHED = "trafficesense.nextGeofenceAlarm";
+	/**
+	 * The context in which we are operating.
+	 */
 	private Context mContext;
-	//callbacks by geofence will be made to these classes 
+	/**
+	 * The journey we are following.
+	 */
+	private Route mRoute;
+	/**
+	 * Callbacks from GeoFence will be made to these classes. 
+	 */
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
-	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
-	//the id of the notification we are giving to the users
+	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver;
+	/**
+	 * Did we encounter an error during onStartCommand().
+	 * If true, the service failed to start.
+	 * onStartCommand() should stopSelf() and onDestroy() should
+	 * not do the clean up.
+	 * This would be true if the service is automatically restarted
+	 * by Android.
+	 */
+	private boolean errorOnStart;
 
-
-	
 	
 	/**
-	 * Called when the service is created
+	 * Instantiate various resources.
 	 */
 	@Override
-	public void onCreate(){
+	public void onCreate() {
 		super.onCreate();
-		mContainer=TrafficsenseContainer.getInstance();
-		
+		mContext = this;
+		mContainer = TrafficsenseContainer.getInstance();
+		mRoute = mContainer.getRoute();
 		mLocationClient=new LocationClient(this, this, this);
-		mContext=this;
+		mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
 		//this class implements the onAddGeofenceListener
-		mOnAddGeofencesListener=this;
-		registerReceiver(mEnteredWaypointAlertReceiver, new IntentFilter(ACTION_NEXT_GEOFENCE_REACHED));
-		//TODO: need to check that google play service are available
+		mOnAddGeofencesListener = this;
 
+		errorOnStart = false;
 	}
+
 	/**
-	 * Called when the service is started
-	 * @param intent
-	 * @param flags
-	 * @param startId
-	 * @return
+	 * Start rolling the service.
+	 * 
+	 * The service stops when:
+	 * 1) Android kills it.
+	 * 2) {@link #errorOnStart} is true
+	 * 3) When the journey ends.
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//successfully connecting to the client also adds all the geofences
-		// TODO: should check return value!!
+		// TODO: need to check that google play service are available
+		if (mContainer.serviceAttach(getApplicationContext()) == false) {
+			System.out.println("DBG LocationOnlyService: unable to attach container");
+			errorOnStart = true;
+		} else if (mRoute == null) {
+			System.out.println("DBG LocationOnlyService: mRoute = null");
+			mContainer.serviceDetach();
+			errorOnStart = true;
+		} else if (mContainer.getPebbleUiController() == null) {
+			System.out.println("DBG LocationOnlyService: Pebble UI not set up properly");
+			mContainer.serviceDetach();
+			errorOnStart = true;
+		} else {
+			registerReceiver(mEnteredWaypointAlertReceiver, new IntentFilter(
+					Constants.ACTION_NEXT_GEOFENCE_REACHED));
+			// Successfully connecting to the client also adds all the GeoFences.
+			mLocationClient.connect();
+		}
 
-		mContainer.serviceAttach(getApplicationContext());
-		mLocationClient.connect();
-		// TODO: check that we can indeed handle service restart.
-		//return START_STICKY;
+		if (errorOnStart) {
+			this.stopSelf();
+		}
+		
+		/**
+		 * We are currently unable to resume operation, so do not re-create
+		 * automatically.
+		 */
 		return START_NOT_STICKY;
 	}
 	
 	/**
-	 * called when the service is destroyed
+	 * Clean up.
+	 * Note that invocation is not guaranteed. 
 	 */
 	@Override
-	public void onDestroy(){
+	public void onDestroy() {
 		super.onDestroy();
-		//need to detach from container
-		mContainer.serviceDetach();
-		//remove any notifications
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-	    mNotificationManager.cancel(Constants.NOTIFICATION_ID);
-		//need to unregister receivers
-		unregisterReceiver(mEnteredWaypointAlertReceiver);
-		//tell anyone listening that the route has ended
-		Intent vi = new Intent();
-		vi.putExtra(Constants.ROUTE_STOPPED, "");
-		vi.setAction(Constants.ACTION_ROUTE_EVENT);
-		sendBroadcast(vi);
+
+		if (errorOnStart == false) {
+			// remove any notifications
+			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			mNotificationManager.cancel(Constants.NOTIFICATION_ID);
+			// need to unregister receivers
+			unregisterReceiver(mEnteredWaypointAlertReceiver);
+			// tell anyone listening that the route has ended
+			Intent vi = new Intent();
+			vi.putExtra(Constants.ROUTE_STOPPED, "");
+			vi.setAction(Constants.ACTION_ROUTE_EVENT);
+			sendBroadcast(vi);
+			
+			mContainer.serviceDetach();
+		}
 	}
 
 	/**
-	 * adds a geofence to the location client. The action taken when 
-	 * geofence transition is made is currently hardcoded.
-	 * @param newFence
+	 * Adds a GeoFence to the location client.
+	 * The action taken when GeoFence transition is made is currently hard coded.
+	 * 
+	 * @param list  (TODO what is this)
 	 */
 	private void addGeofence(ArrayList<Geofence> list){
 		Intent i = new Intent();
-		i.setAction(ACTION_NEXT_GEOFENCE_REACHED);
+		i.setAction(Constants.ACTION_NEXT_GEOFENCE_REACHED);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, 
 				PendingIntent.FLAG_CANCEL_CURRENT);
 		//if the location client is connected send the request
@@ -158,31 +206,29 @@ public class LocationOnlyService extends Service implements
 	}
 	
 	
-	@Override
 	/**
 	 * When we connect to the locationClient we need to add the current geofence
 	 */
+	@Override
 	public void onConnected(Bundle connectionHint) {
 		
 		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
-		// TODO: start the pebble app here (not before)
 		mContainer.getPebbleUiController().update();
 		Intent coordsReadyIntent = new Intent().setAction(Constants.ACTION_COORDS_READY);
-		this.sendBroadcast(coordsReadyIntent);
+		sendBroadcast(coordsReadyIntent);
 		
 	}
 
 	/**
-	 * Sets the geofences for all the waypoints on the route
+	 * Set the GeoFences for all the waypoints on the route.
 	 */
-	public void setGeofencesForRoute(){
+	private void setGeofencesForRoute(){
 		System.out.println("DBG location service received intent");
-		Route currentRoute = mContainer.getRoute();
 		ArrayList<Geofence> listOfFences = new ArrayList<Geofence>();
 		for(int segmentIndex=0;;segmentIndex++){
-			Segment currentSegment = currentRoute.getSegment(segmentIndex);
+			Segment currentSegment = mRoute.getSegment(segmentIndex);
 			if(currentSegment == null){
 				break;
 			}
@@ -196,7 +242,7 @@ public class LocationOnlyService extends Service implements
 				}
 				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
 				String id = Integer.toString(segmentIndex)+","+Integer.toString(waypointIndex);
-				mNextBusStopGeofence = createGeofence(nextWaypoint, id, GEOFENCE_RADIUS,
+				mNextBusStopGeofence = createGeofence(nextWaypoint, id, Constants.GEOFENCE_RADIUS,
 						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
 				listOfFences.add(mNextBusStopGeofence);
 				
@@ -206,10 +252,14 @@ public class LocationOnlyService extends Service implements
 		addGeofence(listOfFences);		
 	}
 	
-	//TODO: add check to status code
+	/**
+	 * TODO: documentation.
+	 */
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
 		System.out.println("DBG: geofence status code: "+ statusCode);
 
+		//TODO: check statusCode
+		
 		StringBuffer dbgBuf = new StringBuffer();
 		for(int i=0;i<geofenceRequestIds.length; i++){
 			dbgBuf.append(" ");
@@ -217,7 +267,7 @@ public class LocationOnlyService extends Service implements
 		}
 		String dbg = dbgBuf.toString();
 		
-		System.out.println("DBG: geofences added: " + dbg);
+		System.out.println("DBG geofences added: " + dbg);
 		if(statusCode == 1000){
 			sendErrorAndExit("Error: some android setting prevents usage");
 		}
@@ -226,85 +276,92 @@ public class LocationOnlyService extends Service implements
 		}
 	}
 	
-	@Override
 	/**
-	 * called if we fail to connect to googlplay client
+	 * Called if we are unable to connect to Google Play client.
 	 */
+	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		sendErrorAndExit("Error: error connecting to google play client");
 	}
 
-	@Override
 	/**
-	 * called if locationClient is disconnected
+	 * Called if mLocationClient is disconnected.
 	 */
+	@Override
 	public void onDisconnected() {
 		sendErrorAndExit("Error: gps signal lost");
 	}
 	
 	/**
-	 * A receiver for receiving alerts. Meant to receive enteredWaypointAlerts
-	 * @author traffisense
-	 *
+	 * A receiver for receiving Entered Waypoint Alerts.
+	 * This is triggered when we enter a GeoFence.
 	 */
-	class EnteredWaypointAlertReceiver extends BroadcastReceiver{
-
+	private class EnteredWaypointAlertReceiver extends BroadcastReceiver {
 		@Override
-		/**
-		 * Receives intents when a geofence is entered
-		 * @param arg0
-		 * @param arg1
-		 */
 		public void onReceive(Context arg0, Intent arg1) {
-			//the intent could also have been sent to indicate an error
-			if(LocationClient.hasError(arg1)==true){
-				return; //TODO: again figure out what happens on error
+			// the intent could also have been sent to indicate an error
+			if (LocationClient.hasError(arg1) == true) {
+				return; // TODO: again figure out what happens on error
 			}
-			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1).get(0);
-			//get the id of the geofence that triggered the alert and increment it to get the next index
+			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1)
+					.get(0);
+			// get the id of the geofence that triggered the alert and increment
+			// it to get the next index
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
-			mRouteSegmentIndex=Integer.parseInt(parts[0]);
-			mSegmentWaypointIndex=Integer.parseInt(parts[1])+1;
+			mRouteSegmentIndex = Integer.parseInt(parts[0]);
+			mSegmentWaypointIndex = Integer.parseInt(parts[1]) + 1;
+
+			Segment currentSegment = mContainer.getRoute().setNextSegment(
+					mRouteSegmentIndex);
+			Waypoint nextWaypoint = currentSegment
+					.setNextWaypoint(mSegmentWaypointIndex);
 			
-			Segment currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
-			Waypoint nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
-			//segment had ended
-			if(nextWaypoint == null){
-				
+			// segment had ended
+			if (nextWaypoint == null) {
+
 				mRouteSegmentIndex++;
-				currentSegment = mContainer.getRoute().setNextSegment(mRouteSegmentIndex);
-				
-				//journey has ended
-				if(currentSegment==null){
-					mRouteSegmentIndex=-1;
-					mSegmentWaypointIndex=-1;
-					mContainer.getRoute().setJourneyEnded(true);
-					//inform clients that waypoint has changed
-					sendNextWaypointIntent("");
-					return; //the route has ended
+				currentSegment = mContainer.getRoute().setNextSegment(
+						mRouteSegmentIndex);
+
+				// The journey is ended.
+				if (currentSegment == null) {
+					mRouteSegmentIndex = -1;
+					mSegmentWaypointIndex = -1;
+					mRoute.setJourneyEnded(true);
+
+					// inform clients that waypoint has changed
+					((LocationOnlyService) mContext).sendNextWaypointIntent("");
+
+					// Stop the service.
+					((LocationOnlyService) mContext).stopSelf();
+
+					return;
 				}
-				mSegmentWaypointIndex=0;
+				mSegmentWaypointIndex = 0;
 				nextWaypoint = currentSegment.setNextWaypoint(0);
 			}
+			
 			// Update the pebble UI
 			mContainer.getPebbleUiController().update();
-			
-			//inform clients that the next waypoint has changed. 
-			if(nextWaypoint.getWaypointName()!=null)
-				System.out.println("DBG Next position is " + nextWaypoint.getWaypointName());
-			makeNotificationAndAlert();
-			sendNextWaypointIntent("");
-		}	
+
+			// inform clients that the next waypoint has changed.
+			if (nextWaypoint.getWaypointName() != null)
+				System.out.println("DBG Next position is "
+						+ nextWaypoint.getWaypointName());
+			((LocationOnlyService) mContext).makeNotificationAndAlert();
+			((LocationOnlyService) mContext).sendNextWaypointIntent("");
+		}
 	}
 	
 
 	/**
-	 * sends an intent that indicates current waypoint information has been updated. 
-	 * It can contain a message but it is currently unused. 
+	 * Sends an Intent that indicates current waypoint information has been updated. 
+	 * It may contain a message but it is currently unused. 
+	 * 
+	 * Protected instead of private beacase {@link EnteredWaypointAlertReceiver} needs this.
 	 * @param message
 	 */
-	
 	protected void sendNextWaypointIntent(String message){
 		Intent vi = new Intent();
 		if(message == null){
@@ -316,28 +373,40 @@ public class LocationOnlyService extends Service implements
 	}
 	
 	/**
-	 * Shows and updates the notification and if we are on the second last waypoint makes the phone vibrate. 
+	 * Shows and updates the notification and if we are on the second last waypoint makes the phone vibrate.
+	 * Protected instead of private beacase {@link EnteredWaypointAlertReceiver} needs this. 
 	 */
-	
 	protected void makeNotificationAndAlert(){
 		
 		//display last notification
 		String msg = OutputLogic.getOutput();             
 		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
 		
-		Notification noti = new Notification.Builder(mContext)
-				.setContentTitle("Trafficsense Route Tracking")
-				.setContentText(msg)
-				.setSmallIcon(resID)
-				.build();
+		Notification notification = null;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN ) {
+			/**
+			 * Notification.Builder.build() requires API level >= 16.
+			 */
+			notification = new Notification.Builder(mContext)
+			.setContentTitle("Trafficsense Route Tracking")
+			.setContentText(msg)
+			.setSmallIcon(resID)
+			.build();
+    	} else {
+    		notification = new Notification.Builder(mContext)
+			.setContentTitle("Trafficsense Route Tracking")
+			.setContentText(msg)
+			.setSmallIcon(resID)
+			.getNotification();
+    	}
 		
 		NotificationManager mNotificationManager =(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mNotificationManager.notify(Constants.NOTIFICATION_ID, noti);
+		mNotificationManager.notify(Constants.NOTIFICATION_ID, notification);
 		
 		//vibrate if user needs to get off at next waypoint
-		Segment curSegment = mContainer.getRoute().getCurrentSegment();
-		int curWaypointIndex = mContainer.getRoute().getCurrentSegment().getCurrentIndex();
-		List<Waypoint> waypointList = mContainer.getRoute().getCurrentSegment().getWaypointList();
+		Segment curSegment = mRoute.getCurrentSegment();
+		int curWaypointIndex = mRoute.getCurrentSegment().getCurrentIndex();
+		List<Waypoint> waypointList = mRoute.getCurrentSegment().getWaypointList();
 		
 		if((curWaypointIndex == waypointList.size() -1) & !curSegment.isWalking()){
 			Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -354,10 +423,10 @@ public class LocationOnlyService extends Service implements
 	}
 	
 	/**
-	 * Send an error intent to listening services and stop the service.
-	 * @param msg
+	 * Send an Intent indicating an error to listening services and stop the service.
+	 * @param msg error message
 	 */
-	public void sendErrorAndExit(String msg){
+	private void sendErrorAndExit(String msg){
 		Intent vi = new Intent();
 		vi.putExtra(Constants.ERROR, msg);
 		vi.setAction(Constants.ACTION_ROUTE_EVENT);
