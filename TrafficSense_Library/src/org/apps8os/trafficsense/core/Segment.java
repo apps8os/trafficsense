@@ -8,13 +8,20 @@ import com.google.gson.JsonObject;
 
 
 /**
- * TODO: Documentation
+ * Class for segments in journey.
  */
 public class Segment {
-	// Time format: EEEE dd.M.yyyy kk:mm (used in both TimeOnlyService and PebbleUiController
-	// TODO: save times as Date objects or something instead of strings
+	/**
+	 * Start time (without date) of this segment.
+	 */
 	private String startTime;
+	/**
+	 * Starting point of this segment.
+	 */
 	private String startPoint;
+	/**
+	 * The mode of ths segment.
+	 */
 	private String mode;
 	/**
 	 * Current progress in this segment.
@@ -31,6 +38,9 @@ public class Segment {
 	 * It is an internal integral version of {@link #mode}.
 	 */
 	private volatile int transportType;
+	/**
+	 * List of waypoints in this segment.
+	 */
 	private ArrayList<Waypoint> waypointList;
 
 	/**
@@ -108,49 +118,105 @@ public class Segment {
 		return waypointList.get(currentWaypoint);
 	}
 
+	/**
+	 * Get the index of the waypoint on which we currently are.
+	 * 
+	 * @return the index of the waypoint on which we currently are.
+	 */
 	public int getCurrentIndex() {
 		return currentWaypoint;
 	}
 
+	/**
+	 * Get the start time (without date) of this segment.
+	 * 
+	 * @return the start time (without date) of this segment.
+	 */
 	public String getSegmentStartTime() {
 		return startTime;
 	}
 
-	public String setSegmentStartTime(String nstartTime) {
-		startTime = nstartTime;
+	/**
+	 * Set the start time (without date) of this segment.
+	 * 
+	 * @param newStartTime the start time (without date) of this segment.
+	 * @return the start time (without date) of this segment.
+	 */
+	public String setSegmentStartTime(String newStartTime) {
+		startTime = newStartTime;
 		return startTime;
 	}
 
+	/**
+	 * Get (the name of) the starting point of this segment.
+	 * 
+	 * @return (the name of) the starting point of this segment.
+	 */
 	public String getSegmentStartPoint() {
 		return startPoint;
 	}
 
-	public String setSegmentStartPoint(String nstartPoint) {
-		startPoint = nstartPoint;
+	/**
+	 * Set the starting point of this segment.
+	 * 
+	 * @param newStartPoint (the name of) the starting point of this segment.
+	 * @return (the name of) the starting point of this segment.
+	 */
+	public String setSegmentStartPoint(String newStartPoint) {
+		startPoint = newStartPoint;
 		return startPoint;
 	}
 
+	/**
+	 * Get the travel mode of this segment. 
+	 * 
+	 * @return the travel mode of this segment.
+	 */
 	public String getSegmentMode() {
 		synchronized (this) {
 			return mode;
 		}
 	}
 
-	public String setSegmentMode(String nMode) {
+	/**
+	 * Set the travel mode of this segment.
+	 * 
+	 * @param newMode the travel mode of this segment.
+	 * @return the travel mode of this segment.
+	 */
+	public String setSegmentMode(String newMode) {
 		synchronized (this) {
-			mode = nMode;
+			mode = newMode;
 			return mode;
 		}
 	}
 
+	/**
+	 * Get the list of waypoints in this segment.
+	 * 
+	 * @return the list of waypoints.
+	 */
 	public ArrayList<Waypoint> getWaypointList() {
 		return waypointList;
 	}
 
+	/**
+	 * Check if this is a walking segment.
+	 * 
+	 * @return true if it is.
+	 */
 	public boolean isWalking() {
 		return isWalking;
 	}
 
+	/**
+	 * Get the waypoint at the given index.
+	 * 
+	 * NOTE: throws an exception if index is out of bound.
+	 * 
+	 * @param index index of the waypoint.
+	 * @return the waypoint.
+	 */
 	public Waypoint getWaypoint(int index) {
 		if (index > waypointList.size() - 1) {
 			return null;
@@ -159,14 +225,17 @@ public class Segment {
 		}
 	}
 
+	/**
+	 * Populate this segment with the given Gson JSON object.
+	 * 
+	 * @param segment JSON object of a segment.
+	 */
 	public void setSegment(JsonObject segment) {
 		setSegmentStartTime(segment.get("startTime").getAsString());
 		setSegmentStartPoint(segment.get("startPoint").getAsString());
 		setSegmentMode(segment.get("mode").getAsString());
-		/**
-		 * TODO: Finnish/Swedish support!!
-		 */
 		synchronized (this) {
+			// metro/ferry is the same for English, Swedisn, and Finnish
 			if (mode.equals("metro")) {
 				transportType = RouteConstants.METRO;
 			} else	if (mode.equals("ferry")) {
@@ -191,17 +260,27 @@ public class Segment {
 		waypointList.trimToSize();
 	}
 
+	/**
+	 * Set the type of transportation of this segment.
+	 * It is an internal integral version of mode.
+	 * 
+	 * @param type the type of transportation of this segment.
+	 */
 	public void setSegmentType(int type) {
 		synchronized (this) {
 			transportType = type;
 		}
 	}
 
+	/**
+	 * Get the type of transportation of this segment.
+	 * 
+	 * @return the type of transportation of this segment.
+	 */
 	public int getSegmentType() {
 		synchronized (this) {
 			return transportType;
 		}
 	}
-
 
 }

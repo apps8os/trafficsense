@@ -10,7 +10,7 @@ import com.google.gson.JsonObject;
 
 
 /**
- * Top level object holding a journey in internal structure.
+ * Top level class holding a journey in internal structure.
  * Includes also progress tracking facility.
  */
 public class Route {
@@ -326,7 +326,7 @@ public class Route {
 	/**
 	 * Get the starting time of the first waypoint in the journey.
 	 * 
-	 * @return the time in miliseconds since epoch, or TEST_TIME after current time if Constants.useWallClock is false.
+	 * @return the time in milliseconds since epoch, or TEST_TIME after current time if Constants.useWallClock is false.
 	 */
 	public long getFirstWaypointTime() {
 		if (Constants.useWallClock == false) {
