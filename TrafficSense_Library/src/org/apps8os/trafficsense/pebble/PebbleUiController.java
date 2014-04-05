@@ -1,22 +1,22 @@
 package org.apps8os.trafficsense.pebble;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
+import org.apps8os.trafficsense.util.TimeParser;
 
 /**
  * Class for Pebble user interface controller.
  */
 public class PebbleUiController {
+	/* -- UNUSED
 	private static final int WINDOW_BASIC = 0;
 	private static final int WINDOW_3STOP = 1;
+	*/
 	
 	private PebbleCommunication mPblCom;
 	private Route mRoute;
@@ -97,7 +97,7 @@ public class PebbleUiController {
 	 */
 	public void totalUpdate() {
 		int newSegmentIndex = mRoute.getCurrentIndex();
-		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
+		//int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		int nonWalkingSeg = getFirstNonWalkingSegmentIndex(newSegmentIndex);
 		initializeSegment(nonWalkingSeg);
 	}
@@ -113,7 +113,7 @@ public class PebbleUiController {
 			return -1;
 		}
 		for (int i = currentIndex; i < mRoute.getSegmentList().size(); i++) {
-			Segment seg = mRoute.getSegmentList().get(i);
+			Segment seg = mRoute.getSegment(i);
 			if (seg.isWalking() == false) {
 				// When the first non-walking segment is found, initialize it on Pebble and stop the loop
 				return i;
@@ -126,7 +126,7 @@ public class PebbleUiController {
 	 * Send an alarm if we are on the second last stop
 	 */
 	private void alarmIfNeeded() {
-		int newSegmentIndex = mRoute.getCurrentIndex();
+		//int newSegmentIndex = mRoute.getCurrentIndex();
 		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		Segment newSegment = mRoute.getCurrentSegment();
 		if (newWpIndex == newSegment.getWaypointList().size() - 2) {
@@ -137,10 +137,10 @@ public class PebbleUiController {
 	}
 	
 	/**
-	 * Initializes segment-related values on pebble, including
-	 * the stops that need to be shown initially. Also shows the screen
-	 * that tells how many minutes until the vehicles comes.
-	 * Should be only used when we are at the first wp of a non-walking segment.
+	 * Initializes segment-related values on pebble.
+	 * This includes the stops that need to be shown initially.
+	 * Also shows the screen that tells how many minutes until the vehicles comes.
+	 * Should be only used when we are at the first waypoint of a non-walking segment.
 	 */
 	private void initializeSegment(int segmentIndex) {
 		Segment currentSegment = null;
@@ -153,26 +153,25 @@ public class PebbleUiController {
 				break;
 			}
 		}
-		
-		// If there are no non-walking segments left, don't do anything
+		// Nothing to do if there is no non-walking segment left.
 		if (currentSegment == null) return;
 		
 		String segmentMode = currentSegment.getSegmentMode();
 		
 		// do things to get the seconds of minute, minute of hour and hour of day
 		System.out.println("DBG segment time: " + currentSegment.getSegmentStartTime());
-		Date segmentStart = timeStringToDate(currentSegment.getSegmentStartTime());
+		Date segmentStart = TimeParser.strTimeToDate(currentSegment.getSegmentStartTime());
 		
 		Date currentDate = new Date(); // Current time
 		Calendar currentDateCal = Calendar.getInstance();
 		currentDateCal.setTime(currentDate);
 		
 		// Check if the route has already started
-		if (segmentStart == null) System.out.println("DBG Date segmentStart was null");
+		if (segmentStart == null) System.out.println("DBG Date segmentStart is null");
 		
 		Calendar cal = Calendar.getInstance();
 		if (cal == null) {
-			System.out.println("DBG Calendar cal was null");
+			System.out.println("DBG Calendar cal is null");
 		}
 		cal.setTime(segmentStart);
 		
@@ -251,18 +250,5 @@ public class PebbleUiController {
 	 */
 	private void alarmGetOff() {
 		mPblCom.sendMessage("Alarm", "Get off on the next stop!");
-	}
-	
-	// TODO: stop using this and somehow get times as date objects from the route
-	private Date timeStringToDate(String timeStr) {
-		Date date = null;
-		try {
-			// TODO: Locale problem
-			date = new SimpleDateFormat("kk:mm", Locale.ENGLISH)
-			.parse(timeStr);
-		} catch (ParseException e) {
-			System.out.println("DBG TimeOnlyService timeStringToDate error: " + e.getMessage());
-		}
-		return date;
 	}
 }
