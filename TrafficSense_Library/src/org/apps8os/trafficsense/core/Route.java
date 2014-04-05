@@ -315,7 +315,9 @@ public class Route {
 			return false;
 		}
 		long journeyStartTime = TimeParser.strDateTimeToDate(mDeparture).getTime();
-		if (journeyStartTime > System.currentTimeMillis()) {
+		long now = System.currentTimeMillis();
+		//System.out.println("DBG isInPast: now:"+now+" start:"+journeyStartTime);
+		if (journeyStartTime >= now) {
 			return false;
 		}
 		return true;
