@@ -1,14 +1,10 @@
 package org.apps8os.trafficsense.android;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
+import org.apps8os.trafficsense.util.TimeParser;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -22,7 +18,7 @@ import android.os.Vibrator;
 import android.widget.Toast;
 
 /**
- * Service that follows our route based on time. 
+ * Service that follows a journey based on time. 
  */
 public class TimeOnlyService extends Service {
 
@@ -127,29 +123,15 @@ public class TimeOnlyService extends Service {
 			registerReceiver(mMakeAlertReceiver, new IntentFilter(
 					Constants.ACTION_GET_OFF));
 
-			// gets the time of the first waypoint
-			long timeToNextWaypoint = timeStringToDate(
-					mRoute.getDate() + " " +
-					mRoute.getSegmentList().get(0).getWaypointList().get(0).getWaypointTime()
-					).getTime();
-
-			if (Constants.useWallClock == true
-					&& timeToNextWaypoint < System.currentTimeMillis()) {
-				System.out.println("DBG next waypoint in the past");
-				Toast toast = Toast.makeText(mContext,
-						"Error:next waypoint is in the past",
-						Toast.LENGTH_SHORT);
-				toast.show();
-				errorOnStart = true;
-			} else {
-				scheduleNextAlarm(timeToNextWaypoint);
-			}
+			// Get the time of the first waypoint
+			long timeToNextWaypoint = mRoute.getFirstWaypointTime();
+			scheduleNextAlarm(timeToNextWaypoint);
 		}
 
 		System.out.println("DBG TimeOnlyService.onStartCommand cp2");
 
 		if (errorOnStart) {
-			this.stopSelf();
+			stopSelf();
 		}
 		/**
 		 * We are currently unable to resume operation, so do not re-create automatically.
@@ -200,23 +182,6 @@ public class TimeOnlyService extends Service {
 	}
 
 	/**
-	 * TODO: documentation
-	 * @param timeStr
-	 * @return
-	 */
-	private Date timeStringToDate(String timeStr) {
-		Date date = null;
-		try {
-			// TODO: Locale problem
-			date = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", Locale.ENGLISH)
-			.parse(timeStr);
-		} catch (ParseException e) {
-			System.out.println("DBG TimeOnlyService timeStringToDate error: " + e.getMessage());
-		}
-		return date;
-	}
-
-	/**
 	 * Broadcast receiver that receives intents indicating that next stop has
 	 * been reached. If it is the last waypoint it set the next segment as the
 	 * current segment and set the timer for it. In any case it gets the next
@@ -234,13 +199,13 @@ public class TimeOnlyService extends Service {
 			/**
 			 * Advance to next waypoint and get its index.
 			 */
-			Waypoint nextWaypoint = mContainer.getRoute().getCurrentSegment()
+			Waypoint nextWaypoint = mRoute.getCurrentSegment()
 					.setNextWaypoint();
 			/**
 			 * If nextWaypoint is null then we have finished this Segment.
 			 */
 			if (nextWaypoint == null) {
-				Segment nextSegment = mContainer.getRoute().setNextSegment();
+				Segment nextSegment = mRoute.setNextSegment();
 				/**
 				 * If there is no more Segment remaining we have finished this journey.
 				 */
@@ -250,14 +215,12 @@ public class TimeOnlyService extends Service {
 				} else {
 					message = "Segment ended.";
 					nextWaypoint = nextSegment.getCurrentWaypoint();
-					if (mContainer.getPebbleUiController() == null)
-						System.out.println("DBG TimeOnlyService uicontroller is null");
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
 					long timeToAlarm = 0;
 					if (Constants.useWallClock == true) {
-						timeToAlarm = timeStringToDate(
-								mContainer.getRoute().getDate()
+						timeToAlarm = TimeParser.strDateTimeToDate(
+								mRoute.getDate()
 										+ " "
 										+ nextSegment.getWaypointList()
 												.get(secondLastWpIndex)
@@ -267,7 +230,7 @@ public class TimeOnlyService extends Service {
 								* Constants.TEST_TIME
 								+ System.currentTimeMillis();
 					}
-					System.out.println("DBG TimeOnlyService scheduling getOffAlarm");
+					System.out.println("DBG TimeOnlyService scheduling GetOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
 				}
 			}
@@ -276,8 +239,8 @@ public class TimeOnlyService extends Service {
 			 * Set the alarm for the next waypoint.
 			 */
 			if (nextWaypoint != null) {
-				long timeToNextWaypoint = timeStringToDate(
-						mContainer.getRoute().getDate() + " "
+				long timeToNextWaypoint = TimeParser.strDateTimeToDate(
+						mRoute.getDate() + " "
 								+ nextWaypoint.getWaypointTime()).getTime();
 				scheduleNextAlarm(timeToNextWaypoint);
 				message = "Next waypoint is: " + nextWaypoint.getWaypointName();
@@ -321,7 +284,7 @@ public class TimeOnlyService extends Service {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			System.out.println("DBG TimeOnlyService received getoffalarm");
+			System.out.println("DBG TimeOnlyService received GetOffAlarm");
 			Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 			vibrator.vibrate(Constants.VIBRATOR_DURATION);
 
