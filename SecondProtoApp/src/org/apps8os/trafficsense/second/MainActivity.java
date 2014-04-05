@@ -1,6 +1,5 @@
 package org.apps8os.trafficsense.second;
 
-
 import java.util.ArrayList;
 
 import org.apps8os.trafficsense.TrafficsenseContainer;
@@ -38,48 +37,51 @@ import android.widget.ListView;
  * TODO: Documentation.
  */
 public class MainActivity extends Activity {
-	
+
 	CoordsReadyReceiver mCoordsReadyReceiver;
 	WaypointChanged mWaypointChangedReceiver;
-	
+
 	TrafficsenseContainer mContainer;
 	GoogleMap map;
 	Menu mMenu;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mContainer = TrafficsenseContainer.getInstance();
-		 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-		 ListView listview = (ListView) findViewById(R.id.listview);
-		  
-		 listview.setVisibility(View.INVISIBLE); 
-		 map.setMyLocationEnabled(true);
-		 
+		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
+				.getMap();
+		ListView listview = (ListView) findViewById(R.id.listview);
+
+		listview.setVisibility(View.INVISIBLE);
+		map.setMyLocationEnabled(true);
+
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
-		mWaypointChangedReceiver = new WaypointChanged();  
-		String welcome[] = {"Welcome"};
+		mWaypointChangedReceiver = new WaypointChanged();
+		String welcome[] = { "Welcome" };
 		showList(welcome);
-		 
+
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
-        invalidateOptionsMenu();
+		invalidateOptionsMenu();
 		mContainer.activityAttach(getApplicationContext());
-		registerReceiver(mCoordsReadyReceiver, new IntentFilter(Constants.ACTION_COORDS_READY));
-		registerReceiver(mWaypointChangedReceiver, new IntentFilter(Constants.ACTION_ROUTE_EVENT));
-		
+		registerReceiver(mCoordsReadyReceiver, new IntentFilter(
+				Constants.ACTION_COORDS_READY));
+		registerReceiver(mWaypointChangedReceiver, new IntentFilter(
+				Constants.ACTION_ROUTE_EVENT));
+
 		if (mContainer.getRoute().getCoordsReady()) {
 			Intent i = new Intent().setAction(Constants.ACTION_ROUTE_EVENT);
 			sendBroadcast(i);
 			drawRoute();
-		 }
+		}
 
 	}
-	
+
 	@Override
 	public void onPause() {
 		unregisterReceiver(mCoordsReadyReceiver);
@@ -87,215 +89,241 @@ public class MainActivity extends Activity {
 		mContainer.activityDetach();
 		super.onPause();
 	}
-	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.main_activity_action, menu);
-	    return super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_activity_action, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	/**
-	 * Makes the options menu. 
+	 * Makes the options menu.
 	 */
-	public boolean onPrepareOptionsMenu(Menu menu){
+	public boolean onPrepareOptionsMenu(Menu menu) {
 
 		super.onPrepareOptionsMenu(menu);
 		MenuItem start = menu.findItem(R.id.menu_start_journey);
 		MenuItem stop = menu.findItem(R.id.menu_stop_journey);
 		MenuItem schematic = menu.findItem(R.id.menu_schematic_view);
-		if(mContainer.isJourneyStarted() == true){
+		if (mContainer.isJourneyStarted() == true) {
 			start.setVisible(false);
 			stop.setVisible(true);
 			schematic.setVisible(true);
-		}
-		else if(mContainer.isLoading()){
+		} else if (mContainer.isLoading()) {
 			start.setVisible(true);
-            start.setActionView(R.layout.progressbar); 
+			start.setActionView(R.layout.progressbar);
 			stop.setVisible(false);
 			schematic.setVisible(false);
-		}
-		else{
+		} else {
 			start.setVisible(true);
 			stop.setVisible(false);
 			schematic.setVisible(false);
 		}
-		return(true);
+		return (true);
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
-	    // Handle presses on the action bar items
-	    switch (item.getItemId()) {
-	        case R.id.menu_start_journey:
-	            item.setActionView(R.layout.progressbar); 
-	            item.expandActionView();
-	        	startJourney();
-	            return true;
-	        case R.id.menu_stop_journey:
-	        	stopJourney();
-	            invalidateOptionsMenu();
-	        	return true;
-	        case R.id.menu_schematic_view:
-	        	Intent myIntent = new Intent(MainActivity.this, SchematicView.class);
-	        	this.startActivity(myIntent);
-	        	return true;
-	        default:
-	            return super.onOptionsItemSelected(item); 
-	    }
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.menu_start_journey:
+			item.setActionView(R.layout.progressbar);
+			item.expandActionView();
+			startJourney();
+			return true;
+		case R.id.menu_stop_journey:
+			stopJourney();
+			invalidateOptionsMenu();
+			return true;
+		case R.id.menu_schematic_view:
+			Intent myIntent = new Intent(MainActivity.this, SchematicView.class);
+			this.startActivity(myIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	/**
 	 * Starts the journey.
 	 */
-	private void startJourney(){
-		//TODO: check for network connectivity
-        EmailCredential cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
-		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);  
-		
+	private void startJourney() {
+		// TODO: check for network connectivity
+		EmailCredential cred = new EmailCredential(
+				"trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
+		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
+
 	}
-	
-	
-	
+
 	/**
 	 * Stops the journey.
 	 */
-	private void stopJourney(){
+	private void stopJourney() {
 		mContainer.stopJourney();
 		map.clear();
-		String msg[] = {"Welcome"}; 
+		String msg[] = { "Welcome" };
 		showList(msg);
 	}
-	
-	private void showList(String[] messages){
 
-		 ListView listview = (ListView) findViewById(R.id.listview);
-		 ArrayList<String> list = new ArrayList<String>();
-		 for (int i = 0; i < messages.length; ++i) {
-		      list.add(messages[i]);
-		 }
-		 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
-		 listview.setAdapter(adapter);
-		 listview.setVisibility(View.VISIBLE);  
+	private void showList(String[] messages) {
+
+		ListView listview = (ListView) findViewById(R.id.listview);
+		ArrayList<String> list = new ArrayList<String>();
+		for (int i = 0; i < messages.length; ++i) {
+			list.add(messages[i]);
+		}
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, list);
+		listview.setAdapter(adapter);
+		listview.setVisibility(View.VISIBLE);
 	}
-	
+
 	/**
-	 * draws the route on the map using lines that dont follow roads. Also zooms to first waypoint with location. 
+	 * draws the route on the map using lines that dont follow roads. Also zooms
+	 * to first waypoint with location.
 	 */
-	public void drawRoute() {  
+	public void drawRoute() {
 		map.clear();
 		Route r = mContainer.getRoute();
+
 		boolean zoomed = false;
-		//Get the image that will be used as the bus stop icon
-		int resID = getResources().getIdentifier("bus_stop_marker" , "drawable", getPackageName());
-		Bitmap icon = resizeIcon(resID);	
-		PolylineOptions o = new PolylineOptions().geodesic(true); 
+		// Get the image that will be used as the bus stop icon
+		int resID = getResources().getIdentifier("bus_stop_marker", "drawable",
+				getPackageName());
+		Bitmap icon = resizeIcon(resID);
+		PolylineOptions o = new PolylineOptions().geodesic(true);
 		for (Segment s : r.getSegmentList()) {
-			if (s.isWalking()) { 
-				// Don't draw walking segments because they don't have coordinates
+			if (s.isWalking()) {
+				// Don't draw walking segments because they don't have
+				// coordinates
 				continue;
 			}
-			
+
 			for (Waypoint w : s.getWaypointList()) {
 				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
 					continue;
 				}
+				
+
+				if (s.getWaypoint(0).getWaypointName()
+						.equals(w.getWaypointName())) {
+					// Starting Point
+					LatLng coord_start = new LatLng(s.getWaypoint(0)
+							.getLatitude(), s.getWaypoint(0).getLongitude());
+
+					map.addMarker(new MarkerOptions()
+							.position(coord_start)
+							.title("Departure: "+ s.getWaypoint(0).getWaypointName())
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+					o.add(coord_start);
+					continue;
+				}
+				if (s.getLastWaypoint().getWaypointName()
+						.equals(w.getWaypointName())) {
+					// End Point
+					LatLng coord_end = new LatLng(s.getLastWaypoint().getLatitude(), s.getLastWaypoint().getLongitude());
+					map.addMarker(new MarkerOptions().position(coord_end)
+							.title("Arrival: " + s.getLastWaypoint().getWaypointName()));
+					o.add(coord_end);
+					continue;
+				}
+				// bus points
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-				
-				map.addMarker(new MarkerOptions()
-								.position(coord)
-								.title(w.getWaypointName())
-								.icon(BitmapDescriptorFactory.fromBitmap(icon)));
+				map.addMarker(new MarkerOptions().position(coord)
+						.title(w.getWaypointName())
+						.icon(BitmapDescriptorFactory.fromBitmap(icon)));
+
 				o.add(coord);
-				
-				if(zoomed == false){
+
+				if (zoomed == false) {
 					centerLocationOnMap(coord);
 					zoomed = true;
 				}
 			}
 		}
+
+		// Add the route
 		map.addPolyline(o);
-	
+
 	}
+
 	/**
-	 * Zooms the map to the current waypoint. 
+	 * Zooms the map to the current waypoint.
 	 */
-	public void zoomToCurrentWaypoint(){
+	public void zoomToCurrentWaypoint() {
 		ArrayList<Segment> segments = mContainer.getRoute().getSegmentList();
 		int index = mContainer.getRoute().getCurrentIndex();
 		Waypoint curWay;
-		//if the current segment is a walking one then the location of waypoints will be (0,0)
-		//so we need to get the next index which is always not walking. 
-		if(segments.get(index).isWalking()){
-			curWay = segments.get(index+1).getWaypoint(0);
-		}
-		else{
+		// if the current segment is a walking one then the location of
+		// waypoints will be (0,0)
+		// so we need to get the next index which is always not walking.
+		if (segments.get(index).isWalking()) {
+			curWay = segments.get(index + 1).getWaypoint(0);
+		} else {
 			curWay = segments.get(index).getCurrentWaypoint();
 		}
 		LatLng loc = new LatLng(curWay.getLatitude(), curWay.getLongitude());
 		map.animateCamera(CameraUpdateFactory.newLatLng(loc));
 	}
-	
-	
-	
+
 	/**
-	 * resize the icon used in the map for busstops. 
+	 * resize the icon used in the map for busstops.
+	 * 
 	 * @param resID
 	 * @return
 	 */
-	public Bitmap resizeIcon(int resID){
-		Bitmap origIcon = BitmapFactory.decodeResource(getResources(),resID);
+	public Bitmap resizeIcon(int resID) {
+		Bitmap origIcon = BitmapFactory.decodeResource(getResources(), resID);
 		Bitmap newIcon = Bitmap.createScaledBitmap(origIcon, 25, 25, false);
 		return newIcon;
 	}
-	
+
 	/**
 	 * centers the map on a location
 	 */
-	public void centerLocationOnMap(LatLng location){
+	public void centerLocationOnMap(LatLng location) {
 		map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
 	}
-	
+
 	/**
 	 * Class that receives an intent when all the coordinates have been loaded
+	 * 
 	 * @author traffisense
-	 *
+	 * 
 	 */
 	class CoordsReadyReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context arg0, Intent intent) {
-            invalidateOptionsMenu();
+			invalidateOptionsMenu();
 			drawRoute();
-			
+
 		}
 	}
-	
+
 	/**
-	 * Class that receives an intent when current waypoint has changed. 
+	 * Class that receives an intent when current waypoint has changed.
 	 */
 	class WaypointChanged extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if(intent.hasExtra(Constants.ROUTE_STOPPED)){
+			if (intent.hasExtra(Constants.ROUTE_STOPPED)) {
 				invalidateOptionsMenu();
 				return;
 			}
-			if(intent.hasExtra(Constants.ERROR)){
-				String msg[] = {intent.getStringExtra(Constants.ERROR)};
+			if (intent.hasExtra(Constants.ERROR)) {
+				String msg[] = { intent.getStringExtra(Constants.ERROR) };
 				showList(msg);
 				return;
 			}
 			System.out.println("DBG: Main activity: Waypoint changed");
-			String msg[] = {OutputLogic.getOutput()};
+			String msg[] = { OutputLogic.getOutput() };
 			showList(msg);
 		}
-		
-		
-		
-	
+
 	}
 }
