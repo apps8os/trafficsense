@@ -224,15 +224,19 @@ public class TrafficsenseContainer {
 	 * @return true if successfully attached.
 	 */
 	public boolean serviceAttach(Context ctx) {
-		if (shouldInit() == true) {
-			System.out.println("DBG serviceAttach no activity?");
-			return false;
+		boolean fDoInit = false;
+		synchronized (this) {
+			fDoInit = shouldInit();
+			if (fDoInit == true) {
+				System.out.println("DBG serviceAttach no activity?");
+				return false;
+			}
+			if (mRunningServices != 0) {
+				System.out.println("DBG serviceAttach multiple services?");
+				return false;
+			}
+			mRunningServices ++;
 		}
-		if (mRunningServices != 0) {
-			System.out.println("DBG serviceAttach multiple services?");
-			return false;
-		}
-		mRunningServices ++;
 		return true;
 	}
 	
