@@ -210,13 +210,16 @@ public class JourneyInfoResolver {
 		if (waypoint == null) {
 			throw new JourneyInfoResolverException("null waypoint");
 		}
+		if (waypoint.hasStopCode() == false) {
+			return;
+		}
+
+		// Sanity check
 		String stopCode = waypoint.getWaypointStopCode();
 		if (stopCode == null || stopCode.isEmpty()) {
 			throw new JourneyInfoResolverException("unfilled stopCode");
 		}
-		if (stopCode.equals(Constants.NO_STOP_CODE)) {
-			return;
-		}
+
 		String url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
 		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
