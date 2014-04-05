@@ -12,7 +12,7 @@
 bin/
 gen/
 *~
-.lock-waf_linux2_build
+.lock-waf_*_build
 
 # Ignore gradle files
 .gradle/
