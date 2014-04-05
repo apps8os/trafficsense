@@ -405,7 +405,7 @@ public class LocationAndTimeService extends Service implements
 	protected void makeNotificationAndAlert(){
 		
 		//display last notification
-		String msg = OutputLogic.getOutput();             
+		String msg = OutputLogic.getJourneyProgressMessage();             
 		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
 		
 		Notification noti = new Notification.Builder(mContext)

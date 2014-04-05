@@ -33,17 +33,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-/**
- * TODO: Documentation.
- */
+
 public class MainActivity extends Activity {
 
-	CoordsReadyReceiver mCoordsReadyReceiver;
-	WaypointChanged mWaypointChangedReceiver;
+	private CoordsReadyReceiver mCoordsReadyReceiver;
+	private WaypointChanged mWaypointChangedReceiver;
 
-	TrafficsenseContainer mContainer;
-	GoogleMap map;
-	Menu mMenu;
+	private TrafficsenseContainer mContainer;
+	private GoogleMap map;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +98,7 @@ public class MainActivity extends Activity {
 	/**
 	 * Makes the options menu.
 	 */
+	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 
 		super.onPrepareOptionsMenu(menu);
@@ -167,6 +165,10 @@ public class MainActivity extends Activity {
 		showList(msg);
 	}
 
+	/**
+	 * TODO: documentation.
+	 * @param messages
+	 */
 	private void showList(String[] messages) {
 
 		ListView listview = (ListView) findViewById(R.id.listview);
@@ -195,53 +197,68 @@ public class MainActivity extends Activity {
 		Bitmap icon = resizeIcon(resID);
 		PolylineOptions o = new PolylineOptions().geodesic(true);
 		for (Segment s : r.getSegmentList()) {
-			int i = 1;
+
+			/**
+			 * Do not draw walking segments because they have no GPS coordinates.
+			 */
 			if (s.isWalking()) {
-				// Don't draw walking segments because they don't have
-				// coordinates
 				continue;
 			}
-
+			
+			int indexInSegment = 1;
+			
 			for (Waypoint w : s.getWaypointList()) {
-				if (w.getLatitude() == 0 && w.getLongitude() == 0) {
+				
+				/**
+				 * Ignore waypoints without valid GPS coordinates.
+				 */
+				if (w.hasCoord() == false) {
 					continue;
 				}
-				
 
+				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
+				
+				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
+
+				/**
+				 * Make a green marker for starting point and a red marker for end point.
+				 * 
+				 * TODO: What if they have no GPS coordinates?
+				 * This happens when their stopCode is empty. 
+				 */
 				if (s.getWaypoint(0).getWaypointName()
 						.equals(w.getWaypointName())) {
-					// StartingPoint transportation
-					LatLng coord_start = new LatLng(s.getWaypoint(0)
-							.getLatitude(), s.getWaypoint(0).getLongitude());
-
+					// This waypoint is the start of the segment
 					map.addMarker(new MarkerOptions()
-							.position(coord_start)
-							.title("Departure on "+s.getSegmentMode() +": " + i + "." +s.getWaypoint(0).getWaypointName()
-									+"(" + s.getWaypoint(0).getWaypointStopCode() +")")
+							.position(coord)
+							.title("Departure on " + s.getSegmentMode() + ": "
+									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-					o.add(coord_start);
-					i++;
-					continue;
-				}
-				if (s.getLastWaypoint().getWaypointName()
+									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+							);
+				} else if (s.getLastWaypoint().getWaypointName()
 						.equals(w.getWaypointName())) {
-					// EndPoint of transportation
-					LatLng coord_end = new LatLng(s.getLastWaypoint().getLatitude(), s.getLastWaypoint().getLongitude());
-					map.addMarker(new MarkerOptions().position(coord_end)
-							.title("Arrival on "+s.getSegmentMode() +": " + i + "."+ s.getLastWaypoint().getWaypointName() +
-									"(" + s.getLastWaypoint().getWaypointStopCode() +")"));
-					o.add(coord_end);
-					i++;
-					continue;
+					// This waypoint is the end of this segment.
+					map.addMarker(new MarkerOptions()
+							.position(coord)
+							.title("Arrival on " + s.getSegmentMode() + ": "
+									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ w.getWaypointStopCode() + ")")
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+							);
+				} else {
+					// Intermediate points.
+					map.addMarker(new MarkerOptions()
+							.position(coord)
+							.title(indexInSegment + "." + w.getWaypointName() + " ("
+									+ w.getWaypointStopCode() + ")")
+							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 				}
-				// middlePoints
-				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-				map.addMarker(new MarkerOptions().position(coord)
-						.title(i+"."+w.getWaypointName() + " (" + w.getWaypointStopCode() +")")
-						.icon(BitmapDescriptorFactory.fromBitmap(icon)));
+				
 				o.add(coord);
-				i++;
+				indexInSegment++;
 
 				if (zoomed == false) {
 					centerLocationOnMap(coord);
@@ -250,7 +267,7 @@ public class MainActivity extends Activity {
 			}
 		}
 
-		// Add the route
+		// Plot the polyline
 		map.addPolyline(o);
 
 	}
@@ -262,9 +279,10 @@ public class MainActivity extends Activity {
 		ArrayList<Segment> segments = mContainer.getRoute().getSegmentList();
 		int index = mContainer.getRoute().getCurrentIndex();
 		Waypoint curWay;
-		// if the current segment is a walking one then the location of
-		// waypoints will be (0,0)
-		// so we need to get the next index which is always not walking.
+		/**
+		 * If the current segment is a walking one then the location of waypoints
+		 * will be (0,0) so we need to get the next index which is always not walking.
+		 */
 		if (segments.get(index).isWalking()) {
 			curWay = segments.get(index + 1).getWaypoint(0);
 		} else {
@@ -275,7 +293,7 @@ public class MainActivity extends Activity {
 	}
 
 	/**
-	 * resize the icon used in the map for busstops.
+	 * Resize the icon used in the map for bus stops.
 	 * 
 	 * @param resID
 	 * @return
@@ -287,19 +305,16 @@ public class MainActivity extends Activity {
 	}
 
 	/**
-	 * centers the map on a location
+	 * Centers the map at a location.
 	 */
 	public void centerLocationOnMap(LatLng location) {
 		map.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 14));
 	}
 
 	/**
-	 * Class that receives an intent when all the coordinates have been loaded
-	 * 
-	 * @author traffisense
-	 * 
+	 * Class that receives an intent when all the coordinates have been loaded.
 	 */
-	class CoordsReadyReceiver extends BroadcastReceiver {
+	private class CoordsReadyReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context arg0, Intent intent) {
@@ -312,7 +327,7 @@ public class MainActivity extends Activity {
 	/**
 	 * Class that receives an intent when current waypoint has changed.
 	 */
-	class WaypointChanged extends BroadcastReceiver {
+	private class WaypointChanged extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -325,8 +340,8 @@ public class MainActivity extends Activity {
 				showList(msg);
 				return;
 			}
-			System.out.println("DBG: Main activity: Waypoint changed");
-			String msg[] = { OutputLogic.getOutput() };
+			System.out.println("DBG: MainActivity: Waypoint changed");
+			String msg[] = { OutputLogic.getJourneyProgressMessage() };
 			showList(msg);
 		}
 

@@ -26,8 +26,8 @@ public class Waypoint{
 	 */
 	public Waypoint () {
 		stopCode = Constants.NO_STOP_CODE;
-		// TODO: how should the default/magic number for Lat/Long coord be?
-		// 0 for now
+		mLatitude = Constants.NO_COORD;
+		mLongitude = Constants.NO_COORD;
 	}
 	
 	public String getWaypointTime(){
@@ -66,7 +66,12 @@ public class Waypoint{
 		setWaypointTime(waypoint.get("time").getAsString());
 		setWaypointName(waypoint.get("name").getAsString());
 		if (waypoint.has("stopCode")) {
-			setWaypointStopCode(waypoint.get("stopCode").getAsString());
+			String stopCode = waypoint.get("stopCode").getAsString().trim();
+			// Handle empty stopCode case (=  "someStop ()" ).
+			if (stopCode.isEmpty()) {
+				stopCode = Constants.NO_STOP_CODE;
+			}
+			setWaypointStopCode(stopCode);
 		} else {
 			setWaypointStopCode(Constants.NO_STOP_CODE);
 		}
@@ -106,5 +111,17 @@ public class Waypoint{
 		synchronized (this) {
 			return mLatitude;
 		}
+	}
+	
+	/**
+	 * Check if this Waypoint has valid GPS coordinates.
+	 * 
+	 * @return true if it has valid GPS coordinates.
+	 */
+	public boolean hasCoord() {
+		if (mLatitude == Constants.NO_COORD || mLongitude == Constants.NO_COORD) {
+			return false;
+		}
+		return true;
 	}
 }

@@ -5,14 +5,15 @@ import java.util.List;
 import org.apps8os.trafficsense.TrafficsenseContainer;
 
 /**
- * Class for implementing any output logic. For example what strings the
- * mainactivity should present to the user at a particular stop.
- * 
+ * Class implementing output logic.
  */
 public class OutputLogic {
-
-	public static String getOutput() {
-
+	/**
+	 * Builds the message that UI banner should present to the user at a particular stop.
+	 * 
+	 * @return the message.
+	 */
+	public static String getJourneyProgressMessage() {
 		TrafficsenseContainer mContainer = TrafficsenseContainer.getInstance();
 		Route route =  mContainer.getRoute();
 		Segment curSegment = route.getCurrentSegment();

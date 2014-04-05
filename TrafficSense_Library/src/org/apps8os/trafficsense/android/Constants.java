@@ -43,7 +43,7 @@ public class Constants {
 	 */
 	final public static long TEST_TIME = 5000;
 	/**
-	 * Duration to vibrate on certain events.
+	 * Duration to vibrate on certain events. (ms)
 	 */
 	final public static int VIBRATOR_DURATION = 250;
 	/**
@@ -56,6 +56,10 @@ public class Constants {
 	 * Magic stopCode for those stops without one.
 	 */
 	final public static String NO_STOP_CODE = "XXXX";
+	/**
+	 * Magic Latitude/Longitude number.
+	 */
+	final public static double NO_COORD = 1000; 
 	/**
 	 * The UUID of our Pebble smart watch application.
 	 * @see appinfo.json
@@ -74,23 +78,9 @@ public class Constants {
 	final public static int NOTIFICATION_ID = 1;
 	
 	/**
-	 * how long the phone vibrates on alerts
+	 * how long the phone vibrates on alerts. (ms)
 	 */
 	final public static int VIBRATION_TIME = 4000;
-	
-	/**
-	 * the time offset that can be passed timeOnlyService
-	 */
-	final public static String OFFSET = "offset";
-
-	/**
-	 * JourneyParser codes
-	 */
-	final public static int PARSER_FAILURE = -1;
-	final public static int PARSER_SUCCESS = 0 ;
-	final public static int MALFORMED_JOURNEY_TEXT = 1;
-	final public static int PARSER_INVALIDCASE = 2;
-	final public static int PARSER_STOPCODEINVALID =3;
 
 }
 

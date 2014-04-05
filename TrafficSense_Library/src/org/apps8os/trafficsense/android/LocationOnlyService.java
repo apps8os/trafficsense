@@ -242,6 +242,12 @@ public class LocationOnlyService extends Service implements
 					waypointIndex++) {
 				Waypoint nextWaypoint = currentSegment
 						.getWaypoint(waypointIndex);
+
+				if (nextWaypoint.hasCoord() == false) {
+					// This waypoint has no valid GPS coordinates, ignore it.
+					continue;
+				}
+				
 				System.out.println("DBG making geofence for " + segmentIndex + "," + waypointIndex);
 				String id = Integer.toString(segmentIndex) + ","
 						+ Integer.toString(waypointIndex);
@@ -378,13 +384,14 @@ public class LocationOnlyService extends Service implements
 	}
 	
 	/**
-	 * Shows and updates the notification and if we are on the second last waypoint makes the phone vibrate.
+	 * Updates and shows a notification.
+	 * If we are on the second last waypoint makes the phone vibrate.
 	 * Protected instead of private beacase {@link EnteredWaypointAlertReceiver} needs this. 
 	 */
-	protected void makeNotificationAndAlert(){
+	protected void makeNotificationAndAlert() {
+		// Build the message
+		String msg = OutputLogic.getJourneyProgressMessage();
 		
-		//display last notification
-		String msg = OutputLogic.getOutput();             
 		int resID = getResources().getIdentifier("bus" , "drawable", getPackageName());
 		
 		Notification notification = null;
