@@ -15,6 +15,7 @@ import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailed
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.google.android.gms.location.LocationStatusCodes;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -266,24 +267,21 @@ public class LocationOnlyService extends Service implements
 	 */
 	@Override
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
-		System.out.println("DBG: geofence status code: "+ statusCode);
+		System.out.println("DBG: geofence status code: " + statusCode);
+		// TODO: check other status codes
+		if (statusCode == LocationStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+			sendErrorAndExit("Error: likely some Android settings prevented usage");
+		} else if (statusCode != LocationStatusCodes.SUCCESS) {
+			sendErrorAndExit("Error adding GeoFences");
+		}
 
-		//TODO: check statusCode
-		
 		StringBuffer dbgBuf = new StringBuffer();
-		for(int i=0;i<geofenceRequestIds.length; i++){
+		for (int i = 0; i < geofenceRequestIds.length; i++) {
 			dbgBuf.append(" ");
 			dbgBuf.append(geofenceRequestIds[i]);
 		}
 		String dbg = dbgBuf.toString();
-		
-		System.out.println("DBG geofences added: " + dbg);
-		if(statusCode == 1000){
-			sendErrorAndExit("Error: some android setting prevents usage");
-		}
-		else if(statusCode != 0){
-			sendErrorAndExit("Error: error adding geofences");
-		}
+		System.out.println("DBG GeoFences added: " + dbg);
 	}
 	
 	/**
@@ -291,7 +289,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		sendErrorAndExit("Error: error connecting to google play client");
+		sendErrorAndExit("Error connecting to Google Play client");
 	}
 
 	/**
@@ -299,7 +297,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	@Override
 	public void onDisconnected() {
-		sendErrorAndExit("Error: gps signal lost");
+		sendErrorAndExit("Error: GPS signal lost");
 	}
 	
 	/**
