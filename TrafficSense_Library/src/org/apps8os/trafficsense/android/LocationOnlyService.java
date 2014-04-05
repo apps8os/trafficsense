@@ -96,7 +96,9 @@ public class LocationOnlyService extends Service implements
 		mRoute = mContainer.getRoute();
 		mLocationClient=new LocationClient(this, this, this);
 		mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
-		//this class implements the onAddGeofenceListener
+		/**
+		 * This class provides onAddGeofenceListener() as well.
+		 */
 		mOnAddGeofencesListener = this;
 
 		errorOnStart = false;
@@ -109,10 +111,12 @@ public class LocationOnlyService extends Service implements
 	 * 1) Android kills it.
 	 * 2) {@link #errorOnStart} is true
 	 * 3) When the journey ends.
+	 * 
+	 * NOTE: Availability of Google Play/Location Services is implicitly
+	 * verified in {@link #onAddGeofencesResult(int, String[])}
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		// TODO: need to check that google play service are available
 		if (mContainer.serviceAttach(getApplicationContext()) == false) {
 			System.out.println("DBG LocationOnlyService: unable to attach container");
 			errorOnStart = true;
