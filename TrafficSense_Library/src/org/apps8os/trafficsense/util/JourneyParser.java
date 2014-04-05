@@ -11,55 +11,61 @@ import com.google.gson.JsonObject;
 /**
  * Class for parsing plain text journey into a Gson JSON object.
  * 
- * The parser accepts the languages English, Finnish and Swedish
+ * The parser accepts English, Finnish, and Swedish
+ * Entry point: {@link #parseString(String)}
+ * Use {@link #getJsonObj()} or {@link #getJsonText()} to retrieve the result.
  * 
  * JSON object is organize as follow :
  * 
- * "_mainObj"(JsonObject) contains : Property "date" Property "start" Property
- * "dest" Property "arrivalTime"
+ * "_mainObj"(JsonObject) contains :
+ *     Property "date"
+ *     Property "start"
+ *     Property "dest"
+ *     Property "arrivalTime"
  * 
- * Property "segments" that is JsonArray called "_segmentsArray" containing:
- * "SegmentsObj"(JsonObject) contains: Property "startTime" Property
- * "startPoint" Property "mode"
+ * Property "segments" that is JsonArray called "mSegmentsArray" containing:
+ * "SegmentsObj"(JsonObject) contains:
+ *   Property "startTime"
+ *   Property "startPoint"
+ *   Property "mode"
  * 
  * Property "waypoints" that is JsonArray called "waypointsArray" containing:
- * "waypointObj"(JsonObject ) contains: Property "time" Property "name" Property
- * "stopCode" (!walking)
- * 
- * @see #parseString(String)
+ * "waypointObj"(JsonObject ) contains:
+ *   Property "time"
+ *   Property "name"
+ *   Property "stopCode" (except for walking)
+ * @see #addJsonObject()
  */
-
 public class JourneyParser {
-
 	/**
 	 * The Gson JSON object for the current journey.
 	 * */
-	private JsonObject _mainObj;
+	private JsonObject mJourneyObj;
 	/**
 	 * Parsed segments.
 	 */
-	private JsonArray _segmentsArray;
+	private JsonArray mSegmentsArray;
 	/**
 	 * Temporary Array for the values of each segment.
 	 *  (startTime,startPoint,mode,waypoints)
 	 */
-	private ArrayList<String> _textArray = new ArrayList<String>();
-
+	private ArrayList<String> mTextArray;
 	/**
 	 * Attribute to keep track in which line we are in the journey text.
 	 */
 	private int mCurrentLineLoc = 0;
 	/**
-	 * line stored from the text journey
+	 * Line stored from the text journey
 	 */
-	private String mCurrentLine;
+	private String mCurrentLine = null;
 
 	/**
 	 * Class constructor
 	 */
 	public JourneyParser() {
-		_mainObj = new JsonObject();
-		_segmentsArray = new JsonArray();
+		mJourneyObj = new JsonObject();
+		mSegmentsArray = new JsonArray();
+		mTextArray = new ArrayList<String>();
 	}
 
 	/**
@@ -70,7 +76,7 @@ public class JourneyParser {
 	}
 
 	/**
-	 * Set the text line of the moment
+	 * Set the text line of the moment.
 	 * 
 	 * @param txtLine
 	 *            the journey text line.
@@ -87,8 +93,7 @@ public class JourneyParser {
 	 * @return array of strings carrying the information of one segment
 	 */
 	private ArrayList<String> getTextArray() {
-
-		return _textArray;
+		return mTextArray;
 	}
 
 	/**
@@ -97,20 +102,19 @@ public class JourneyParser {
 	 * @see #getTextArray()
 	 */
 	private void flushTextArray() {
-
-		getTextArray().clear();
+		mTextArray.clear();
 	}
 
 	/**
 	 * Add a line of the segment to the temporary TextArray
 	 * 
-	 * @param line
+	 * @param line the line to add
 	 * 
 	 * @see #getTextArray()
 	 */
 	private void addTextArray(String line) {
-		// trim removes the white space at the beginning and end
-		this.getTextArray().add(line.trim());
+		// trim removes the white space at the beginning and the end
+		mTextArray.add(line.trim());
 	}
 
 	/**
@@ -119,7 +123,7 @@ public class JourneyParser {
 	 * @return Gson JSON object of the journey.
 	 */
 	public JsonObject getJsonObj() {
-		return _mainObj;
+		return mJourneyObj;
 	}
 
 	/**
@@ -131,7 +135,7 @@ public class JourneyParser {
 	 *            value as a String.
 	 */
 	private void addProperty(String key, String value) {
-		_mainObj.addProperty(key, value);
+		mJourneyObj.addProperty(key, value);
 	}
 
 	/**
@@ -143,42 +147,41 @@ public class JourneyParser {
 	 *            value as a JsonElement.
 	 */
 	private void addProperty(String key, JsonElement element) {
-		_mainObj.add(key, element);
+		mJourneyObj.add(key, element);
 	}
 
 	/**
-	 * Contains all the segments of the parser
+	 * Adds the given Segment into the journey.
 	 * 
-	 * @return segments of the parser
-	 */
-	private JsonArray getSegmentsArray() {
-		return _segmentsArray;
-	}
-
-	/**
-	 * Set the each segment of the parser One segment is arranged:
-	 * "startTime","startPoint","mode","waypoints"
-	 * 
+	 * One segment is arranged as follow:
+	 * "startTime","startPoint","mode", and a list of "waypoints".
 	 */
 	private void setSegmentsArray(JsonElement value) {
-		_segmentsArray.add(value);
+		mSegmentsArray.add(value);
 	}
 
 	/**
-	 * Will add the elements to the JSON object
+	 * Add the elements of the journey to the JSON object.
 	 * 
-	 * General Structure : line 1 add the time line 2 is always the string
-	 * "Departure" do nothing
+	 * General Structure:
+	 * Line 1 add the time
+	 * Line 2 is always the string Departure/Lähtö/Avgång - do nothing.
 	 * 
-	 * line 3 until second from the last is always segments and have the
-	 * following struct: Time and location Transportation mode (e.g Walking Bus
-	 * etc) Time location (several lines) Stop condition is through a blank line
+	 * Line 3 until the second last are the segments and have the
+	 * following structure:
+	 * Time and location
+	 *  Transportation mode (Walking, Bus... etc)
+	 *    Time Location (several lines)
+	 *    
+	 * Stop condition is through a blank line
 	 * 
-	 * Exception Conditions from the above segments structure: 1) Two first
-	 * lines can be equal and only third line has the mode
+	 * Exception conditions from the above segments structure:
+	 * 1) Two first lines can be equal and only third line has the mode.
+	 *   This happens when you have to wait for a while a some point
+	 *   before the segment starts.
 	 * 
-	 * Last line always string "Arrival" || "Perillä"(FIN lang) || "Ankomst"(SWE
-	 * lang)
+	 * Last line is always "Arrival"(English) or "Perillä"(Suomi/Finnish) or
+	 * "Ankomst"(Svenska/Swedish).
 	 * 
 	 * @throws java.text.ParseException
 	 * 
@@ -196,110 +199,126 @@ public class JourneyParser {
 		 * array in two parts: time and location
 		 */
 		String[] str_split = null;
-		int exception = 0; // Number of the exception case. 0 Normal case
+		/**
+		 * Number of the exception case. 0 = Normal case
+		 * Also used as the offset into the plain text.
+		 */
+		int exception = 0;
 		String[] temp1, temp2; // Temporaries variables
 
+		// The first line is the date
 		if (mCurrentLineLoc == 1) {
 			addProperty("date", mCurrentLine);
 			return;
 		}
 
+		/**
+		 * Extract the starting point of the first segment and use it
+		 * as the starting point of the journey.
+		 */
 		if (mCurrentLineLoc == 3) {
 			String[] parts = mCurrentLine.split(" ", 2);
 			addProperty("start", parts[1]);
 			return;
 		}
 
-		if (getTextArray().get(1).contains(":")) {
-			// We are in an exception case
+		/**
+		 * Now we have a segment. 
+		 */
 
-			temp1 = getTextArray().get(0).split(" ", 2);
-			temp2 = getTextArray().get(1).split(" ", 2);
+		if (mTextArray.get(1).contains(":")) {
+			// We are in an exception case: a longer wait here
+			temp1 = mTextArray.get(0).split(" ", 2);
+			temp2 = mTextArray.get(1).split(" ", 2);
 			if ((temp1[1].compareTo(temp2[1])) == 0) {
 				// Exception case number 1
 
-				// split the string in two parts through a " "
-				str_split = getTextArray().get(1).split(" ", 2);
+				// Split the string in two parts at a space (" ")
+				str_split = mTextArray.get(1).split(" ", 2);
 				exception = 1;
-				// System.out.println("EXCEPTION: " + exception);
+				//System.out.println("DBG EXCEPTION: " + exception);
 			}
 		} else {
 			// Normal case
-			str_split = getTextArray().get(0).split(" ", 2);
-			// System.out.println("NORMAL CASE: " + exception + "->" +
-			// str_split[1]);
+			str_split = mTextArray.get(0).split(" ", 2);
+			//System.out.println("DBG NORMAL CASE: " + exception + "->" + str_split[1]);
 		}
 
 		if (str_split == null) {
-
 			throw new ParseException(
 					"JourneyParser: Malformed journey text:", mCurrentLineLoc);
 		}
 
-		if (!getTextArray().get(1).equals("Arrival")
-				&& !getTextArray().get(1).equals("Perillä")
-				&& !getTextArray().get(1).equals("Ankomst")) {
+		if (!mTextArray.get(1).equals("Arrival")
+				&& !mTextArray.get(1).equals("Perillä")
+				&& !mTextArray.get(1).equals("Ankomst")) {
 
-			JsonObject SegmentsObj = new JsonObject();
-			SegmentsObj.addProperty("startTime", str_split[0]);
-			SegmentsObj.addProperty("startPoint", str_split[1]);
+			JsonObject segmentsObj = new JsonObject();
+			segmentsObj.addProperty("startTime", str_split[0]);
+			segmentsObj.addProperty("startPoint", str_split[1]);
 
-			// System.out.println("CASE:" + exception);
+			//System.out.println("DBG CASE:" + exception);
 			switch (exception) {
 			case 0:
-				SegmentsObj.addProperty("mode", getTextArray().get(1));
+				segmentsObj.addProperty("mode", mTextArray.get(1));
 				break;
 			case 1:
-				SegmentsObj.addProperty("mode", getTextArray().get(2));
+				segmentsObj.addProperty("mode", mTextArray.get(2));
 				break;
 
 			default:
+				// TODO: Can we ever reach here?
 				throw new ParseException(
 						"JourneyParser: Invalid segment structure:", mCurrentLineLoc);
-
 			}
 
-			setSegmentsArray(SegmentsObj);
+			setSegmentsArray(segmentsObj);
 
+			/**
+			 * Now we parse the waypoints.
+			 */
+			
 			JsonArray waypointsArray = new JsonArray();
 
-			// System.out.println("ARRAY SIZE: " + getTextArray().size()
-			// + "exception: " + exception);
+			//System.out.println("DBG ARRAY SIZE: " + mTextArray.size() + "exception: " + exception);
 
-			for (int i = exception + 2; i < getTextArray().size(); i++) {
+			boolean isWalkingSegment = false;
+			if (mTextArray.get(exception + 1).contains("Walking")
+					|| mTextArray.get(exception + 1).contains("Kävelyä")
+					|| mTextArray.get(exception + 1).contains("Gång")) {
+				isWalkingSegment = true;
+			}
+			
+			for (int i = exception + 2; i < mTextArray.size(); i++) {
 
 				JsonObject waypointObj = new JsonObject();
 
 				str_split = getTextArray().get(i).split(" ", 2);
 
-				System.out.println("DBG: textArray " + getTextArray().get(i));
+				//System.out.println("DBG textArray " + mTextArray.get(i));
 
 				waypointObj.addProperty("time", str_split[0]);
 				waypointObj.addProperty("name", str_split[1]);
 
-				if (!getTextArray().get(exception + 1).contains("Walking")
-						&& !getTextArray().get(exception + 1).contains(
-								"Kävelyä")
-						&& !getTextArray().get(exception + 1).contains("Gång")) {
+				/**
+				 *  A stopCode field for each waypoint(stop) is expected from
+				 *  a non-walking Segment.
+				 */
+				if (!isWalkingSegment) {
 
-					// System.out.println("STRING: " + str_split[0] + " "+
-					// str_split[1]);
+					//System.out.println("DBG STRING: " + str_split[0] + " "+ str_split[1]);
 					String stopCode;
 					int start, end;
-					// start = str_split[1].indexOf("(") + 1;
-					// end = str_split[1].indexOf(")");
-
-					/*
-					 * Getting the last parentheses from the string because
-					 * usually is where is the stop code
+					/**
+					 * Get the last pair of parentheses from the string because
+					 * usually that is where the stop code lies.
 					 */
-
 					start = str_split[1].lastIndexOf("(") + 1;
 					end = str_split[1].lastIndexOf(")");
 
 					if (start == -1 || end == -1) {
 						throw new ParseException(
-								"JsonParser: No stopCode:"+mCurrentLine, mCurrentLineLoc);
+								"JourneyParser: No stopCode:"+mCurrentLine, mCurrentLineLoc);
 					}
 
 					stopCode = str_split[1].substring(start, end);
@@ -313,21 +332,21 @@ public class JourneyParser {
 				waypointsArray.add(waypointObj);
 			}
 
-			SegmentsObj.add("waypoints", waypointsArray);
+			segmentsObj.add("waypoints", waypointsArray);
 
 		} else {
 			// Last line of the file, "Arrival" line
 
-			// System.out.println("ARRAY " + this.getSegmentsArray());
+			//System.out.println("DBG ARRAY " + mSegmentsArray);
 			addProperty("dest", str_split[1]);
 			addProperty("arrivalTime", str_split[0]);
-			addProperty("segments", this.getSegmentsArray());
+			addProperty("segments", mSegmentsArray);
 		}
 	}
 
 	/**
-	 * Augment journey object with a newly encountered journey text line. The
-	 * newly read encountered line should had been passed to
+	 * Augment journey object with a newly encountered journey text line.
+	 * The newly encountered line should had been passed to
 	 * {@link #setTxtLine(String)} and {@link #incrementLine()} should be called
 	 * before.
 	 * 
@@ -337,28 +356,33 @@ public class JourneyParser {
 	 */
 	private void organizeJson() throws ParseException {
 
+		/*
 		System.out.println("DBG organizeJson loc:" + mCurrentLineLoc + " arraySz:"
-				+ _textArray.size() + " line:" + mCurrentLine);
+				+ mTextArray.size() + " line:" + mCurrentLine);
+				*/
 
 		switch (mCurrentLineLoc) {
 		case 1:
+			// Add to json object the key value "date"
 			addJsonObject();
-			return; // Add to json object the key value "date"
+			return;
 		case 2:
-			return; // "Departure" line
+			// "Departure" line
+			return;
 		case 3:
-			addJsonObject(); // Add to json object the key value "start"
+			// Add to json object the key value "start", starting point
+			addJsonObject();
 			break;
 		default:
+			// Normal segment text.
 			break;
 		}
 
 		/**
-		 * isNotBlank - Checks if a String is not empty (""), not null and not
-		 * whitespace only
+		 * Checks if a String is not empty (""), not null and not whitespace only.
 		 */
 		if (mCurrentLine.trim().equals("")) {
-			// The line is blank
+			// The line is blank - the end of a segment.
 			addJsonObject();
 			flushTextArray();
 			return;
@@ -366,9 +390,9 @@ public class JourneyParser {
 			addTextArray(mCurrentLine);
 		}
 
+		// End of the last segment
 		if (mCurrentLine.equals("Arrival") || mCurrentLine.equals("Perillä")
 				|| mCurrentLine.equals("Ankomst")) {
-
 			addJsonObject();
 			flushTextArray();
 		}
@@ -380,7 +404,7 @@ public class JourneyParser {
 	 * @return JSON object
 	 */
 	public String getJsonText() {
-		return _mainObj.toString();
+		return mJourneyObj.toString();
 	}
 
 	/**
@@ -406,9 +430,7 @@ public class JourneyParser {
 	 * @throws java.text.ParseException on error.
 	 */
 	public void parseString(String jsonText) throws ParseException {
-
 		Scanner scanner = new Scanner(jsonText);
-
 		try {
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
