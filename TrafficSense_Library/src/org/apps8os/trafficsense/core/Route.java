@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.util.TimeParser;
 
+import android.database.CursorIndexOutOfBoundsException;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -62,11 +64,12 @@ public class Route {
 	/**
 	 * Get the next Segment in the journey.
 	 * 
-	 * @return the next Segment, null if already on the last Segment.
+	 * @return the next Segment
+	 * @throws CursorIndexOutOfBoundsException if already on the last Segment.
 	 */
-	public Segment getNextSegment() {
+	public Segment getNextSegment() throws CursorIndexOutOfBoundsException {
 		if (mCurrentSegment+1 >= mSegmentList.size()) {
-			return null;
+			throw new CursorIndexOutOfBoundsException(mCurrentSegment+1, mSegmentList.size());
 		}
 		return mSegmentList.get(mCurrentSegment+1);
 	}
@@ -76,30 +79,26 @@ public class Route {
 	 * 
 	 * @param nextSegment index to the new current segment.
 	 * @return new current Segment.
-	 * @throws IndexOutOfBoundsException
+	 * @throws CursorIndexOutOfBoundsException
 	 */
-	public Segment setNextSegment(int nextSegment) throws IndexOutOfBoundsException {
+	public Segment setNextSegment(int nextSegment) throws CursorIndexOutOfBoundsException {
         if(nextSegment < mSegmentList.size()) {
                 mCurrentSegment = nextSegment;
                 return getCurrentSegment();
         }
-        throw new IndexOutOfBoundsException("size:"+mSegmentList.size()+" next:"+nextSegment);
+        throw new CursorIndexOutOfBoundsException(nextSegment, mSegmentList.size());
 	}
 
 	/**
 	 * Sets the current segment to the next.
 	 * 
 	 * @return the next Segment, null if already on the last segment.
+	 * @throws CursorIndexOutOfBoundsException
 	 */
-	public Segment setNextSegment(){
+	public Segment setNextSegment() throws CursorIndexOutOfBoundsException {
 		Segment segment = getNextSegment();
-		if(segment ==null) {
-			return null;
-		}
-		else{
-			mCurrentSegment++;
-			return segment;
-		}
+		mCurrentSegment++;
+		return segment;
 	}
 	
 	/**
@@ -123,8 +122,12 @@ public class Route {
 	 * Get the last Segment of this journey.
 	 * 
 	 * @return the last Segment.
+	 * @throws CursorIndexOutOfBoundsException if segment length is 0.
 	 */
-	public Segment getLastSegment() {
+	public Segment getLastSegment() throws CursorIndexOutOfBoundsException {
+		if (mSegmentList.size() == 0) {
+			throw new CursorIndexOutOfBoundsException(-1, 0);
+		}
 		return mSegmentList.get(mSegmentList.size()-1);
 	}
 	

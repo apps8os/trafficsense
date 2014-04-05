@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.CursorIndexOutOfBoundsException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -181,13 +182,10 @@ public class LocationOnlyService extends Service implements
 		i.setAction(Constants.ACTION_NEXT_GEOFENCE_REACHED);
 		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, 
 				PendingIntent.FLAG_CANCEL_CURRENT);
-		//if the location client is connected send the request
+		// If the location client is connected send the request
 		if(mLocationClient.isConnected()){
 			System.out.println("DBG adding geofence list");
 			mLocationClient.addGeofences(list, pi, mOnAddGeofencesListener);
-		}
-		else{
-			//TODO: figure out what happens if location client is not connected
 		}
 	}
 	
@@ -214,12 +212,11 @@ public class LocationOnlyService extends Service implements
 	
 	
 	/**
-	 * When we connect to the locationClient we need to add the current GeoFence.
+	 * Called when we successfully connected to LocationClient.
 	 */
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		
-		//System.out.println("DBG LocationOnlyService GeoFencing disabled");
+		//System.out.println("DBG LocationOnlyService GeoFencing enabled");
 		setGeofencesForRoute();
 		sendNextWaypointIntent(null);
 		mContainer.getPebbleUiController().update();
@@ -313,7 +310,10 @@ public class LocationOnlyService extends Service implements
 		public void onReceive(Context arg0, Intent arg1) {
 			// the intent could also have been sent to indicate an error
 			if (LocationClient.hasError(arg1) == true) {
-				// TODO: figure out what happens on error
+				int error = LocationClient.getErrorCode(arg1);
+				// TODO error handling ?
+				if (error == LocationStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+				}
 				return;
 			}
 			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1)
@@ -327,32 +327,33 @@ public class LocationOnlyService extends Service implements
 
 			Segment currentSegment = mRoute.setNextSegment(
 					mRouteSegmentIndex);
-			Waypoint nextWaypoint = currentSegment
-					.setNextWaypoint(mSegmentWaypointIndex);
 			
-			// segment had ended
+			Waypoint nextWaypoint;
+			try {
+				nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+			} catch (CursorIndexOutOfBoundsException e) {
+				nextWaypoint = null;
+			}
+			// Segment has ended
 			if (nextWaypoint == null) {
-
+				// Advance to next segment
 				mRouteSegmentIndex++;
-				currentSegment = mRoute.setNextSegment(
-						mRouteSegmentIndex);
-
-				// The journey is ended.
-				if (currentSegment == null) {
+				try {
+					currentSegment = mRoute.setNextSegment(mRouteSegmentIndex);
+				} catch (CursorIndexOutOfBoundsException e) {
+					// The journey is ended.
 					mRouteSegmentIndex = -1;
 					mSegmentWaypointIndex = -1;
 					mRoute.setJourneyEnded(true);
-
 					// inform clients that waypoint has changed
 					((LocationOnlyService) mContext).sendNextWaypointIntent("");
-
 					// Stop the service.
 					((LocationOnlyService) mContext).stopSelf();
-
 					return;
 				}
+
 				mSegmentWaypointIndex = 0;
-				nextWaypoint = currentSegment.setNextWaypoint(0);
+				nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
 			}
 			
 			// Update the pebble UI

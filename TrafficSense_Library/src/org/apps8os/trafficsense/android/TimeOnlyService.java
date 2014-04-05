@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.CursorIndexOutOfBoundsException;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.widget.Toast;
@@ -199,21 +200,32 @@ public class TimeOnlyService extends Service {
 			/**
 			 * Advance to next waypoint and get its index.
 			 */
-			Waypoint nextWaypoint = mRoute.getCurrentSegment()
-					.setNextWaypoint();
-			/**
-			 * If nextWaypoint is null then we have finished this Segment.
-			 */
+			Waypoint nextWaypoint;
+			try {
+				nextWaypoint = mRoute.getCurrentSegment().setNextWaypoint();
+			} catch (CursorIndexOutOfBoundsException e) {
+				nextWaypoint = null;
+			}
+			
 			if (nextWaypoint == null) {
-				Segment nextSegment = mRoute.setNextSegment();
 				/**
-				 * If there is no more Segment remaining we have finished this journey.
+				 * We have finished this Segment.
 				 */
+				Segment nextSegment;
+				try {
+					nextSegment = mRoute.setNextSegment();
+				} catch (CursorIndexOutOfBoundsException e) {
+					nextSegment = null;
+				}
+				
 				if (nextSegment == null) {
+					/**
+					 * If there is no more Segment remaining we have finished this journey.
+					 */
 					message = "Journey ended.";
 					fJourneyEnded = true;
 				} else {
-					message = "Segment ended.";
+					message = "Segment ended. ";
 					nextWaypoint = nextSegment.getCurrentWaypoint();
 					int secondLastWpIndex = nextSegment.getWaypointList()
 							.size() - 2;
@@ -233,17 +245,25 @@ public class TimeOnlyService extends Service {
 					System.out.println("DBG TimeOnlyService scheduling GetOffAlarm");
 					scheduleGetOffAlarm(timeToAlarm);
 				}
+			} else {
+				message = "";
 			}
-
-			/**
-			 * Set the alarm for the next waypoint.
-			 */
+			
 			if (nextWaypoint != null) {
-				long timeToNextWaypoint = TimeParser.strDateTimeToDate(
-						mRoute.getDate() + " "
-								+ nextWaypoint.getWaypointTime()).getTime();
+				long timeToNextWaypoint = TimeParser
+						.strDateTimeToDate(mRoute.getDate() + " "
+									+ nextWaypoint.getWaypointTime())
+						.getTime();
 				scheduleNextAlarm(timeToNextWaypoint);
-				message = "Next waypoint is: " + nextWaypoint.getWaypointName();
+				message += "Next waypoint is: "+ nextWaypoint.getWaypointName();
+			} else {
+				/**
+				 * Assertion: All empty segments are removed by JourneyParser
+				 * So we may reach here only if the journey is ended.
+				 */
+				if (fJourneyEnded == false) {
+					throw new IllegalStateException("nextWaypoint=null but !fJourneyEnded");
+				}
 			}
 
 			System.out.println("DBG TimeOnlyService NextWaypointReceiver.onReceive cp");

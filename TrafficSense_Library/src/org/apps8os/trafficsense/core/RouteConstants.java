@@ -2,9 +2,12 @@ package org.apps8os.trafficsense.core;
 
 
 /**
- * TODO: move them somewhere else. 
+ * Various constants used in Route/Segment/Waypoint classes.
  */
 public class RouteConstants {
+	/**
+	 * Integral HSL segment travel modes.
+	 */
 	public static final int UNKNOWN = -1;
 	public static final int WALKING = 0;
 	public static final int HELS_INTERNAL_BUS_LINES = 1;

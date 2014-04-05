@@ -3,6 +3,8 @@ package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
 
+import android.database.CursorIndexOutOfBoundsException;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -53,54 +55,50 @@ public class Segment {
 	
 	/**
 	 * Return the next Waypoint according to our progress.
-	 * @return next Waypoint. null if we are at the end already.
+	 * 
+	 * @return next Waypoint.
+	 * @throws CursorIndexOutOfBoundsException if we are at the end already.
 	 */
-	public Waypoint getNextWaypoint() {
-		if (currentWaypoint + 1 < waypointList.size()) {
-			return (waypointList.get(currentWaypoint + 1));
-		} else {
-			return null;
+	public Waypoint getNextWaypoint() throws CursorIndexOutOfBoundsException {
+		if (currentWaypoint + 1 >= waypointList.size()) {
+			throw new CursorIndexOutOfBoundsException(currentWaypoint+1, waypointList.size());
 		}
-
+		return waypointList.get(currentWaypoint + 1);
 	}
 
 	/**
 	 * Advance to the next Waypoint.
 	 *  
-	 * @return the next Waypoint. null if we are at the end already.
+	 * @return the next Waypoint.
+	 * @throws CursorIndexOutOfBoundsException
 	 */
-	public Waypoint setNextWaypoint() {
-		Waypoint waypoint = getNextWaypoint();
-		if(waypoint != null) {
-			currentWaypoint++;
-		}
-		return waypoint;
+	public Waypoint setNextWaypoint() throws CursorIndexOutOfBoundsException {
+		return setNextWaypoint(currentWaypoint + 1);
 	}
 
 	/**
 	 * Advance to the specified-th Waypoint.
 	 * 
 	 * @param index index of the Waypoint to become current.
-	 * @return current Waypoint. null if at the end or out of range.
+	 * @return current Waypoint.
+	 * @throws CursorIndexOutOfBoundsException
 	 */
-	public Waypoint setNextWaypoint(int index) {
-		if (currentWaypoint + 1 < waypointList.size()
-				&& index < waypointList.size()) {
-			currentWaypoint = index;
-			return getCurrentWaypoint();
-		} else {
-			return null;
+	public Waypoint setNextWaypoint(int index) throws CursorIndexOutOfBoundsException {
+		if (index >= waypointList.size() || index < 0) {
+			throw new CursorIndexOutOfBoundsException(index, waypointList.size());
 		}
+		currentWaypoint = index;
+		return getCurrentWaypoint();
 	}
 
 	/**
 	 * Return the last Waypoint.
 	 * 
-	 * @return the last Waypoint in this Segment. null if empty segment.
+	 * @return the last Waypoint in this Segment.
 	 */
-	public Waypoint getLastWaypoint(){
+	public Waypoint getLastWaypoint() throws CursorIndexOutOfBoundsException {
 		if (waypointList.size() == 0) {
-			return null;
+			throw new CursorIndexOutOfBoundsException(-1, 0);
 		}
 		return waypointList.get(waypointList.size()-1);
 	}
@@ -109,11 +107,12 @@ public class Segment {
 	/**
 	 * Return the current Waypoint.
 	 * 
-	 * @return current Waypoint. null if empty segment or error.
+	 * @return current Waypoint.
+	 * @throws CursorIndexOutOfBoundsException if segment is empty.
 	 */
-	public Waypoint getCurrentWaypoint() {
+	public Waypoint getCurrentWaypoint() throws CursorIndexOutOfBoundsException {
 		if (waypointList.size() == 0) {
-			return null;
+			throw new CursorIndexOutOfBoundsException(currentWaypoint, 0);
 		}
 		return waypointList.get(currentWaypoint);
 	}
@@ -212,17 +211,11 @@ public class Segment {
 	/**
 	 * Get the waypoint at the given index.
 	 * 
-	 * NOTE: throws an exception if index is out of bound.
-	 * 
 	 * @param index index of the waypoint.
 	 * @return the waypoint.
 	 */
 	public Waypoint getWaypoint(int index) {
-		if (index > waypointList.size() - 1) {
-			return null;
-		} else {
-			return waypointList.get(index);
-		}
+		return waypointList.get(index);
 	}
 
 	/**
