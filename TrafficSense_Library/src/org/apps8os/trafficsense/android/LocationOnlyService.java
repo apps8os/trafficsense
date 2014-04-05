@@ -29,9 +29,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
 
-
 /**
- * TODO: Documentation.
+ * Service that follows a journey based on location. 
  */
 public class LocationOnlyService extends Service implements 
 		ConnectionCallbacks,
@@ -67,9 +66,12 @@ public class LocationOnlyService extends Service implements
 	 */
 	private Route mRoute;
 	/**
-	 * Callbacks from GeoFence will be made to these classes. 
+	 * For callbacks from GeoFence. 
 	 */
 	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
+	/**
+	 * For callbacks from GeoFence. 
+	 */
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver;
 	/**
 	 * Did we encounter an error during onStartCommand().
@@ -129,7 +131,7 @@ public class LocationOnlyService extends Service implements
 		}
 
 		if (errorOnStart) {
-			this.stopSelf();
+			stopSelf();
 		}
 		
 		/**
@@ -164,10 +166,10 @@ public class LocationOnlyService extends Service implements
 	}
 
 	/**
-	 * Adds a GeoFence to the location client.
+	 * Adds a list of GeoFences to the location client.
 	 * The action taken when GeoFence transition is made is currently hard coded.
 	 * 
-	 * @param list  (TODO what is this)
+	 * @param list list of GeoFences to be added
 	 */
 	private void addGeofence(ArrayList<Geofence> list){
 		Intent i = new Intent();
@@ -187,11 +189,11 @@ public class LocationOnlyService extends Service implements
 	/**
 	 * Returns a Geofence made from a waypoint
 	 * 
-	 * @param busStop -get the longitude and latitude of the waypoint
-	 * @param id -id of the geofence
-	 * @param radius -the radius of the geofence
-	 * @param expiryDuration -how long the geofence exists
-	 * @param transition -what type of transition triggers alert
+	 * @param busStop get the longitude and latitude of the waypoint
+	 * @param id id of the geofence
+	 * @param radius the radius of the geofence
+	 * @param expiryDuration how long the geofence exists
+	 * @param transition what type of transition triggers alert
 	 * @return a geofence created using the method parameters
 	 */
 	private Geofence createGeofence(Waypoint busStop,String id, float radius, 
@@ -207,7 +209,7 @@ public class LocationOnlyService extends Service implements
 	
 	
 	/**
-	 * When we connect to the locationClient we need to add the current geofence
+	 * When we connect to the locationClient we need to add the current GeoFence.
 	 */
 	@Override
 	public void onConnected(Bundle connectionHint) {
@@ -224,37 +226,39 @@ public class LocationOnlyService extends Service implements
 	/**
 	 * Set the GeoFences for all the waypoints on the route.
 	 */
-	private void setGeofencesForRoute(){
+	private void setGeofencesForRoute() {
 		System.out.println("DBG location service received intent");
 		ArrayList<Geofence> listOfFences = new ArrayList<Geofence>();
-		for(int segmentIndex=0;;segmentIndex++){
+		for (int segmentIndex = 0;
+				segmentIndex < mRoute.getSegmentList().size();
+				segmentIndex++) {
 			Segment currentSegment = mRoute.getSegment(segmentIndex);
-			if(currentSegment == null){
-				break;
-			}
-			
-			//skip the first waypoint because it it also the last one in the last segment
-			for(int waypointIndex=0;;waypointIndex++){
-				
-				Waypoint nextWaypoint = currentSegment.getWaypoint(waypointIndex);
-				if(nextWaypoint==null){
-					break;
-				}
-				System.out.println("DBG making geofence for " + segmentIndex +"," + waypointIndex);
-				String id = Integer.toString(segmentIndex)+","+Integer.toString(waypointIndex);
-				mNextBusStopGeofence = createGeofence(nextWaypoint, id, Constants.GEOFENCE_RADIUS,
-						Geofence.NEVER_EXPIRE, Geofence.GEOFENCE_TRANSITION_ENTER);
+			/**
+			 * TODO: skip the first waypoint because it it also the last one in
+			 * the last segment
+			 */
+			for (int waypointIndex = 0;
+					waypointIndex < currentSegment.getWaypointList().size();
+					waypointIndex++) {
+				Waypoint nextWaypoint = currentSegment
+						.getWaypoint(waypointIndex);
+				System.out.println("DBG making geofence for " + segmentIndex + "," + waypointIndex);
+				String id = Integer.toString(segmentIndex) + ","
+						+ Integer.toString(waypointIndex);
+				mNextBusStopGeofence = createGeofence(nextWaypoint, id,
+						Constants.GEOFENCE_RADIUS,
+						Geofence.NEVER_EXPIRE,
+						Geofence.GEOFENCE_TRANSITION_ENTER);
 				listOfFences.add(mNextBusStopGeofence);
-				
 			}
-			
 		}
-		addGeofence(listOfFences);		
+		addGeofence(listOfFences);
 	}
 	
 	/**
-	 * TODO: documentation.
+	 * Callback for results from adding GeoFences.
 	 */
+	@Override
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
 		System.out.println("DBG: geofence status code: "+ statusCode);
 
@@ -301,7 +305,8 @@ public class LocationOnlyService extends Service implements
 		public void onReceive(Context arg0, Intent arg1) {
 			// the intent could also have been sent to indicate an error
 			if (LocationClient.hasError(arg1) == true) {
-				return; // TODO: again figure out what happens on error
+				// TODO: figure out what happens on error
+				return;
 			}
 			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1)
 					.get(0);
@@ -312,7 +317,7 @@ public class LocationOnlyService extends Service implements
 			mRouteSegmentIndex = Integer.parseInt(parts[0]);
 			mSegmentWaypointIndex = Integer.parseInt(parts[1]) + 1;
 
-			Segment currentSegment = mContainer.getRoute().setNextSegment(
+			Segment currentSegment = mRoute.setNextSegment(
 					mRouteSegmentIndex);
 			Waypoint nextWaypoint = currentSegment
 					.setNextWaypoint(mSegmentWaypointIndex);
@@ -321,7 +326,7 @@ public class LocationOnlyService extends Service implements
 			if (nextWaypoint == null) {
 
 				mRouteSegmentIndex++;
-				currentSegment = mContainer.getRoute().setNextSegment(
+				currentSegment = mRoute.setNextSegment(
 						mRouteSegmentIndex);
 
 				// The journey is ended.
@@ -431,7 +436,7 @@ public class LocationOnlyService extends Service implements
 		vi.putExtra(Constants.ERROR, msg);
 		vi.setAction(Constants.ACTION_ROUTE_EVENT);
 		sendBroadcast(vi);
-		this.stopSelf();
+		stopSelf();
 	}
 
 }
