@@ -16,6 +16,7 @@ public class Constants {
 	final public static boolean isDevelopmentMode = true;
 	/**
 	 * Whether time-based service(s) should use wall clock or toy time.
+	 * Affects also Route.isJourneyInThePast().
 	 */
 	final public static boolean useWallClock = false;
 	/**

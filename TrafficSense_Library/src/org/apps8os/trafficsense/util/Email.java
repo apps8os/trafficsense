@@ -2,27 +2,26 @@ package org.apps8os.trafficsense.util;
 
 
 /**
- * A simple data container for a email. Recognizes that emails have a
- * sender, a send time, a subject, and content. Provides methods to set 
- * and get these parts. 
+ * A simple data container for a email.
+ * Recognizes that e-mails have a sender, a send time, a subject, and content.
+ * Provides methods to set and get these parts.
+ * 
  * @author Jussi
- *
  */
 public class Email {
 	private String sender;
 	private String content;
 	private String sendTime;
 	private String subject;
-	
 
-	public Email(String sender, String sendTime, String subject, String content){
+	public Email(String sender, String sendTime, String subject, String content) {
 		setSender(sender);
 		setSendTime(sendTime);
 		setSubject(subject);
 		setContent(content);
 	}
-	
-	public Email(){}
+
+	public Email() {}
 	
 	public void setSendTime(String sendTime){
 		this.sendTime=sendTime;
@@ -58,6 +57,5 @@ public class Email {
 	
 	public String toString(){
 		return "From: "+sender+"\nTime: "+sendTime+"\nSubject: "+subject+"\nContent:\n"+content ;
-		
 	}
 }

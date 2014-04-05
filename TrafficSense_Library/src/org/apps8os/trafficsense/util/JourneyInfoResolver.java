@@ -27,9 +27,6 @@ import com.google.gson.Gson;
  * This includes GPS coordinates for Waypoints,
  * and HSL transport type for Segments.
  * 
- * TODO 1. test Finnish and Swedish support
- * TODO 2. documentation.
- * 
  * @see http://developer.reittiopas.fi/pages/en/http-get-interface-version-2.php
  */
 public class JourneyInfoResolver {
@@ -153,8 +150,6 @@ public class JourneyInfoResolver {
 	 * 
 	 * Invokes thread-unsafe private methods which make HTTP requests.
 	 * Thus, this method is also thread-unsafe and is synchronized.
-	 *
-	 *  TODO: should throw JourneyInfoResolverException
 	 *  
 	 * @param journey the journey for which GPS coordinates shall be retrieved.
 	 * @throws JourneyInfoResolverException
@@ -314,18 +309,7 @@ public class JourneyInfoResolver {
 		return url;
 	}
 	
-	
-	/**
-	 * TODO: 1. Documentation
-	 * TODO: 2. Test!!
-	 * @deprecated unused and not tested yet.
-	 * 
-	 * @param responseLimit
-	 * @param cities
-	 * @param locType
-	 * @param key
-	 * @return
-	 */
+/*	
 	private String buildGetGeocodingUrl(String responseLimit,
 			String cities, String locType, String key) {
 		String url;
@@ -335,16 +319,6 @@ public class JourneyInfoResolver {
 	}
 
 	
-	/**
-	 * TODO: 1. Documentation
-	 * TODO: 2. Test!!
-	 * @deprecated unused and not tested yet.
-	 * 
-	 * @param responseLimit
-	 * @param x
-	 * @param y
-	 * @return
-	 */
 	private String buildGetReverseGeocodingUrl(String responseLimit,
 			String x, String y) {
 		String url;
@@ -352,6 +326,7 @@ public class JourneyInfoResolver {
 				+ x + "," + y + "&p=" + responseLimit;
 		return url;
 	}
+*/
 
 	/**
 	 *A generic exception for possible errors that could happen in this class. 

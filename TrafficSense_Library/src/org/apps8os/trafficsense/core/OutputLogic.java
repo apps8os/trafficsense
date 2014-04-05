@@ -70,6 +70,8 @@ public class OutputLogic {
 		return ("");
 	}
 
-
-
+	/**
+	 * No instantiation.
+	 */
+	private OutputLogic() {}
 }
