@@ -9,6 +9,10 @@ import org.apps8os.trafficsense.core.Segment;
 
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -115,6 +119,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    textview.setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
 	    textview.setChecked(isExpanded);
 	    ImageView imageView = (ImageView) convertView.findViewById(R.id.GroupImage);
+	   //textview.setBackgroundColor(Color.BLACK);
+
+	    
 	    
 	    if(mode == 0){
 	    	 imageView.setImageResource(R.drawable.walking_icon_small);
@@ -148,5 +155,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	  public ArrayList<View> getWaypointViewList(){
 		  return waypoint_Views;
 	  }*/
+	  
+//		public void highlightCurrentWaypoint(){
+//		
+//	}
+	  
 	} 
+
+
 
