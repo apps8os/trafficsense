@@ -195,6 +195,7 @@ public class MainActivity extends Activity {
 		Bitmap icon = resizeIcon(resID);
 		PolylineOptions o = new PolylineOptions().geodesic(true);
 		for (Segment s : r.getSegmentList()) {
+			int i = 1;
 			if (s.isWalking()) {
 				// Don't draw walking segments because they don't have
 				// coordinates
@@ -209,34 +210,38 @@ public class MainActivity extends Activity {
 
 				if (s.getWaypoint(0).getWaypointName()
 						.equals(w.getWaypointName())) {
-					// Starting Point
+					// StartingPoint transportation
 					LatLng coord_start = new LatLng(s.getWaypoint(0)
 							.getLatitude(), s.getWaypoint(0).getLongitude());
 
 					map.addMarker(new MarkerOptions()
 							.position(coord_start)
-							.title("Departure: "+ s.getWaypoint(0).getWaypointName())
+							.title("Departure on "+s.getSegmentMode() +": " + i + "." +s.getWaypoint(0).getWaypointName()
+									+"(" + s.getWaypoint(0).getWaypointStopCode() +")")
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 					o.add(coord_start);
+					i++;
 					continue;
 				}
 				if (s.getLastWaypoint().getWaypointName()
 						.equals(w.getWaypointName())) {
-					// End Point
+					// EndPoint of transportation
 					LatLng coord_end = new LatLng(s.getLastWaypoint().getLatitude(), s.getLastWaypoint().getLongitude());
 					map.addMarker(new MarkerOptions().position(coord_end)
-							.title("Arrival: " + s.getLastWaypoint().getWaypointName()));
+							.title("Arrival on "+s.getSegmentMode() +": " + i + "."+ s.getLastWaypoint().getWaypointName() +
+									"(" + s.getLastWaypoint().getWaypointStopCode() +")"));
 					o.add(coord_end);
+					i++;
 					continue;
 				}
-				// bus points
+				// middlePoints
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 				map.addMarker(new MarkerOptions().position(coord)
-						.title(w.getWaypointName())
+						.title(i+"."+w.getWaypointName() + " (" + w.getWaypointStopCode() +")")
 						.icon(BitmapDescriptorFactory.fromBitmap(icon)));
-
 				o.add(coord);
+				i++;
 
 				if (zoomed == false) {
 					centerLocationOnMap(coord);
