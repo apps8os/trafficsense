@@ -1,5 +1,6 @@
 package org.apps8os.trafficsense;
 
+import java.security.InvalidParameterException;
 import java.text.ParseException;
 
 import org.apps8os.trafficsense.android.Constants;
@@ -12,6 +13,7 @@ import org.apps8os.trafficsense.util.Email;
 import org.apps8os.trafficsense.util.EmailCredential;
 import org.apps8os.trafficsense.util.EmailReader;
 import org.apps8os.trafficsense.util.JourneyInfoResolver;
+import org.apps8os.trafficsense.util.JourneyInfoResolver.JourneyInfoResolverException;
 import org.apps8os.trafficsense.util.JourneyParser;
 import org.apps8os.trafficsense.util.EmailReader.EmailException;
 
@@ -26,6 +28,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.view.View;
+import android.widget.Toast;
 
 
 /**
@@ -279,8 +282,9 @@ public class TrafficsenseContainer {
 		mContext.stopService(serviceIntent);
 		serviceIntent = new Intent(mContext, LocationOnlyService.class);
 		mContext.stopService(serviceIntent);
-		
-		// TODO: add some code here if a new Service is introduced.
+		/**
+		 *  TODO: add some code here if a new Service is introduced.
+		 */
 	}
 	
 	/**
@@ -327,9 +331,7 @@ public class TrafficsenseContainer {
 		mContext = null;
 		
 		if (isLast() != true) {
-			System.out.println("DBG Container: stop() but !isLast() ?!");
-			System.out.println("DBG Container: Act:"+mAttachedActivities+" Ser:"+mRunningServices);
-			// TODO: maybe throw an Exception and do a stack trace here
+			throw new IllegalStateException("Container: stop() but !isLast() A:"+mAttachedActivities+" S:"+mRunningServices);
 		}
 	}
 	
@@ -355,16 +357,19 @@ public class TrafficsenseContainer {
 					activityAttach(mContext.getApplicationContext());
 					mJourneyText = retrieveJourneyBlockingPart(credential);
 					parseJourney();
-					System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
-					if (serviceType != Constants.SERVICE_TIME_ONLY) {
-						/**
-						 * TODO: Check its return value!
-						 * false is returned on error.
-						 * Maybe send an Intent?
-						 */
-						retrieveCoordinatesForStopsBlockingPart(mRoute);
+					//System.out.println("DBG startJourneyTracker mJourneyText:"+mJourneyText);
+					if (mRoute.isJourneyInThePast() == true) {
+						System.out.println("DBG Container: journey in the past");
+						Toast toast = Toast.makeText(mContext,
+								"Error: this journey is in the past!",
+								Toast.LENGTH_SHORT);
+						toast.show();
+					} else {
+						if (serviceType == Constants.SERVICE_LOCATION_ONLY) {
+							retrieveCoordinatesForStopsBlockingPart(mRoute);
+						}
+						startTrackerService(serviceType);
 					}
-					startTrackerService(serviceType);
 				} catch (ParseException e) {
 					// Unable to parse journey.
 					System.out.println("DBG startJourneyTracker parse:"+e.getMessage());
@@ -372,6 +377,10 @@ public class TrafficsenseContainer {
 				} catch (EmailException e) {
 					// Unable to retrieve journey text.
 					System.out.println("DBG startJourneyTracker email:"+e.getMessage());
+					return;
+				} catch (JourneyInfoResolverException e) {
+					// Unable to retrieve GPS coordinates.
+					System.out.println("DBG startJourneyTracker coords:"+e.getMessage());
 					return;
 				} finally {
 					activityDetach();
@@ -405,6 +414,10 @@ public class TrafficsenseContainer {
 			System.out.println("DBG startTrackerService: trying to start multiple services?");
 			return;
 		}
+		if (mRoute.isJourneyInThePast()) {
+			System.out.println("DBG startTrackerService: in the past");
+			return;
+		}
 		switch (serviceType) {
 		case Constants.SERVICE_TIME_ONLY:
 			serviceIntent = new Intent(mContext, TimeOnlyService.class);
@@ -413,13 +426,7 @@ public class TrafficsenseContainer {
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
 		default:
-			// TODO: throw InvalidParameterException
-			System.out.println("DBG invalid serviceType");
-			break;
-		}
-		// TODO: remove after throwing exception
-		if (serviceIntent == null) {
-			return;
+			throw new InvalidParameterException("invalid serviceType");
 		}
 		
 		/**
@@ -453,8 +460,9 @@ public class TrafficsenseContainer {
 
 		if (email != null) {
 			journeyText = email.getContent();
-			// TODO: filter out trailing HTML text
-			// TODO: check for other error / format ?
+			/**
+			 * TODO: filter out trailing HTML text / check format ?
+			 */
 		}
 
 		return journeyText;
@@ -496,17 +504,13 @@ public class TrafficsenseContainer {
 	 * Retrieves GPS coordinates for all stops along the journey.
 	 * 
 	 * Must NOT invoke this from the main/UI thread.
-	 * 
-	 * @return true on success, false otherwise.
 	 */
-	public static boolean retrieveCoordinatesForStopsBlockingPart(Route route) {
+	public static void retrieveCoordinatesForStopsBlockingPart(Route route) {
 		JourneyInfoResolver resolver = new JourneyInfoResolver();
 		/**
 		 * Access HSL API to retrieve GPS coordinates for each Waypoint (if stopCode is available).
 		 */
 		resolver.retrieveCoordinatesFromHsl(route);
-
-		return true;
 	}
 	
 	/**
