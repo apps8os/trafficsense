@@ -2,126 +2,254 @@ package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
 
+import org.apps8os.trafficsense.android.Constants;
+import org.apps8os.trafficsense.util.TimeParser;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 
 /**
- * TODO: Documentation.
+ * Top level object holding a journey in internal structure.
+ * Includes also progress tracking facility.
  */
 public class Route {
 
-	private String date;
-	private String start;
-	private String destination;
-	private String arrivaltime;
-	private String departure;
-	private int currentSegment=0;
+	/**
+	 * Date of the journey.
+	 */
+	private String mDate;
+	/**
+	 * Starting point.
+	 */
+	private String mStart;
+	/**
+	 * Destination.
+	 */
+	private String mDestination;
+	/**
+	 * Arrival time.
+	 */
+	private String mArrivalTime;
+	/**
+	 * Departure time including date.
+	 */
+	private String mDeparture;
+	/**
+	 * Index of the Segment in which we currently are.
+	 */
+	private int mCurrentSegment=0;
+	/**
+	 * The list of Segments of the journey.
+	 */
+	private ArrayList <Segment> mSegmentList;
+	/**
+	 * Have all the GPS coordinates been retrieved?
+	 */
 	private boolean coordsReady = false;
+	/**
+	 * Have we finished the journey?
+	 */
 	private boolean journeyEnded = false;
 	
-	
-	private ArrayList <Segment> segmentList = new ArrayList<Segment>();
-	
 	/**
-	 * gets the next segment in the route
-	 * returns next segment or a null if on last segment
+	 * Constructor
 	 */
-	public Segment getNextSegment(){
-		return segmentList.get(currentSegment+1);
+	public Route () {
+		mSegmentList = new ArrayList<Segment>();
 	}
 
-	public Segment setNextSegment(int nextSegment){
-        if(currentSegment+1 < segmentList.size()){
-                currentSegment=nextSegment;
-                return(getCurrentSegment());
+	/**
+	 * Get the next Segment in the journey.
+	 * 
+	 * @return the next Segment, null if already on the last Segment.
+	 */
+	public Segment getNextSegment() {
+		if (mCurrentSegment+1 >= mSegmentList.size()) {
+			return null;
+		}
+		return mSegmentList.get(mCurrentSegment+1);
+	}
+
+	/**
+	 * Set current segment to the given index.
+	 * 
+	 * @param nextSegment index to the new current segment.
+	 * @return new current Segment.
+	 * @throws IndexOutOfBoundsException
+	 */
+	public Segment setNextSegment(int nextSegment) throws IndexOutOfBoundsException {
+        if(nextSegment < mSegmentList.size()) {
+                mCurrentSegment = nextSegment;
+                return getCurrentSegment();
         }
-        else return(null);
-}
-	
-	//sets the current segment to the next segment
-	//and returns the next segment.
-	//returns null if on last segment.
+        throw new IndexOutOfBoundsException("size:"+mSegmentList.size()+" next:"+nextSegment);
+	}
+
+	/**
+	 * Sets the current segment to the next.
+	 * 
+	 * @return the next Segment, null if already on the last segment.
+	 */
 	public Segment setNextSegment(){
 		Segment segment = getNextSegment();
-		if(segment ==null){
-			return segment;
+		if(segment ==null) {
+			return null;
 		}
 		else{
-			currentSegment++;
+			mCurrentSegment++;
 			return segment;
 		}
-
 	}
 	
+	/**
+	 * Mark or clear the ended state of this journey.
+	 * @param state state
+	 */
 	public void setJourneyEnded(boolean state){
 		journeyEnded = state;
 	}
 	
+	/**
+	 * Check if the journey is ended.
+	 * 
+	 * @return is the journey ended.
+	 */
 	public boolean isJourneyEnded(){
 		return journeyEnded;
 	}
-	//gets the last segment on the route
-	public Segment getLastSegment(){
-		return segmentList.get(segmentList.size()-1);
+	
+	/**
+	 * Get the last Segment of this journey.
+	 * 
+	 * @return the last Segment.
+	 */
+	public Segment getLastSegment() {
+		return mSegmentList.get(mSegmentList.size()-1);
 	}
 	
+	/**
+	 * Get the Segment in which we currently are.
+	 * 
+	 * @return the Segment.
+	 */
 	public Segment getCurrentSegment(){
-		return(segmentList.get(currentSegment));
+		return mSegmentList.get(mCurrentSegment);
 	}
 	
+	/**
+	 * Get the index of the segment in which we currently are.
+	 * 
+	 * @return the index.
+	 */
 	public int getCurrentIndex() {
-		return currentSegment;
+		return mCurrentSegment;
 	}
 	
+	/**
+	 * Get the date of this journey.
+	 * 
+	 * @return date string.
+	 */
 	public String getDate() {	
-		return date;
+		return mDate;
 	}
 
-	public String setDate (String nDate){
-		date=nDate;
-		return date;
+	/**
+	 * Set the date of this journey.
+	 * 
+	 * @param newDate date string.
+	 * @return date string.
+	 */
+	public String setDate (String newDate){
+		mDate=newDate;
+		return mDate;
 	}
 	
+	/**
+	 * Get starting point string.
+	 * 
+	 * @return starting point.
+	 */
 	public String getStart(){
-		return start;
+		return mStart;
 	}
 	
-	public String setStart(String nStart){
-		start = nStart;
-		return start;
+	/**
+	 * Set starting point string.
+	 * 
+	 * @param newStart starting point
+	 * @return starting point
+	 */
+	public String setStart(String newStart){
+		mStart = newStart;
+		return mStart;
 	}
 	
-	public String getDestination(){
-		return destination;
+	/**
+	 * Get destination string.
+	 * 
+	 * @return destination string.
+	 */
+	public String getDestination() {
+		return mDestination;
 	}
 	
-	public String setDestination(String nDestination){
-		destination = nDestination;
-		return destination;
+	/**
+	 * Set destination string.
+	 * 
+	 * @param newDestination destination.
+	 * @return destination.
+	 */
+	public String setDestination(String newDestination){
+		mDestination = newDestination;
+		return mDestination;
 	}
 	
+	/**
+	 * Get arrival time.
+	 * @return arrival time.
+	 */
 	public String getArrivalTime (){
-		return arrivaltime;
+		return mArrivalTime;
 	}
 	
-	public String setArrivalTime (String nArrival) {
-		arrivaltime = nArrival;
-		return arrivaltime;
+	/**
+	 * Set arrival time.
+	 * 
+	 * @param newArrival new arrival time.
+	 * @return arrival time.
+	 */
+	public String setArrivalTime (String newArrival) {
+		mArrivalTime = newArrival;
+		return mArrivalTime;
 	}
 	
-	public ArrayList <Segment> getSegmentList (){
-		return segmentList;
+	/**
+	 * Get the list of Segments in th journey.
+	 * 
+	 * @return list of Segments.
+	 */
+	public ArrayList <Segment> getSegmentList () {
+		return mSegmentList;
 	}
 	
+	/**
+	 * Get the Segment of given index.
+	 * 
+	 * @param index index of the requested Segment.
+	 * @return the Segment.
+	 */
 	public Segment getSegment(int index) {
-		if(index > segmentList.size()-1){
-	        return null;
-	}
-		return segmentList.get(index);
+		return mSegmentList.get(index);
 	}
 	
-	public void setRoute (JsonObject journey){
+	/**
+	 * Populate the route with given JSON object.
+	 * 
+	 * @param journey journey in Gson JSON.
+	 */
+	public void setRoute (JsonObject journey) {
 		setDate(journey.get("date").getAsString());
 		setStart(journey.get("start").getAsString());
 		setDestination(journey.get("dest").getAsString());
@@ -131,30 +259,82 @@ public class Route {
 	    for (int i = 0; i < segmentJs.size(); i++) {
 			Segment segment = new Segment();
 			segment.setSegment(segmentJs.get(i).getAsJsonObject());
-			segmentList.add(i, segment);
+			mSegmentList.add(i, segment);
 		}
-	    segmentList.trimToSize();
+	    mSegmentList.trimToSize();
 	    setDepartureTime(segmentJs.get(0).getAsJsonObject());
 	}
-	
-	
 
-	public String setDepartureTime (JsonObject firstSegment){
-		departure = firstSegment.get("startTime").getAsString();
-		departure = date + " " + departure;
-		return departure;
+	/**
+	 * Set the departure time to that of the given Segment.
+	 * 
+	 * Should call {@link #setDate(String)} first.
+	 * 
+	 * @param segment the intended first segment.
+	 * @return departure time.
+	 */
+	public String setDepartureTime (JsonObject segment) {
+		mDeparture = mDate + " " + segment.get("startTime").getAsString();
+		return mDeparture;
 	}
 	
+	/**
+	 * Get the departure time.
+	 * 
+	 * @return departure time.
+	 */
 	public String getDepartureTime (){
-		return departure;
+		return mDeparture;
 	}
 	
+	/**
+	 * Mark the status of GPS coordinates.
+	 * 
+	 * @param isReady are they ready?
+	 */
 	public void setCoordsReady(boolean isReady) {
 		coordsReady = isReady;
 	}
 	
+	/**
+	 * Get the status of GPS coordinates.
+	 * 
+	 * @return status of GPS coordinates.
+	 */
 	public boolean getCoordsReady() {
 		return coordsReady;
+	}
+	
+	/**
+	 * Check if this journey is in the past if Constants.useWallClock is true.
+	 * 
+	 * @return true if it is it in the past. Always false if  Constants.useWallClock is false.
+	 */
+	public boolean isJourneyInThePast() {
+		if (Constants.useWallClock == false) {
+			return false;
+		}
+		long journeyStartTime = TimeParser.strDateTimeToDate(mDeparture).getTime();
+		if (journeyStartTime > System.currentTimeMillis()) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Get the starting time of the first waypoint in the journey.
+	 * 
+	 * @return the time in miliseconds since epoch, or TEST_TIME after current time if Constants.useWallClock is false.
+	 */
+	public long getFirstWaypointTime() {
+		if (Constants.useWallClock == false) {
+			return Constants.TEST_TIME + System.currentTimeMillis();
+		}
+		// Get the time of the first waypoint
+		return TimeParser.strDateTimeToDate(
+				mDate + " " +
+				mSegmentList.get(0).getWaypointList().get(0).getWaypointTime())
+				.getTime();
 	}
 
 }
