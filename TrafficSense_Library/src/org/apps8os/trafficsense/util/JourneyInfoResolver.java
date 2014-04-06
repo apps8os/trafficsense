@@ -2,6 +2,8 @@ package org.apps8os.trafficsense.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
@@ -72,6 +74,18 @@ public class JourneyInfoResolver {
 	 */
 	private static class StopInfo {
 		public String wgs_coords;
+	};
+	/**
+	 * HSL Geocoding response limiter.
+	 * Retrieve only field number 6: coords.
+	 * TODO: HSL bug? It is actually 7
+	 */
+	private final static String geocodingResponseLimit = "0000001";
+	/**
+	 * A structure for Gson to parse JSON response from HSL. 
+	 */
+	private static class Geocoding {
+		public String coords;
 	};
 	
 	/**
@@ -202,37 +216,49 @@ public class JourneyInfoResolver {
 	 * @param waypoint waypoint to query for
 	 * @throws JourneyInfoResolverException
 	 */
-	private void lookupWaypointCoordinate(Waypoint waypoint) throws JourneyInfoResolverException {
+	private void lookupWaypointCoordinate(Waypoint waypoint)
+			throws JourneyInfoResolverException {
 		if (waypoint == null) {
 			throw new JourneyInfoResolverException("null waypoint");
 		}
+
+		String url;
 		if (waypoint.hasStopCode() == false) {
-			return;
+			url = buildGetGeocodingUrl(geocodingResponseLimit, "address",
+					waypoint.getWaypointName());
+		} else {
+			// Sanity check
+			String stopCode = waypoint.getWaypointStopCode();
+			if (stopCode == null || stopCode.isEmpty()) {
+				throw new JourneyInfoResolverException("unfilled stopCode");
+			}
+			url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
 		}
 
-		// Sanity check
-		String stopCode = waypoint.getWaypointStopCode();
-		if (stopCode == null || stopCode.isEmpty()) {
-			throw new JourneyInfoResolverException("unfilled stopCode");
-		}
-
-		String url = buildGetStopInfoUrl(stopResponseLimit, stopCode);
 		String result = doHttpGetRequest(url);
 		if (result.isEmpty()) {
 			throw new JourneyInfoResolverException("HTTP response is empty");
 		}
-		StopInfo[] stop = mGson.fromJson(result, StopInfo[].class);
-		if (stop.length == 0) {
-			throw new JourneyInfoResolverException("stop[] size = 0");
+
+		String long_lat[] = null;
+		if (waypoint.hasStopCode() == false) {
+			//System.out.println("DBG Geocoding case");
+			Geocoding[] geocods = mGson.fromJson(result, Geocoding[].class);
+			if (geocods.length == 0) {
+				throw new JourneyInfoResolverException("coords[].length = 0");
+			}
+			long_lat = geocods[0].coords.split(",", 2);
+		} else {
+			//System.out.println("DBG StopInfo case");
+			StopInfo[] stops = mGson.fromJson(result, StopInfo[].class);
+			if (stops.length == 0) {
+				throw new JourneyInfoResolverException("stop[].length = 0");
+			}
+			long_lat = stops[0].wgs_coords.split(",", 2);
 		}
-		// Parse longitude and latitude coordinates from the result string
-		String coords = stop[0].wgs_coords;
-		if (coords == null || coords.isEmpty()) {
-			throw new JourneyInfoResolverException("coords empty");
-		}
-		
-		double longCord = Double.parseDouble(coords.substring(9, 17));
-		double latCord = Double.parseDouble(coords.substring(0, 8));
+
+		double latCord = Double.parseDouble(long_lat[0]);
+		double longCord = Double.parseDouble(long_lat[1]);
 		waypoint.setCoordinate(longCord, latCord);
 	}
 	
@@ -308,16 +334,23 @@ public class JourneyInfoResolver {
 		return url;
 	}
 	
-/*	
 	private String buildGetGeocodingUrl(String responseLimit,
-			String cities, String locType, String key) {
+			String locType, String key) {
+		if (locType.isEmpty()) {
+			locType = "stop|address";
+		}
 		String url;
-		url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types=" + locType
-				+ "&p=" + responseLimit + "&cities=" + cities + "&key=" + key;
+		try {
+			url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types=" +
+		URLEncoder.encode(locType, "UTF-8")
+				+ "&p=" + responseLimit + "&key=" + key;
+		} catch (UnsupportedEncodingException e) {
+			throw new JourneyInfoResolverException(e.getMessage());
+		}
 		return url;
 	}
 
-	
+/*
 	private String buildGetReverseGeocodingUrl(String responseLimit,
 			String x, String y) {
 		String url;
