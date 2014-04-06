@@ -122,9 +122,11 @@ public class MainActivity extends Activity {
 		return (true);
 	}
 
+	/**
+	 * Handle taps on the action bar items
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the action bar items
 		switch (item.getItemId()) {
 		case R.id.menu_start_journey:
 			item.setActionView(R.layout.progressbar);
@@ -166,8 +168,9 @@ public class MainActivity extends Activity {
 	}
 
 	/**
-	 * TODO: documentation.
-	 * @param messages
+	 * Combine and show a list of message on the top banner of MainActivity.
+	 * 
+	 * @param messages the list of messages to show.
 	 */
 	private void showList(String[] messages) {
 
@@ -183,8 +186,8 @@ public class MainActivity extends Activity {
 	}
 
 	/**
-	 * draws the route on the map using lines that dont follow roads. Also zooms
-	 * to first waypoint with location.
+	 * Draws the route on the map using poly-lines and zoom to first Waypoint.
+	 * These lines do not follow roads.
 	 */
 	public void drawRoute() {
 		map.clear();
@@ -211,6 +214,8 @@ public class MainActivity extends Activity {
 				
 				/**
 				 * Ignore waypoints without valid GPS coordinates.
+				 * 
+				 * TODO: What to do if this is the start or end of a segment?
 				 */
 				if (w.hasCoord() == false) {
 					continue;
@@ -222,9 +227,6 @@ public class MainActivity extends Activity {
 
 				/**
 				 * Make a green marker for starting point and a red marker for end point.
-				 * 
-				 * TODO: What if they have no GPS coordinates?
-				 * This happens when their stopCode is empty. 
 				 */
 				if (s.getWaypoint(0).getWaypointName()
 						.equals(w.getWaypointName())) {
