@@ -15,6 +15,7 @@ import android.text.SpannableString;
 import android.text.style.BackgroundColorSpan;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -62,6 +63,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    //waypoint_Views.add(index, object);
 	    text = (TextView) convertView.findViewById(R.id.checkedTextView);
 	    text.setText(children);
+	 //   this.highlightCurrentWaypoint(convertView);
+	    
 	    convertView.setOnClickListener(new OnClickListener() {
 	      @Override
 	      public void onClick(View v) {
@@ -119,8 +122,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 	    textview.setText(SegmentList.get(groupPosition).getSegmentMode() + ", " + SegmentList.get(groupPosition).getSegmentStartTime());
 	    textview.setChecked(isExpanded);
 	    ImageView imageView = (ImageView) convertView.findViewById(R.id.GroupImage);
-	   //textview.setBackgroundColor(Color.BLACK);
-
 	    
 	    
 	    if(mode == 0){
@@ -156,9 +157,42 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter{
 		  return waypoint_Views;
 	  }*/
 	  
-//		public void highlightCurrentWaypoint(){
+		//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
+	  public void highlightCurrentWaypoint(View convertView){
+//			
+//			    TextView text = null; 
 //		
-//	}
+			    //ArrayList<View> al = waypoint_Views.get(0);
+			  //  System.out.println("SIZEEE:" + segment_Views.size());
+			    
+			   // this.route.getSegmentList().get(1).getWaypointList().get(0);
+			    
+			    
+			    //segment_Views.get().findViewById(R.id.checkedTextView).setBackgroundColor(Color.CYAN);
+			    
+			    
+			    
+			    
+			    
+			    
+//			    View v = al.get(0);
+			    
+			   // TextView p = (TextView) this.waypoint_Views.get(1).get(1);
+//			    text = (TextView) p.findViewById(R.id.checkedTextView);
+			    //   p.setBackgroundColor(Color.CYAN);
+			    
+			    //text = (TextView) convertView.findViewById(R.id.checkedTextView);
+				 
+			    //text.setBackgroundColor(Color.CYAN); 
+		  
+
+		  
+		  	
+			    
+			    
+			    
+			
+	}
 	  
 	} 
 
