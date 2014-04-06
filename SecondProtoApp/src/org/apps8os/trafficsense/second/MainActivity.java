@@ -6,6 +6,7 @@ import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.OutputLogic;
 import org.apps8os.trafficsense.core.Route;
+import org.apps8os.trafficsense.core.RouteConstants;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
@@ -197,20 +198,43 @@ public class MainActivity extends Activity {
 
 		boolean zoomed = false;
 		// Get the image that will be used as the bus stop icon
-		int resID = getResources().getIdentifier("bus_stop_marker", "drawable",
-				getPackageName());
-		Bitmap icon = resizeIcon(resID);
+		int resID ;
+		Bitmap icon ;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
+		int indexInWaypoint ;		
+		
 		for (Segment s : r.getSegmentList()) {
 
-			/**
-			 * Do not draw walking segments because they have no GPS coordinates.
-			 */
-			if (s.isWalking()) {
-				continue;
-			}
+			indexInWaypoint = 1 ;
+//			/**
+//			 * Do not draw walking segments because they have no GPS coordinates.
+//			 */
+//			if (s.isWalking()) {
+//				continue;
+//			}
+//			
 			
-			int indexInSegment = 1;
+			/* metro and ferry is the same for English, Swedish and Finnish */
+			if (s.getSegmentMode().equals("metro")) {
+				 resID = getResources().getIdentifier("metro_orange_marker", "drawable",
+						getPackageName());
+				
+			} else	if (s.getSegmentMode().equals("ferry")) {
+				 resID = getResources().getIdentifier("ferry_yellow_marker", "drawable",
+							getPackageName());
+			} else	if(s.getSegmentMode().startsWith("Walking") || s.getSegmentMode().startsWith("Kävelyä") || s.getSegmentMode().startsWith("Gång")) {
+				 resID = getResources().getIdentifier("walking_pink_marker", "drawable",
+							getPackageName());
+			} else {
+				/**
+				 * Bus, tram and unknown 
+				 */
+				resID = getResources().getIdentifier("bus_blue_marker", "drawable",
+						getPackageName());
+			}	
+			icon = resizeIcon(resID);
+			
+		
 			
 			for (Waypoint w : s.getWaypointList()) {
 				
@@ -227,42 +251,82 @@ public class MainActivity extends Activity {
 				
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 
+				
+				
 				/**
-				 * Make a green marker for starting point and a red marker for end point.
+				 * Make a green marker for starting point and 
+				 * Red marker for end point
 				 */
-				if (s.getWaypoint(0).getWaypointName()
-						.equals(w.getWaypointName())) {
+				if(s.getWaypoint(0).getWaypointName().equals(r.getSegment(0).getWaypoint(0).getWaypointName())){
+					
 					// This waypoint is the start of the segment
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Departure on " + s.getSegmentMode() + ": "
-									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ indexInWaypoint + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 							);
-				} else if (s.getLastWaypoint().getWaypointName()
-						.equals(w.getWaypointName())) {
+				}else if (s.getLastWaypoint().getWaypointName().equals(r.getLastSegment().getLastWaypoint())){
+				
 					// This waypoint is the end of this segment.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Arrival on " + s.getSegmentMode() + ": "
-									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ indexInWaypoint + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 							);
-				} else {
+				}else {
 					// Intermediate points.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
-							.title(indexInSegment + "." + w.getWaypointName() + " ("
+							.title(indexInWaypoint + "." + w.getWaypointName() + " ("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 				}
 				
+				
+				
+//				
+//				/**
+//				 * Make a green marker for starting point and a red marker for end point.
+//				 */
+//				if (s.getWaypoint(0).getWaypointName()
+//						.equals(w.getWaypointName())) {
+//					// This waypoint is the start of the segment
+//					map.addMarker(new MarkerOptions()
+//							.position(coord)
+//							.title("Departure on " + s.getSegmentMode() + ": "
+//									+ indexInSegment + "." + w.getWaypointName() + "("
+//									+ w.getWaypointStopCode() + ")")
+//							.icon(BitmapDescriptorFactory
+//									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+//							);
+//				} else if (s.getLastWaypoint().getWaypointName()
+//						.equals(w.getWaypointName())) {
+//					// This waypoint is the end of this segment.
+//					map.addMarker(new MarkerOptions()
+//							.position(coord)
+//							.title("Arrival on " + s.getSegmentMode() + ": "
+//									+ indexInSegment + "." + w.getWaypointName() + "("
+//									+ w.getWaypointStopCode() + ")")
+//							.icon(BitmapDescriptorFactory
+//									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+//							);
+//				} else {
+//					// Intermediate points.
+//					map.addMarker(new MarkerOptions()
+//							.position(coord)
+//							.title(indexInSegment + "." + w.getWaypointName() + " ("
+//									+ w.getWaypointStopCode() + ")")
+//							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
+//				}
+				
 				o.add(coord);
-				indexInSegment++;
+				indexInWaypoint++;
 
 				if (zoomed == false) {
 					centerLocationOnMap(coord);
