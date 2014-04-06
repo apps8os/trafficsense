@@ -269,11 +269,21 @@ public class LocationOnlyService extends Service implements
 	@Override
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
 		System.out.println("DBG: geofence status code: " + statusCode);
-		// TODO: check other status codes
-		if (statusCode == LocationStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+		switch (statusCode) {
+		case LocationStatusCodes.SUCCESS:
+			break;
+		case LocationStatusCodes.GEOFENCE_NOT_AVAILABLE:
 			sendErrorAndExit("Error: likely some Android settings prevented usage");
-		} else if (statusCode != LocationStatusCodes.SUCCESS) {
-			sendErrorAndExit("Error adding GeoFences");
+			break;
+		case LocationStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
+			sendErrorAndExit("Error: too many GeoFences");
+			break;
+		case LocationStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
+			sendErrorAndExit("Error: too many PendingIntents");
+			break;
+		default:
+			sendErrorAndExit("Error: unknown GeoFence error");
+			break;
 		}
 
 		StringBuffer dbgBuf = new StringBuffer();
