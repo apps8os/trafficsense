@@ -120,28 +120,26 @@ public class JourneyInfoResolver {
 	 * @param language language code (Constants.LANG_*)
 	 * @return true on success.
 	 */
-	public boolean setLanguage(final int language) {
+	public synchronized boolean setLanguage(final int language) {
 		boolean success = true;
-		synchronized (this) {
-			switch (language) {
-			case Constants.LANG_EN:
-				mLang = language;
-				break;
-			case Constants.LANG_FI:
-				mLang = language;
-				break;
-			case Constants.LANG_SV:
-				mLang = language;
-				break;
-			default:
-				mLang = Constants.LANG_EN;
-				success = false;
-				break;
-			}
-			HSL_API_BASE_URL = HSL_API_BASE_URL_FIXED + "&lang="
-					+ HSL_API_LANG[mLang];
-			return success;
+		switch (language) {
+		case Constants.LANG_EN:
+			mLang = language;
+			break;
+		case Constants.LANG_FI:
+			mLang = language;
+			break;
+		case Constants.LANG_SV:
+			mLang = language;
+			break;
+		default:
+			mLang = Constants.LANG_EN;
+			success = false;
+			break;
 		}
+		HSL_API_BASE_URL = HSL_API_BASE_URL_FIXED + "&lang="
+				+ HSL_API_LANG[mLang];
+		return success;
 	}
 	
 	/**
@@ -154,18 +152,16 @@ public class JourneyInfoResolver {
 	 * @param journey the journey for which GPS coordinates shall be retrieved.
 	 * @throws JourneyInfoResolverException
 	 */
-	public void retrieveCoordinatesFromHsl(Route journey) {
-		synchronized (this) {
-			ArrayList<Segment> segments = journey.getSegmentList();
-			for (Segment segment : segments) {
-				lookupSegmentTransportType(segment);
-				ArrayList<Waypoint> waypoints = segment.getWaypointList();
-				for (Waypoint waypoint : waypoints) {
-					lookupWaypointCoordinate(waypoint);
-				}
+	public synchronized void retrieveCoordinatesFromHsl(Route journey) {
+		ArrayList<Segment> segments = journey.getSegmentList();
+		for (Segment segment : segments) {
+			lookupSegmentTransportType(segment);
+			ArrayList<Waypoint> waypoints = segment.getWaypointList();
+			for (Waypoint waypoint : waypoints) {
+				lookupWaypointCoordinate(waypoint);
 			}
-			journey.setCoordsReady(true);
 		}
+		journey.setCoordsReady(true);
 	}
 	
 	/**
