@@ -76,10 +76,6 @@ public class LocationOnlyService extends Service implements
 	/**
 	 * For callbacks from GeoFence. 
 	 */
-	//private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
-	/**
-	 * For callbacks from GeoFence. 
-	 */
 	private EnteredWaypointAlertReceiver mEnteredWaypointAlertReceiver;
 	/**
 	 * Did we encounter an error during onStartCommand().
