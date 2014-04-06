@@ -279,8 +279,7 @@ public class JourneyInfoResolver {
 			StatusLine statusLine = response.getStatusLine();
 			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 				response.getEntity().writeTo(mByteOutStream);
-				// TODO: Encoding
-				responseString = mByteOutStream.toString();
+				responseString = mByteOutStream.toString("UTF-8");
 			} else {
 				throw new JourneyInfoResolverException("HTTP status:"
 						+ statusLine.getStatusCode() + " : "
