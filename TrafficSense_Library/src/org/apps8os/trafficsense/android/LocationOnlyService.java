@@ -15,6 +15,7 @@ import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailed
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
 import com.google.android.gms.location.LocationStatusCodes;
 
 import android.app.Notification;
@@ -37,7 +38,8 @@ import android.os.Vibrator;
 public class LocationOnlyService extends Service implements 
 		ConnectionCallbacks,
 		OnConnectionFailedListener,
-		OnAddGeofencesResultListener{
+		OnAddGeofencesResultListener,
+		OnRemoveGeofencesResultListener {
 
 	/**
 	 * The TrafficSense service container. 
@@ -56,6 +58,10 @@ public class LocationOnlyService extends Service implements
 	 */
 	private Geofence mNextBusStopGeofence;
 	/**
+	 * PendingIntent for GeoFence.
+	 */
+	private PendingIntent mGeofencePendingIntent;
+	/**
 	 * Google Location Service client instance.
 	 */
 	private LocationClient mLocationClient;
@@ -70,7 +76,7 @@ public class LocationOnlyService extends Service implements
 	/**
 	 * For callbacks from GeoFence. 
 	 */
-	private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
+	//private LocationClient.OnAddGeofencesResultListener mOnAddGeofencesListener;
 	/**
 	 * For callbacks from GeoFence. 
 	 */
@@ -97,10 +103,11 @@ public class LocationOnlyService extends Service implements
 		mRoute = mContainer.getRoute();
 		mLocationClient=new LocationClient(this, this, this);
 		mEnteredWaypointAlertReceiver = new EnteredWaypointAlertReceiver();
-		/**
-		 * This class provides onAddGeofenceListener() as well.
-		 */
-		mOnAddGeofencesListener = this;
+
+		Intent i = new Intent();
+		i.setAction(Constants.ACTION_NEXT_GEOFENCE_REACHED);
+		mGeofencePendingIntent = PendingIntent.getBroadcast(mContext, 1, i, 
+				PendingIntent.FLAG_UPDATE_CURRENT);
 
 		errorOnStart = false;
 	}
@@ -156,12 +163,17 @@ public class LocationOnlyService extends Service implements
 		super.onDestroy();
 
 		if (errorOnStart == false) {
-			// remove any notifications
+			// Remove notifications
 			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			mNotificationManager.cancel(Constants.NOTIFICATION_ID);
-			// need to unregister receivers
+			// Unregister broadcast receivers
 			unregisterReceiver(mEnteredWaypointAlertReceiver);
-			// tell anyone listening that the route has ended
+			/**
+			 *  Remove GeoFences.
+			 *  LocationOnlyService implements OnRemoveGeofencesResultListener.
+			 */
+			mLocationClient.removeGeofences(mGeofencePendingIntent, this);
+			// Tell anyone listening that the route has ended
 			Intent vi = new Intent();
 			vi.putExtra(Constants.ROUTE_STOPPED, "");
 			vi.setAction(Constants.ACTION_ROUTE_EVENT);
@@ -178,14 +190,12 @@ public class LocationOnlyService extends Service implements
 	 * @param list list of GeoFences to be added
 	 */
 	private void addGeofence(ArrayList<Geofence> list){
-		Intent i = new Intent();
-		i.setAction(Constants.ACTION_NEXT_GEOFENCE_REACHED);
-		PendingIntent pi = PendingIntent.getBroadcast(mContext, 1, i, 
-				PendingIntent.FLAG_CANCEL_CURRENT);
+		
 		// If the location client is connected send the request
 		if(mLocationClient.isConnected()){
 			System.out.println("DBG adding geofence list");
-			mLocationClient.addGeofences(list, pi, mOnAddGeofencesListener);
+			// LocationOnlyService implements OnAddGeofencesResultListener.
+			mLocationClient.addGeofences(list, mGeofencePendingIntent, this);
 		}
 	}
 	
@@ -328,8 +338,10 @@ public class LocationOnlyService extends Service implements
 			}
 			Geofence curGeofence = LocationClient.getTriggeringGeofences(arg1)
 					.get(0);
-			// get the id of the geofence that triggered the alert and increment
-			// it to get the next index
+			/**
+			 * Get the id of the GeoFence that triggered the alert and
+			 * increment it to get the next index.
+			 */
 			String id = curGeofence.getRequestId();
 			String parts[] = id.split(",");
 			mRouteSegmentIndex = Integer.parseInt(parts[0]);
@@ -355,7 +367,7 @@ public class LocationOnlyService extends Service implements
 					mRouteSegmentIndex = -1;
 					mSegmentWaypointIndex = -1;
 					mRoute.setJourneyEnded(true);
-					// inform clients that waypoint has changed
+					// Inform clients that waypoint has changed
 					((LocationOnlyService) mContext).sendNextWaypointIntent("");
 					// Stop the service.
 					((LocationOnlyService) mContext).stopSelf();
@@ -369,7 +381,7 @@ public class LocationOnlyService extends Service implements
 			// Update the pebble UI
 			mContainer.getPebbleUiController().update();
 
-			// inform clients that the next waypoint has changed.
+			// Inform clients that the next waypoint has changed.
 			if (nextWaypoint.getWaypointName() != null)
 				System.out.println("DBG Next position is "
 						+ nextWaypoint.getWaypointName());
@@ -428,7 +440,7 @@ public class LocationOnlyService extends Service implements
 		NotificationManager mNotificationManager =(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mNotificationManager.notify(Constants.NOTIFICATION_ID, notification);
 		
-		//vibrate if user needs to get off at next waypoint
+		// Vibrate if user needs to get off at next waypoint.
 		Segment curSegment = mRoute.getCurrentSegment();
 		int curWaypointIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		List<Waypoint> waypointList = mRoute.getCurrentSegment().getWaypointList();
@@ -457,6 +469,35 @@ public class LocationOnlyService extends Service implements
 		vi.setAction(Constants.ACTION_ROUTE_EVENT);
 		sendBroadcast(vi);
 		stopSelf();
+	}
+
+	/**
+	 * Handle results of GeoFences' removal by PendingIntent.
+	 */
+	@Override
+	public void onRemoveGeofencesByPendingIntentResult(int statusCode,
+			PendingIntent pendingIntent) {
+		switch (statusCode) {
+		case LocationStatusCodes.SUCCESS:
+			System.out.println("DBG LocationOnlyService GeoFences removed");
+			break;
+		case LocationStatusCodes.GEOFENCE_NOT_AVAILABLE:
+			System.out.println("DBG LocationOnlyService GeoFence remove status: NOT_AVAILABLE");
+			break;
+		case LocationStatusCodes.ERROR:
+			System.out.println("DBG LocationOnlyService GeoFence remove status: ERROR");
+			break;
+		}
+	}
+
+	/**
+	 * Unused.
+	 * @throws RuntimeException if called.
+	 */
+	@Override
+	public void onRemoveGeofencesByRequestIdsResult(int statusCode,
+			String[] geofenceRequestIds) {
+		throw new RuntimeException("LocationOnlyService.onRemoveGeofencesByRequestIdsResult called ?!");
 	}
 
 }
