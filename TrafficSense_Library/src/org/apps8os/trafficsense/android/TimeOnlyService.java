@@ -125,7 +125,7 @@ public class TimeOnlyService extends Service {
 					Constants.ACTION_GET_OFF));
 
 			// Get the time of the first waypoint
-			long timeToNextWaypoint = mRoute.getFirstWaypointTime();
+			long timeToNextWaypoint = mRoute.getFirstWaypointTime().getTime();
 			scheduleNextAlarm(timeToNextWaypoint);
 		}
 
@@ -164,6 +164,7 @@ public class TimeOnlyService extends Service {
 	 * @param atMillis time in milliseconds that the alarm should go off.
 	 */
 	private void scheduleNextAlarm(long atMillis) {
+		System.out.println("DBG scheduleNextAlarm atMillis: "+atMillis);
 		if (Constants.useWallClock == true) {
 			mAM.set(AlarmManager.RTC_WAKEUP, atMillis, mNextWaypointIntent);
 		} else {
@@ -231,12 +232,11 @@ public class TimeOnlyService extends Service {
 							.size() - 2;
 					long timeToAlarm = 0;
 					if (Constants.useWallClock == true) {
-						timeToAlarm = TimeParser.strDateTimeToDate(
-								mRoute.getDate()
-										+ " "
-										+ nextSegment.getWaypointList()
+						// Add 1 day automatically if we crossed midnight.
+						timeToAlarm = TimeParser.strWaypointTimeToMillisCrossDay(
+								mRoute, nextSegment.getWaypointList()
 												.get(secondLastWpIndex)
-												.getWaypointTime()).getTime();
+												.getWaypointTime());
 					} else {
 						timeToAlarm = (secondLastWpIndex + 1)
 								* Constants.TEST_TIME
@@ -250,10 +250,10 @@ public class TimeOnlyService extends Service {
 			}
 			
 			if (nextWaypoint != null) {
+				// Add 1 day automatically if we crossed midnight.
 				long timeToNextWaypoint = TimeParser
-						.strDateTimeToDate(mRoute.getDate() + " "
-									+ nextWaypoint.getWaypointTime())
-						.getTime();
+						.strWaypointTimeToMillisCrossDay(mRoute,
+									nextWaypoint.getWaypointTime());
 				scheduleNextAlarm(timeToNextWaypoint);
 				message += "Next waypoint is: "+ nextWaypoint.getWaypointName();
 			} else {

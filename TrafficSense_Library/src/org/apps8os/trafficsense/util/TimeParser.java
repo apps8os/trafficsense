@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apps8os.trafficsense.TrafficsenseContainer;
+import org.apps8os.trafficsense.core.Route;
+
 /**
  * Utility class holding various time string parsers.
  */
@@ -13,6 +16,35 @@ public class TimeParser {
 	 * No instantiation of this class.
 	 */
 	private TimeParser() {}
+
+	/**
+	 * Parse a given time string and adds one day if it is in the past.
+	 * Used to parse Time/Date from an Reittiopas journey which may cross midnight.
+	 * Supports English, Swedish, and Finnish journey text from Reittiopas.
+	 * 
+	 * MUST only be called when tracking a journey.
+	 * 
+	 * Detect midnight crossing by comparing the given time against the starting
+	 * time of the first waypoint in route.
+	 * 
+	 * @param route the journey we are tracking.
+	 * @param timeStr date-time string.
+	 * @return number of milliseconds since epoch.
+	 * @throws TimeParserException
+	 */
+	public static long strWaypointTimeToMillisCrossDay(Route route, String timeStr)
+			throws TimeParserException {
+		System.out.println("DBG ToMillisCrossDay str: "+timeStr);
+		Date parsed = strDateTimeToDate(route.getDate() + " " + timeStr);
+		long result = parsed.getTime();
+		System.out.println("DBG ToMillisCrossDay parsed: "+result);
+		if (parsed.before(route.getFirstWaypointTime())) {
+			System.out.println("DBG ToMillisCrossDay crossed midnight, adjusting");
+			result += 86400000;
+		}
+		System.out.println("DBG ToMillisCrossDay: result "+result+" : "+new Date(result).toString());
+		return result;
+	}
 
 	/**
 	 * Parse a given date-time string.
@@ -51,7 +83,7 @@ public class TimeParser {
 		try {
 			Date result = new SimpleDateFormat("EEEE dd.M.yyyy kk:mm", locale)
 					.parse(timeStr);
-			System.out.println("DBG strDateTimeToDate: " +timeStr +"->"+ result.toString());
+			//System.out.println("DBG strDateTimeToDate: " +timeStr +"->"+ result.toString());
 			return result;
 		} catch (ParseException e) {
 			/**

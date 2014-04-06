@@ -1,6 +1,7 @@
 package org.apps8os.trafficsense.core;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.util.TimeParser;
@@ -329,17 +330,12 @@ public class Route {
 	/**
 	 * Get the starting time of the first waypoint in the journey.
 	 * 
-	 * @return the time in milliseconds since epoch, or TEST_TIME after current time if Constants.useWallClock is false.
+	 * @return starting time of the first waypoint.
 	 */
-	public long getFirstWaypointTime() {
-		if (Constants.useWallClock == false) {
-			return Constants.TEST_TIME + System.currentTimeMillis();
-		}
-		// Get the time of the first waypoint
+	public Date getFirstWaypointTime() {
 		return TimeParser.strDateTimeToDate(
 				mDate + " " +
-				mSegmentList.get(0).getWaypointList().get(0).getWaypointTime())
-				.getTime();
+				mSegmentList.get(0).getWaypointList().get(0).getWaypointTime());
 	}
 
 }
