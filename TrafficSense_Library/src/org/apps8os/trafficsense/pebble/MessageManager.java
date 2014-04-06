@@ -79,22 +79,20 @@ public class MessageManager implements Runnable {
     private void consumeAsync() {
     	messageHandler.post(new Runnable() {
     		@Override
-    		public void run() {
-    			synchronized (this) {
-    				if (isMessagePending.booleanValue()) {
-    					return;
-    				}
-    				if (messageQueue.size() == 0) {
-    					return;
-    				}
-    				
-    				// DBG stuff
-    				long command = messageQueue.peek().getUnsignedInteger(0);
-    				System.out.println("DBG MessageManager sent dict to pebble with command " + command);
-    				
-    				PebbleKit.sendDataToPebble(mContext.getApplicationContext(), mUUID, messageQueue.peek());
-    				isMessagePending = Boolean.valueOf(true);
+    		public synchronized void run() {
+    			if (isMessagePending.booleanValue()) {
+    				return;
     			}
+    			if (messageQueue.size() == 0) {
+    				return;
+    			}
+
+    			// DBG stuff
+    			long command = messageQueue.peek().getUnsignedInteger(0);
+    			System.out.println("DBG MessageManager sent dict to pebble with command " + command);
+
+    			PebbleKit.sendDataToPebble(mContext.getApplicationContext(), mUUID, messageQueue.peek());
+    			isMessagePending = Boolean.valueOf(true);
     		}
     	});
     }
@@ -105,21 +103,19 @@ public class MessageManager implements Runnable {
      * @param transactionId Pebble communication transaction ID.
      */
     public void notifyAckReceivedAsync(final int transactionId) {
-        messageHandler.post(new Runnable() {
-            @Override
-            public void run() {
-            	synchronized (this) {
-            		isMessagePending = Boolean.valueOf(false);
-            		System.out.println("DBG MessageManager Received ack from command: " + messageQueue.peek().getUnsignedInteger(0));
-            		// Check this because there might be fragmentation.
-            		if (messageQueue.isEmpty() == false)
-            		{
-            			messageQueue.remove();
-            		}
-            	}
-            }
-        });
-        consumeAsync();
+    	messageHandler.post(new Runnable() {
+    		@Override
+    		public synchronized void run() {
+    			isMessagePending = Boolean.valueOf(false);
+    			System.out.println("DBG MessageManager Received ack from command: " + messageQueue.peek().getUnsignedInteger(0));
+    			// Check this because there might be fragmentation.
+    			if (messageQueue.isEmpty() == false)
+    			{
+    				messageQueue.remove();
+    			}
+    		}
+    	});
+    	consumeAsync();
     }
 
     /**
@@ -130,10 +126,8 @@ public class MessageManager implements Runnable {
     public void notifyNackReceivedAsync(final int transactionId) {
         messageHandler.post(new Runnable() {
             @Override
-            public void run() {
-            	synchronized (this) {
-            		isMessagePending = Boolean.valueOf(false);
-            	}
+            public synchronized void run() {
+            	isMessagePending = Boolean.valueOf(false);
             }
         });
         consumeAsync();
