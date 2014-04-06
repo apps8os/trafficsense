@@ -171,10 +171,8 @@ public class Segment {
 	 * 
 	 * @return the travel mode of this segment.
 	 */
-	public String getSegmentMode() {
-		synchronized (this) {
-			return mode;
-		}
+	public synchronized String getSegmentMode() {
+		return mode;
 	}
 
 	/**
@@ -183,11 +181,9 @@ public class Segment {
 	 * @param newMode the travel mode of this segment.
 	 * @return the travel mode of this segment.
 	 */
-	public String setSegmentMode(String newMode) {
-		synchronized (this) {
-			mode = newMode;
-			return mode;
-		}
+	public synchronized String setSegmentMode(String newMode) {
+		mode = newMode;
+		return mode;
 	}
 
 	/**
@@ -223,25 +219,23 @@ public class Segment {
 	 * 
 	 * @param segment JSON object of a segment.
 	 */
-	public void setSegment(JsonObject segment) {
+	public synchronized void setSegment(JsonObject segment) {
 		setSegmentStartTime(segment.get("startTime").getAsString());
 		setSegmentStartPoint(segment.get("startPoint").getAsString());
 		setSegmentMode(segment.get("mode").getAsString());
-		synchronized (this) {
-			// metro/ferry is the same for English, Swedisn, and Finnish
-			if (mode.equals("metro")) {
-				transportType = RouteConstants.METRO;
-			} else	if (mode.equals("ferry")) {
-				transportType = RouteConstants.FERRY;
-			} else	if(mode.startsWith("Walking") || mode.startsWith("Kävelyä") || mode.startsWith("Gång")) {
-				isWalking = true;
-				transportType = RouteConstants.WALKING;
-			} else {
-				/**
-				 * Other types are resolved later by JourneyInfoResolver.
-				 */
-				transportType = RouteConstants.UNKNOWN;
-			}
+		// metro/ferry is the same for English, Swedisn, and Finnish
+		if (mode.equals("metro")) {
+			transportType = RouteConstants.METRO;
+		} else	if (mode.equals("ferry")) {
+			transportType = RouteConstants.FERRY;
+		} else	if(mode.startsWith("Walking") || mode.startsWith("Kävelyä") || mode.startsWith("Gång")) {
+			isWalking = true;
+			transportType = RouteConstants.WALKING;
+		} else {
+			/**
+			 * Other types are resolved later by JourneyInfoResolver.
+			 */
+			transportType = RouteConstants.UNKNOWN;
 		}
 
 		JsonArray waypoints = segment.get("waypoints").getAsJsonArray();
@@ -259,10 +253,8 @@ public class Segment {
 	 * 
 	 * @param type the type of transportation of this segment.
 	 */
-	public void setSegmentType(int type) {
-		synchronized (this) {
-			transportType = type;
-		}
+	public synchronized void setSegmentType(int type) {
+		transportType = type;
 	}
 
 	/**
@@ -270,10 +262,8 @@ public class Segment {
 	 * 
 	 * @return the type of transportation of this segment.
 	 */
-	public int getSegmentType() {
-		synchronized (this) {
-			return transportType;
-		}
+	public synchronized int getSegmentType() {
+		return transportType;
 	}
 
 }
