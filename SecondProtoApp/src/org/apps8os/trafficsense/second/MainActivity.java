@@ -33,8 +33,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.google.android.gms.location.LocationStatusCodes;
-
 
 public class MainActivity extends Activity {
 
