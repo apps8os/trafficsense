@@ -130,12 +130,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		case RouteConstants.FERRY:
 			imageView.setImageResource(R.drawable.ferry_icon_small);
 			break;
+		case RouteConstants.CONMUTER_TRAINS:
 		case RouteConstants.TRAMS:
 			imageView.setImageResource(R.drawable.tram_icon_small);
 			break;
-		case RouteConstants.CONMUTER_TRAINS:
-			break;
 		case RouteConstants.METRO:
+			imageView.setImageResource(R.drawable.metro_icon_small);
 			break;
 		default:
 			imageView.setImageResource(R.drawable.bus_icon_small);
