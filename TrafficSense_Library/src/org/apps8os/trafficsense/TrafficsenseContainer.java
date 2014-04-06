@@ -429,6 +429,9 @@ public class TrafficsenseContainer {
 		case Constants.SERVICE_LOCATION_ONLY:
 			serviceIntent = new Intent(mContext, LocationOnlyService.class);
 			break;
+		/**
+		 * TODO: add some code here if a new Service is introduced.
+		 */
 		default:
 			throw new InvalidParameterException("invalid serviceType");
 		}

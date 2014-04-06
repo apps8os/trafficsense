@@ -37,7 +37,7 @@ import android.os.Vibrator;
 /**
  * This service tracks a journey using both location and time information.
  * 
- * @deprecated This has not been fully tested yet.
+ * @deprecated this WILL NOT work in its current state.
  */
 public class LocationAndTimeService extends Service implements	
 	ConnectionCallbacks,OnConnectionFailedListener,OnAddGeofencesResultListener{
