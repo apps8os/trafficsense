@@ -157,7 +157,7 @@ public class PebbleUiController {
 		//int newSegmentIndex = mRoute.getCurrentIndex();
 		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		Segment newSegment = mRoute.getCurrentSegment();
-		if (newWpIndex == newSegment.getWaypointList().size() - 2) {
+		if (newWpIndex == newSegment.getWaypointList().size() - 1) {
 			/**
 			 * If we are at the second last waypoint, send the alarm.
 			 * TODO: start a timer and do the alarm a little later to avoid confusion for the user

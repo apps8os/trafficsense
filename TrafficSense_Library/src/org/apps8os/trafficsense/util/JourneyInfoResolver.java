@@ -279,8 +279,7 @@ public class JourneyInfoResolver {
 			StatusLine statusLine = response.getStatusLine();
 			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 				response.getEntity().writeTo(mByteOutStream);
-				// TODO: Encoding
-				responseString = mByteOutStream.toString();
+				responseString = mByteOutStream.toString("UTF-8");
 			} else {
 				throw new JourneyInfoResolverException("HTTP status:"
 						+ statusLine.getStatusCode() + " : "
@@ -334,16 +333,27 @@ public class JourneyInfoResolver {
 		return url;
 	}
 	
-	private String buildGetGeocodingUrl(String responseLimit,
-			String locType, String key) {
+	/**
+	 * Builds the URL to query HSL API for Geocoding.
+	 * 
+	 * Does not support specifying certain city(ies) in HSL region.
+	 * 
+	 * @param responseLimit response field filter.
+	 * @param locType location type. default: stop|address
+	 * @param key search key.
+	 * @return the URL.
+	 * @throws JourneyInfoResolverException on encoding errors.
+	 */
+	private String buildGetGeocodingUrl(String responseLimit, String locType,
+			String key) throws JourneyInfoResolverException {
 		if (locType.isEmpty()) {
 			locType = "stop|address";
 		}
 		String url;
 		try {
-			url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types=" +
-		URLEncoder.encode(locType, "UTF-8")
-				+ "&p=" + responseLimit + "&key=" + key;
+			url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types="
+					+ URLEncoder.encode(locType, "UTF-8") + "&p="
+					+ responseLimit + "&key=" + URLEncoder.encode(key, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new JourneyInfoResolverException(e.getMessage());
 		}
