@@ -185,12 +185,10 @@ public class TrafficsenseContainer {
 	 * 
 	 * @param ctx the Context to be associated.
 	 */
-	public void activityAttach(Context ctx) {
+	public synchronized void activityAttach(Context ctx) {
 		boolean fDoInit = false;
-		synchronized (this) {
-			fDoInit = shouldInit();
-			mAttachedActivities ++;
-		}
+		fDoInit = shouldInit();
+		mAttachedActivities ++;
 		if (fDoInit == true) {
 			open(ctx);
 		}
@@ -201,13 +199,11 @@ public class TrafficsenseContainer {
 	 * Should be invoked in onPause().
 	 * Release resources if there is no one else attached.
 	 */
-	public void activityDetach() {
+	public synchronized void activityDetach() {
 		boolean fIsLast = false;
 		System.out.println("DBG activityDetach");
-		synchronized (this) {
-			mAttachedActivities --;
-			fIsLast = isLast();
-		}
+		mAttachedActivities --;
+		fIsLast = isLast();
 		if (fIsLast == true) {
 			close();
 		}
@@ -223,20 +219,18 @@ public class TrafficsenseContainer {
 	 * @param ctx (currently unused).
 	 * @return true if successfully attached.
 	 */
-	public boolean serviceAttach(Context ctx) {
+	public synchronized boolean serviceAttach(Context ctx) {
 		boolean fDoInit = false;
-		synchronized (this) {
-			fDoInit = shouldInit();
-			if (fDoInit == true) {
-				System.out.println("DBG serviceAttach no activity?");
-				return false;
-			}
-			if (mRunningServices != 0) {
-				System.out.println("DBG serviceAttach multiple services?");
-				return false;
-			}
-			mRunningServices ++;
+		fDoInit = shouldInit();
+		if (fDoInit == true) {
+			System.out.println("DBG serviceAttach no activity?");
+			return false;
 		}
+		if (mRunningServices != 0) {
+			System.out.println("DBG serviceAttach multiple services?");
+			return false;
+		}
+		mRunningServices ++;
 		return true;
 	}
 	
@@ -245,13 +239,11 @@ public class TrafficsenseContainer {
 	 * Should be invoked in onDestroy().
 	 * Release resources if there is no one else attached.
 	 */
-	public void serviceDetach() {
+	public synchronized void serviceDetach() {
 		boolean fIsLast = false;
 		System.out.println("DBG serviceDetach");
-		synchronized (this) {
-			mRunningServices --;
-			fIsLast = isLast();
-		}
+		mRunningServices --;
+		fIsLast = isLast();
 		if (fIsLast == true) {
 			close();
 		}
@@ -262,11 +254,9 @@ public class TrafficsenseContainer {
 	 * 
 	 * @return true if at least one journey tracker service is active.
 	 */
-	public boolean isJourneyStarted() {
-		synchronized (this) {
-			if (mRunningServices > 0) {
-				return true;
-			}
+	public synchronized boolean isJourneyStarted() {
+		if (mRunningServices > 0) {
+			return true;
 		}
 		return false;
 	}
@@ -275,12 +265,10 @@ public class TrafficsenseContainer {
 	 * Stops all running tracker services.
 	 * Does not reset current progress in mRoute.
 	 */
-	public void stopJourney() {
+	public synchronized void stopJourney() {
 		Intent serviceIntent;
-		synchronized (this) {
-			if (mRunningServices == 0) {
-				return;
-			}
+		if (mRunningServices == 0) {
+			return;
 		}
 		serviceIntent = new Intent(mContext, TimeOnlyService.class);
 		mContext.stopService(serviceIntent);
