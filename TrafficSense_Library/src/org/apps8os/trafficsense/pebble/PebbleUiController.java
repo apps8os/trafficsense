@@ -226,8 +226,15 @@ public class PebbleUiController {
 		mPblCom.initializeSegment(segmentMode, stopName, stopCode, hours, minutes, seconds);
 		// Send the stops
 		updateList(currentSegment);
+		
+		// TODO: test this
+		long wpMillis = TimeParser.strWaypointTimeToMillisCrossDay(mRoute, currentSegment.getSegmentStartTime());
+		String currentTimeStr = currentDate.toString(); // Not sure if in correct form kk:mm
+		long currentMillis = TimeParser.strWaypointTimeToMillisCrossDay(mRoute, currentTimeStr);
+		
+		
 		// If the segment start time has already passed, switch to the 3stop screen
-		if (segmentStart.before(currentDate)) {
+		if (wpMillis < currentMillis) {
 			mPblCom.switchTo3stopScreen();
 		}
 	}
