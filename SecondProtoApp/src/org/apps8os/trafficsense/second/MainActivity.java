@@ -213,23 +213,19 @@ public class MainActivity extends Activity {
 //			
 			
 			/* metro and ferry is the same for English, Swedish and Finnish */
-			if (s.getSegmentMode().equals("metro")) {
-				 resID = getResources().getIdentifier("metro_orange_marker", "drawable",
-						getPackageName());
-				
-			} else	if (s.getSegmentMode().equals("ferry")) {
-				 resID = getResources().getIdentifier("ferry_yellow_marker", "drawable",
-							getPackageName());
-			} else	if(s.getSegmentMode().startsWith("Walking") || s.getSegmentMode().startsWith("Kävelyä") || s.getSegmentMode().startsWith("Gång")) {
-				 resID = getResources().getIdentifier("walking_pink_marker", "drawable",
-							getPackageName());
-			} else {
-				/**
-				 * Bus, tram and unknown 
-				 */
-				resID = getResources().getIdentifier("bus_blue_marker", "drawable",
-						getPackageName());
-			}	
+			
+			switch(s.getSegmentType()){
+			
+			case -1 : resID = getResources().getIdentifier(" unknown_black_marker", "drawable",getPackageName());break;
+			case 0 : resID = getResources().getIdentifier("walking_pink_marker", "drawable",getPackageName());break;
+			case 2 : resID = getResources().getIdentifier("tram_yellow_marker", "drawable",getPackageName());break;
+			case 6 : resID = getResources().getIdentifier("metro_orange_marker", "drawable",getPackageName());break;
+			case 7 : resID = getResources().getIdentifier("ferry_gray_marker", "drawable",getPackageName()); break;
+			case 8 : resID = getResources().getIdentifier("train_brown_marker", "drawable",getPackageName()); break;
+			case 12 : resID = getResources().getIdentifier("train_brown_marker", "drawable",getPackageName()); break;
+			default : resID = getResources().getIdentifier("bus_blue_marker", "drawable",getPackageName()); break;
+			}
+			
 			icon = resizeIcon(resID);
 			
 		

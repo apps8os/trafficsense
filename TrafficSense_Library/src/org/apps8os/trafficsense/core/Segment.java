@@ -22,7 +22,7 @@ public class Segment {
 	 */
 	private String startPoint;
 	/**
-	 * The mode of ths segment.
+	 * The mode of the segment.
 	 */
 	private String mode;
 	/**
