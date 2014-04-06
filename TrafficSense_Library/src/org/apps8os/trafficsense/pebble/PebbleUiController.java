@@ -18,11 +18,25 @@ public class PebbleUiController {
 	private static final int WINDOW_3STOP = 1;
 	*/
 	
+	/**
+	 * Pebble communication handler.
+	 */
 	private PebbleCommunication mPblCom;
+	/**
+	 * The route we are tracking.
+	 */
 	private Route mRoute;
-	// Store the last segment and wp indices sent to Pebble
+	/**
+	 * Index to the last Segment sent to Pebble.
+	 */
 	private int mLastSegmentIndex;
+	/**
+	 * Index to the last Waypoint sent to Pebble.
+	 */
 	private int mLastWpIndex;
+	/**
+	 * Is there any non-walking Segment left?
+	 */
 	private boolean mNoNonWalkingSegmentsLeft = false;
 	
 
@@ -55,10 +69,14 @@ public class PebbleUiController {
 		Segment newSegment = mRoute.getSegmentList().get(newSegmentIndex);
 		Waypoint newWaypoint = newSegment.getCurrentWaypoint();
 		
-		if (newSegmentIndex == mLastSegmentIndex) { //Still on the same segment
-			// If we didn't jump over any stops, add the next wp to list. Else, update the whole list.
+		if (newSegmentIndex == mLastSegmentIndex) {
+			// We are still on the same segment
+			/**
+			 * If we did not jump over any stops, add the next waypoint to list.
+			 * Otherwise, update the whole list.
+			 */
 			if (newWaypoint == newSegment.getLastWaypoint()) {
-				// If we are already on the last waypoint, initialize the new segment
+				// If we are already on the last waypoint, initialize the next segment.
 				int newerSegmentIndex = getFirstNonWalkingSegmentIndex(newSegmentIndex + 1);
 				if (newerSegmentIndex != -1) {
 					initializeSegment(newerSegmentIndex);
@@ -69,7 +87,7 @@ public class PebbleUiController {
 				alarmIfNeeded();
 				addWpToList();
 			} else if (newWpIndex != mLastWpIndex) {
-				// We've jumped over a wp, so update the whole list
+				// We jumped over some waypoint(s), update the whole list.
 				alarmIfNeeded();
 				updateList(newSegment);
 				mPblCom.switchTo3stopScreen();
@@ -77,17 +95,24 @@ public class PebbleUiController {
 		} else if (newSegmentIndex > mLastSegmentIndex) {
 			// Segment has changed
 			if (newWpIndex < 2 || newSegment.isWalking()) {
-				// We are on the first waypoint (or on a walking segment), so initialize the segment
+				/**
+				 * We are on the first waypoint (or on a walking segment),
+				 * so initialize the segment.
+				 */
 				initializeSegment(newSegmentIndex);
 			} else {
-				/* Segment changed, but we've jumped over it's first waypoint,
-				 * so don't use initializeSegment
+				/**
+				 * Segment changed, but we jumped over its first waypoint,
+				 * so do not use initializeSegment.
 				 */
 				updateList(newSegment);
 				mPblCom.switchTo3stopScreen();
 			}
 		}
-		// Update the segment indices before returning. Don't return from this method before this except at the start!
+		/**
+		 * Update the segment indices before returning.
+		 * Do not return from this method before this except at the start!
+		 */
 		mLastSegmentIndex = newSegmentIndex;
 		mLastWpIndex = newWpIndex;
 	}
@@ -115,7 +140,10 @@ public class PebbleUiController {
 		for (int i = currentIndex; i < mRoute.getSegmentList().size(); i++) {
 			Segment seg = mRoute.getSegment(i);
 			if (seg.isWalking() == false) {
-				// When the first non-walking segment is found, initialize it on Pebble and stop the loop
+				/**
+				 * When the first non-walking segment is found,
+				 * initialize it on Pebble and stop the loop.
+				 */
 				return i;
 			}
 		}
@@ -130,68 +158,73 @@ public class PebbleUiController {
 		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		Segment newSegment = mRoute.getCurrentSegment();
 		if (newWpIndex == newSegment.getWaypointList().size() - 2) {
-			// If we are at the second last wp, send the alarm
-			// TODO: start a timer and do the alarm a little later to avoid confusion for the user
+			/**
+			 * If we are at the second last waypoint, send the alarm.
+			 * TODO: start a timer and do the alarm a little later to avoid confusion for the user
+			 */
 			alarmGetOff();
 		}
 	}
 	
 	/**
-	 * Initializes segment-related values on pebble.
+	 * Initializes segment-related values on Pebble.
 	 * This includes the stops that need to be shown initially.
 	 * Also shows the screen that tells how many minutes until the vehicles comes.
 	 * Should be only used when we are at the first waypoint of a non-walking segment.
 	 */
 	private void initializeSegment(int segmentIndex) {
+		/**
+		 * Find the first non-walking segment.
+		 * We do not care about leading walking segments.
+		 */
 		Segment currentSegment = null;
-		// Find the first non-walking segment (don't care about walking segments)
 		for (int i = segmentIndex; i < mRoute.getSegmentList().size(); i++) {
 			Segment seg = mRoute.getSegmentList().get(i);
 			if (seg.isWalking() == false) {
-				// When the first non-walking segment is found, initialize it on Pebble and stop the loop
+				/**
+				 * When the first non-walking segment is found,
+				 * initialize it on Pebble and stop the loop.
+				 */
 				currentSegment = seg;
 				break;
 			}
 		}
-		// Nothing to do if there is no non-walking segment left.
-		if (currentSegment == null) return;
-		
-		String segmentMode = currentSegment.getSegmentMode();
-		
-		// do things to get the seconds of minute, minute of hour and hour of day
-		System.out.println("DBG segment time: " + currentSegment.getSegmentStartTime());
-		Date segmentStart = TimeParser.strTimeToDate(currentSegment.getSegmentStartTime());
-		
-		Date currentDate = new Date(); // Current time
-		Calendar currentDateCal = Calendar.getInstance();
-		currentDateCal.setTime(currentDate);
-		
-		// Check if the route has already started
-		if (segmentStart == null) System.out.println("DBG Date segmentStart is null");
-		
-		Calendar cal = Calendar.getInstance();
-		if (cal == null) {
-			System.out.println("DBG Calendar cal is null");
-		}
-		cal.setTime(segmentStart);
-		
-		long diffMs = cal.getTimeInMillis() - currentDateCal.getTimeInMillis();
-		long diffHours = diffMs / 1000 / 3600;
-		if (diffHours > 23) {
-			// Don't send anything to pebble if the route starts after 24h because pebble app can't handle that
-			System.out.println("DBG PebbleUiController segment start time was over 23h after current time");
+		if (currentSegment == null) {
+			// Nothing to do if there is no non-walking segment left.
 			return;
 		}
 		
+		String segmentMode = currentSegment.getSegmentMode();
+		System.out.println("DBG initializeSegment time: " + currentSegment.getSegmentStartTime());
+		Date segmentStart = TimeParser.strTimeToDate(currentSegment.getSegmentStartTime());
+		if (segmentStart == null) {
+			System.out.println("DBG initializeSegment unable to get segment start time");
+		}
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(segmentStart);
+		Date currentDate = new Date(); // Current time
+		Calendar currentDateCal = Calendar.getInstance();
+		currentDateCal.setTime(currentDate);
+		long diffMs = cal.getTimeInMillis() - currentDateCal.getTimeInMillis();
+		long diffHours = diffMs / 1000 / 3600;
+		if (diffHours > 23) {
+			/**
+			 * Send nothing to Pebble if the route starts after 23h because
+			 * our Pebble application is unable to handle that. (TODO)
+			 */
+			System.out.println("DBG PebbleUiController segment starts more than 23h later");
+			return;
+		}
 		
+		// Get the seconds of minute, minute of hour and hour of day.
 		int seconds = cal.get(Calendar.SECOND);
 		int minutes = cal.get(Calendar.MINUTE);
 		int hours = cal.get(Calendar.HOUR_OF_DAY);
 		String stopName = currentSegment.getWaypoint(0).getWaypointName();
 		String stopCode = currentSegment.getWaypoint(0).getWaypointStopCode();
 		mPblCom.initializeSegment(segmentMode, stopName, stopCode, hours, minutes, seconds);
-		
-		// Then, send the stops
+		// Send the stops
 		updateList(currentSegment);
 		// If the segment start time has already passed, switch to the 3stop screen
 		if (segmentStart.before(currentDate)) {
@@ -211,12 +244,15 @@ public class PebbleUiController {
 				i < currentWpIndex + PebbleCommunication.NUM_STOPS-1; i++) {
 			waypoints.add(segment.getWaypointList().get(i));
 		}
-		// if there are less than NUM_STOPS-1 waypoints to be sent, send additional null
-		// waypoints to clear the list (not including the last waypoint yet)
+		/**
+		 * If there are less than NUM_STOPS-1 waypoints to be sent,
+		 * send additional null waypoints to clear the list
+		 * (except the last waypoint).
+		 */
 		for (int i = waypoints.size(); i < PebbleCommunication.NUM_STOPS-1; i++) {
 			waypoints.add(null);
 		}
-		// finally add the last waypoint to the list
+		// Finally add the last waypoint to the list
 		waypoints.add(segment.getLastWaypoint());
 		for (int i = 0; i < PebbleCommunication.NUM_STOPS; i++) {
 			mPblCom.sendWaypoint(waypoints.get(i), i);
@@ -224,7 +260,7 @@ public class PebbleUiController {
 	}
 
 	/**
-	 * Scrolls PebbleUI 1 stop forward
+	 * Scrolls PebbleUI one stop forward
 	 */
 	private void addWpToList() {
 		System.out.println("DBG updateList s " + mRoute.getCurrentIndex());
