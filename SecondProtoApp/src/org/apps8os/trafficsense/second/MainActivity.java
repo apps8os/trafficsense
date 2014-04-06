@@ -204,19 +204,10 @@ public class MainActivity extends Activity {
 		for (Segment s : r.getSegmentList()) {
 
 			indexInWaypoint = 1 ;
-//			/**
-//			 * Do not draw walking segments because they have no GPS coordinates.
-//			 */
-//			if (s.isWalking()) {
-//				continue;
-//			}
-//			
-			
-			/* metro and ferry is the same for English, Swedish and Finnish */
 			
 			switch(s.getSegmentType()){
 			
-			case -1 : resID = getResources().getIdentifier(" unknown_black_marker", "drawable",getPackageName());break;
+			case -1 : resID = getResources().getIdentifier("unknown_black_marker", "drawable",getPackageName());break;
 			case 0 : resID = getResources().getIdentifier("walking_pink_marker", "drawable",getPackageName());break;
 			case 2 : resID = getResources().getIdentifier("tram_yellow_marker", "drawable",getPackageName());break;
 			case 6 : resID = getResources().getIdentifier("metro_orange_marker", "drawable",getPackageName());break;
@@ -227,9 +218,7 @@ public class MainActivity extends Activity {
 			}
 			
 			icon = resizeIcon(resID);
-			
 		
-			
 			for (Waypoint w : s.getWaypointList()) {
 				
 				/**
@@ -244,8 +233,6 @@ public class MainActivity extends Activity {
 				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
 				
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-
-				
 				
 				/**
 				 * Make a green marker for starting point and 
@@ -280,45 +267,7 @@ public class MainActivity extends Activity {
 							.title(indexInWaypoint + "." + w.getWaypointName() + " ("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
-				}
-				
-				
-				
-//				
-//				/**
-//				 * Make a green marker for starting point and a red marker for end point.
-//				 */
-//				if (s.getWaypoint(0).getWaypointName()
-//						.equals(w.getWaypointName())) {
-//					// This waypoint is the start of the segment
-//					map.addMarker(new MarkerOptions()
-//							.position(coord)
-//							.title("Departure on " + s.getSegmentMode() + ": "
-//									+ indexInSegment + "." + w.getWaypointName() + "("
-//									+ w.getWaypointStopCode() + ")")
-//							.icon(BitmapDescriptorFactory
-//									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-//							);
-//				} else if (s.getLastWaypoint().getWaypointName()
-//						.equals(w.getWaypointName())) {
-//					// This waypoint is the end of this segment.
-//					map.addMarker(new MarkerOptions()
-//							.position(coord)
-//							.title("Arrival on " + s.getSegmentMode() + ": "
-//									+ indexInSegment + "." + w.getWaypointName() + "("
-//									+ w.getWaypointStopCode() + ")")
-//							.icon(BitmapDescriptorFactory
-//									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-//							);
-//				} else {
-//					// Intermediate points.
-//					map.addMarker(new MarkerOptions()
-//							.position(coord)
-//							.title(indexInSegment + "." + w.getWaypointName() + " ("
-//									+ w.getWaypointStopCode() + ")")
-//							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
-//				}
-				
+				}				
 				o.add(coord);
 				indexInWaypoint++;
 
@@ -331,7 +280,6 @@ public class MainActivity extends Activity {
 
 		// Plot the polyline
 		map.addPolyline(o);
-
 	}
 
 	/**
