@@ -1,11 +1,17 @@
-#include "menu.h"
+#include "common.h"
 
 MenuLayer *menu_layer;
 
+/**
+ * TODO: documentation.
+ */
 uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
   return 2;
 }
 
+/**
+ * TODO: documentation.
+ */
 uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     case 0:
@@ -19,6 +25,9 @@ uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_inde
   }
 }
 
+/**
+ * TODO: documentation.
+ */
 int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   switch (section_index) {
     // Section 0: Upcoming stops, return 0 not to show this header at all
@@ -32,6 +41,9 @@ int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_
   return 0;
 }
 
+/**
+ * TODO: documentation.
+ */
 void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   // Determine which section we're working with
   switch (section_index) {
@@ -46,6 +58,9 @@ void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t 
   }
 }
 
+/**
+ * TODO: documentation.
+ */
 void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
   int row = cell_index->row;
@@ -58,6 +73,9 @@ void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *c
     menu_cell_basic_draw(ctx, cell_layer, stopArray[index].code, stopArray[index].time, NULL);
 }
 
+/**
+ * Called when the user selects a menu item.
+ */
 void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   // Do nothing
 }

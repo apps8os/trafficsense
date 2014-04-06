@@ -1,8 +1,16 @@
-#include "windowControl.h"
+#include "common.h"
 
-Window* windowArray[NUM_WINDOWS]; // Array of all windows
-// TODO: maybe just check the currently active window from the window stack
-int currentWindow; // Currently active window
+static const char* timeUnitsStr[3] = {UNIT_SECONDS_STR, UNIT_MINUTES_STR, UNIT_HOURS_STR};
+
+/**
+ * Array of all windows.
+ */
+Window* windowArray[NUM_WINDOWS];
+/**
+ * Currently active window
+ * TODO: maybe just check the currently active window from the window stack
+ */
+int currentWindow;
 Window* alarmWindow;
 TextLayer* alarmText;
 int viewMode;
@@ -20,26 +28,37 @@ char stopCodeAndNameBuff[30];
 char errorStrArray[10][200]; 
 TextLayer* errorText;
 
+/**
+ * Called when the MIDDLE button is clicked once.
+ */
 void stoplist_window_single_click_SELECT_handler(ClickRecognizerRef recognizer, void* context) {
   //Called when the MIDDLE button is clicked once.
   viewMode = (viewMode + 1) % NUM_VIEW_MODES;
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
+/**
+ * TODO: documentation.
+ */
 void window_single_click_UP_handler(ClickRecognizerRef recognizer, void* context) {
   currentWindow = (currentWindow + 1) % NUM_VIEW_MODES;
   window_stack_pop(true);
   window_stack_push(windowArray[currentWindow], true);
 }
 
+/**
+ * TODO: documentation.
+ */
 void window_single_click_DOWN_handler(ClickRecognizerRef recognizer, void* context) {
   currentWindow = ((currentWindow - 1) % NUM_VIEW_MODES) * -1;
   window_stack_pop(true);
   window_stack_push(windowArray[currentWindow], true);
 }
 
+/**
+ * Function for setting callbacks for button clicks.
+ */
 void click_config_provider(Window *window) {
-  //Function for setting callbacks for button clicks.
   if (window == windowArray[WINDOW_3STOP]) {
     window_single_click_subscribe(BUTTON_ID_SELECT, stoplist_window_single_click_SELECT_handler);
   }
@@ -48,8 +67,15 @@ void click_config_provider(Window *window) {
   //window_single_click_subscribe(BUTTON_ID_DOWN, window_single_click_DOWN_handler);
 }
 
+/**
+ * Present a Get Off alarm.
+ * Called by main.c:alarm_get_off(), which is
+ * called by communication.c:message_received().
+ */
 void show_get_off_alarm() {
-  //Right now this function is not in use
+  /**
+   * TODO: Really? --> Right now this function is not in use
+   */
   alarmWindow = window_create();
   window_stack_push(alarmWindow, true /* Animated */);
   Layer *window_layer = window_get_root_layer(alarmWindow);
@@ -58,8 +84,10 @@ void show_get_off_alarm() {
   text_layer_set_text(alarmText, TEXT_GET_OFF);
 }
 
+/**
+ * Set the amount of time to the current value.
+ */
 void set_time_text_by_unit(int unit) {
-  // Set the amount of time to the current value
   switch (unit) {
     // TODO: stop using the magic variable 4 for the length
     case UNIT_HOURS:
@@ -76,18 +104,27 @@ void set_time_text_by_unit(int unit) {
   text_layer_set_text(timeUnit, timeUnitsStr[unit]);
 }
 
+/**
+ * Looping function for updating the time in basic window.
+ */
 void basic_window_loop() {
+	/**
+	 * If the window is not shown, stop the loop.
+	 * It is possible that we want to show the 3stop window early,
+	 * so we need to check this.
+	 */
   if (currentWindow != WINDOW_BASIC) {
-    return; // If the window is not shown, stop the loop
-    // It is possible that we want to show the 3stop window early, so we need to check this
+    return;
   }
+
   uint32_t timeout_ms;
   TimeOfDay timeToStart = getTimeToStart();
   if (timeToStart.hours < 1) {
     if (timeToStart.minutes < 1) {
       if (timeToStart.seconds < 1) {
+    	  // stop the loop when time has run out
         show_3stop_window();
-        return; // stop the loop when time has run out 
+        return;
       } else {
         set_time_text_by_unit(UNIT_SECONDS);
       }
@@ -101,6 +138,9 @@ void basic_window_loop() {
   timerHandle = app_timer_register(timeout_ms, (AppTimerCallback)basic_window_loop, NULL);
 }
 
+/**
+ * TODO: documentation.
+ */
 void show_basic_window() {
   // TODO: Make sure the buffer size is enough
   stopCodeAndNameBuff[0] = '\0';
@@ -120,6 +160,9 @@ void show_basic_window() {
   basic_window_loop();
 }
 
+/**
+ * TODO: documentation.
+ */
 void show_3stop_window() {
   if (currentWindow != WINDOW_3STOP) {
     currentWindow = WINDOW_3STOP;
@@ -128,11 +171,17 @@ void show_3stop_window() {
   }
 }
 
+/**
+ * TODO: documentation.
+ */
 void show_error_window(int error_code) {
   window_stack_push(windowArray[WINDOW_ERROR], true);
   text_layer_set_text(errorText, errorStrArray[error_code]);
 }
 
+/**
+ * TODO: documentation.
+ */
 void init_error_window() {
   // Initialize the error strings TODO: define them elsewhere
   strncpy(errorStrArray[ERROR_WAITING], "Waiting for route information from the Android application...", 200);
@@ -149,6 +198,9 @@ void init_error_window() {
   layer_add_child(window_layer, text_layer_get_layer(errorText));
 }
 
+/**
+ * TODO: documentation.
+ */
 void init_basic_window() {
   // Initialize the time units
 
@@ -169,7 +221,7 @@ void init_basic_window() {
   
   // Initialize the text layer which shows the units for the shown time
   timeUnit = text_layer_create((GRect){ .origin = { 30, 30 }, .size = bounds.size });
-  text_layer_set_text(timeUnit, timeUnitsStr[0]);
+  text_layer_set_text(timeUnit, timeUnitsStr[UNIT_SECONDS]);
   layer_add_child(window_layer, text_layer_get_layer(timeUnit));
 
   // Initialize the text layer which shows the first stop name and code
@@ -187,6 +239,9 @@ void init_basic_window() {
   
 }
 
+/**
+ * TODO: documentation.
+ */
 void init_windows() {
   currentWindow = WINDOW_ERROR;
   init_basic_window();
@@ -200,3 +255,4 @@ void init_windows() {
   init_menu(windowArray[WINDOW_3STOP]);
   show_error_window(ERROR_WAITING); // Tell the user to wait
 }
+

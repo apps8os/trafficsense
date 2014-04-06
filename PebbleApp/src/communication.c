@@ -1,5 +1,8 @@
-#include "communication.h"
+#include "common.h"
 
+/**
+ * Function to send a command with value cmd to Android.
+ */
 void send_cmd(uint8_t cmd) {
 	Tuplet value = TupletInteger(KEY_COMMAND, cmd);
 	DictionaryIterator *iter;
@@ -11,6 +14,9 @@ void send_cmd(uint8_t cmd) {
 	app_message_outbox_send(); //returns AppMessageResult
 }
 
+/**
+ * This function is called when a message is received from Android side.
+ */
 void message_received(DictionaryIterator *iterator) {
   //Automatically called when a message is received from the phone.
   Tuple *commandTuple = dict_find(iterator, KEY_COMMAND);
@@ -74,6 +80,9 @@ void message_received(DictionaryIterator *iterator) {
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
+/**
+ * This function is called when a message from Android is dropped for some reason.
+ */
 void message_dropped(DictionaryIterator *iterator) {
 	// TODO: do something
 }
@@ -86,6 +95,9 @@ void message_sent(DictionaryIterator *iterator, void *context) {
 
 }
 
+/**
+ * TODO: documentation.
+ */
 void init_app_message() {
 	// Start appmessage with an inbox (phone to watch) size of the first parameter and outbox of the second
 	app_message_open(APP_MESSAGE_INBOX_SIZE_MINIMUM, 16);
