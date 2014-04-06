@@ -224,6 +224,9 @@ public class JourneyInfoResolver {
 
 		String url;
 		if (waypoint.hasStopCode() == false) {
+			if (Constants.getCoordsForNoStopCode == false) {
+				return;
+			}
 			url = buildGetGeocodingUrl(geocodingResponseLimit, "address",
 					waypoint.getWaypointName());
 		} else {
