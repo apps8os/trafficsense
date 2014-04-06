@@ -199,77 +199,91 @@ public class MainActivity extends Activity {
 		int resID ;
 		Bitmap icon ;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
-		int indexInWaypoint ;		
 		
 		for (Segment s : r.getSegmentList()) {
-
-			indexInWaypoint = 1 ;
 			
-			switch(s.getSegmentType()){
-			
-			case -1 : resID = getResources().getIdentifier("unknown_black_marker", "drawable",getPackageName());break;
-			case 0 : resID = getResources().getIdentifier("walking_pink_marker", "drawable",getPackageName());break;
-			case 2 : resID = getResources().getIdentifier("tram_yellow_marker", "drawable",getPackageName());break;
-			case 6 : resID = getResources().getIdentifier("metro_orange_marker", "drawable",getPackageName());break;
-			case 7 : resID = getResources().getIdentifier("ferry_gray_marker", "drawable",getPackageName()); break;
-			case 8 : resID = getResources().getIdentifier("train_brown_marker", "drawable",getPackageName()); break;
-			case 12 : resID = getResources().getIdentifier("train_brown_marker", "drawable",getPackageName()); break;
-			default : resID = getResources().getIdentifier("bus_blue_marker", "drawable",getPackageName()); break;
+			// Determine the icon for waypoints in this segment
+			switch (s.getSegmentType()) {
+			case RouteConstants.UNKNOWN:
+				resID = getResources().getIdentifier("unknown_black_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.WALKING:
+				resID = getResources().getIdentifier("walking_pink_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.TRAMS:
+				resID = getResources().getIdentifier("tram_yellow_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.METRO:
+				resID = getResources().getIdentifier("metro_orange_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.FERRY:
+				resID = getResources().getIdentifier("ferry_gray_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.CONMUTER_TRAINS:
+				resID = getResources().getIdentifier("train_brown_marker","drawable", getPackageName());
+				break;
+			default:
+				resID = getResources().getIdentifier("bus_blue_marker","drawable", getPackageName());
+				break;
 			}
-			
 			icon = resizeIcon(resID);
-		
+
+			/**
+			 * The sequence number of this waypoint in the polyline plotted on map.
+			 */
+			int sequenceInSegmentOnMap = 1;
+
 			for (Waypoint w : s.getWaypointList()) {
-				
 				/**
 				 * Ignore waypoints without valid GPS coordinates.
 				 * 
-				 * TODO: What to do if this is the start or end of a segment?
+				 * TODO: What to do if this is the start or end of a segment/the journey?
 				 */
 				if (w.hasCoord() == false) {
 					continue;
 				}
 
 				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
-				
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 				
 				/**
-				 * Make a green marker for starting point and 
-				 * Red marker for end point
+				 * Make a green marker for journey starting point and 
+				 * Red marker for journey end point.
 				 */
-				if(s.getWaypoint(0).getWaypointName().equals(r.getSegment(0).getWaypoint(0).getWaypointName())){
+				if(s.getWaypoint(0).getWaypointName().equals(
+						r.getSegment(0).getWaypoint(0).getWaypointName())){
 					
 					// This waypoint is the start of the segment
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Departure on " + s.getSegmentMode() + ": "
-									+ indexInWaypoint + "." + w.getWaypointName() + "("
+									+ sequenceInSegmentOnMap + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
-							.icon(BitmapDescriptorFactory
+									.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 							);
-				}else if (s.getLastWaypoint().getWaypointName().equals(r.getLastSegment().getLastWaypoint())){
+				}else if (s.getLastWaypoint().getWaypointName().equals(
+						r.getLastSegment().getLastWaypoint().getWaypointName())){
 				
 					// This waypoint is the end of this segment.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Arrival on " + s.getSegmentMode() + ": "
-									+ indexInWaypoint + "." + w.getWaypointName() + "("
+									+ sequenceInSegmentOnMap + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
-							.icon(BitmapDescriptorFactory
+									.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 							);
 				}else {
 					// Intermediate points.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
-							.title(indexInWaypoint + "." + w.getWaypointName() + " ("
+							.title(sequenceInSegmentOnMap + "." + w.getWaypointName() + " ("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 				}				
 				o.add(coord);
-				indexInWaypoint++;
+				sequenceInSegmentOnMap++;
 
 				if (zoomed == false) {
 					centerLocationOnMap(coord);
