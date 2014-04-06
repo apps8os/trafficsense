@@ -334,16 +334,16 @@ public class JourneyInfoResolver {
 		return url;
 	}
 	
-	private String buildGetGeocodingUrl(String responseLimit,
-			String locType, String key) {
+	private String buildGetGeocodingUrl(String responseLimit, String locType,
+			String key) {
 		if (locType.isEmpty()) {
 			locType = "stop|address";
 		}
 		String url;
 		try {
-			url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types=" +
-		URLEncoder.encode(locType, "UTF-8")
-				+ "&p=" + responseLimit + "&key=" + key;
+			url = HSL_API_BASE_URL + "&request=geocode" + "&loc_types="
+					+ URLEncoder.encode(locType, "UTF-8") + "&p="
+					+ responseLimit + "&key=" + URLEncoder.encode(key, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new JourneyInfoResolverException(e.getMessage());
 		}
