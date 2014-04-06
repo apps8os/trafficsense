@@ -33,6 +33,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.location.LocationStatusCodes;
+
 
 public class MainActivity extends Activity {
 
@@ -53,7 +55,6 @@ public class MainActivity extends Activity {
 
 		listview.setVisibility(View.INVISIBLE);
 		map.setMyLocationEnabled(true);
-
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
 		mWaypointChangedReceiver = new WaypointChanged();
 		String welcome[] = { "Welcome" };
@@ -118,6 +119,7 @@ public class MainActivity extends Activity {
 			start.setVisible(true);
 			stop.setVisible(false);
 			schematic.setVisible(false);
+			
 		}
 		return (true);
 	}

@@ -50,7 +50,7 @@ public class SchematicView extends Activity{
 		ExpandableListAdapter adapter = new ExpandableListAdapter(this, route);
 		listView.setAdapter(adapter);
 		myTextView = (TextView) findViewById(R.id.checkedTextView);
-		myTextView.setText("From: " + route.getStart() + ", to " + route.getDestination());
+		myTextView.setText("\t From: " + route.getStart() + "\n\t To: " + route.getDestination() + "\n");
 		mWaypointChangedReceiver = new WaypointChanged(adapter);
    }
 
