@@ -144,31 +144,25 @@ public class Waypoint{
 	 * @param latitude latitude.
 	 * @param longitude longitude.
 	 */
-	public void setCoordinate(double latitude, double longitude) {
-		synchronized (this) {
-			mLatitude = latitude;
-			mLongitude = longitude;
-		}
+	public synchronized void setCoordinate(double latitude, double longitude) {
+		mLatitude = latitude;
+		mLongitude = longitude;
 	}
 
 	/**
 	 * Return the longitude of the GPS coordinate.
 	 * @return longitude.
 	 */
-	public double getLongitude() {
-		synchronized (this) {
-			return mLongitude;
-		}
+	public synchronized double getLongitude() {
+		return mLongitude;
 	}
 	
 	/**
 	 * Return the latitude of the GPS coordinate.
 	 * @return latitude.
 	 */
-	public double getLatitude() {
-		synchronized (this) {
-			return mLatitude;
-		}
+	public synchronized double getLatitude() {
+		return mLatitude;
 	}
 	
 	/**
