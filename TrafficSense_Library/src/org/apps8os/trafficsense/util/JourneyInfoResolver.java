@@ -333,8 +333,19 @@ public class JourneyInfoResolver {
 		return url;
 	}
 	
+	/**
+	 * Builds the URL to query HSL API for Geocoding.
+	 * 
+	 * Does not support specifying certain city(ies) in HSL region.
+	 * 
+	 * @param responseLimit response field filter.
+	 * @param locType location type. default: stop|address
+	 * @param key search key.
+	 * @return the URL.
+	 * @throws JourneyInfoResolverException on encoding errors.
+	 */
 	private String buildGetGeocodingUrl(String responseLimit, String locType,
-			String key) {
+			String key) throws JourneyInfoResolverException {
 		if (locType.isEmpty()) {
 			locType = "stop|address";
 		}
