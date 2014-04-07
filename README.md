@@ -8,6 +8,19 @@ This project is developed in [Aalto University](http://aalto.fi/).
 
 ### Directory structure:
 
+- PebbleApp/: Pebble smartwatch application.
+
+- FirstPrototype/: Android application for tracking a journey using time information.
+
+- SecondPrototype/: Android application for tracking a journey using location information.
+
+- TrafficSense\_Library/: TrafficSense core logics, shared among Android applications.
+
+- misc/: miscellaneous stuff.
+
+- doc/: Javadoc generated document.
+
+- experiment/: experimental stuff.
 
 ### License
 
