@@ -56,7 +56,6 @@ public class MainActivity extends Activity {
 		mContainer = TrafficsenseContainer.getInstance();
 		// TODO: hard-coded
 		mCred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
-		// TODO: Does not work due to self-signed certificate
 		//mCred = new EmailCredential("developer@trafficsense.org", "trafficsense", "mail.trafficsense.org");
 	}
 

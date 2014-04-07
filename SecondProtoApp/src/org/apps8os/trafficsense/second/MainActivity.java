@@ -152,10 +152,12 @@ public class MainActivity extends Activity {
 	 */
 	private void startJourney() {
 		// TODO: check for network connectivity
-		EmailCredential cred = new EmailCredential(
-				"trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
+		
+		// TODO: hard-coded
+		EmailCredential cred;
+		cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
+		//cred = new EmailCredential("developer@trafficsense.org", "trafficsense", "mail.trafficsense.org");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
-
 	}
 
 	/**
