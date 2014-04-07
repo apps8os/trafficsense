@@ -189,21 +189,21 @@ public class LocationOnlyService extends Service implements
 		
 		// If the location client is connected send the request
 		if(mLocationClient.isConnected()){
-			System.out.println("DBG adding geofence list");
+			System.out.println("DBG adding GeoFence list");
 			// LocationOnlyService implements OnAddGeofencesResultListener.
 			mLocationClient.addGeofences(list, mGeofencePendingIntent, this);
 		}
 	}
 	
 	/**
-	 * Returns a Geofence made from a waypoint
+	 * Returns a GeoFence made from a waypoint
 	 * 
 	 * @param busStop get the longitude and latitude of the waypoint
-	 * @param id id of the geofence
-	 * @param radius the radius of the geofence
-	 * @param expiryDuration how long the geofence exists
+	 * @param id id of the GeoFence
+	 * @param radius the radius of the GeoFence
+	 * @param expiryDuration how long the GeoFence exists
 	 * @param transition what type of transition triggers alert
-	 * @return a geofence created using the method parameters
+	 * @return a GeoFence created using the method parameters
 	 */
 	private Geofence createGeofence(Waypoint busStop,String id, float radius, 
 			long expiryDuration, int transition){
@@ -256,7 +256,7 @@ public class LocationOnlyService extends Service implements
 					continue;
 				}
 				
-				System.out.println("DBG making geofence for " + segmentIndex + "," + waypointIndex);
+				System.out.println("DBG making GeoFence for " + segmentIndex + "," + waypointIndex);
 				String id = Integer.toString(segmentIndex) + ","
 						+ Integer.toString(waypointIndex);
 				mNextBusStopGeofence = createGeofence(nextWaypoint, id,
@@ -274,7 +274,7 @@ public class LocationOnlyService extends Service implements
 	 */
 	@Override
 	public void onAddGeofencesResult(int statusCode, String[] geofenceRequestIds) {
-		System.out.println("DBG: geofence status code: " + statusCode);
+		System.out.println("DBG: addGeofences status code: " + statusCode);
 		switch (statusCode) {
 		case LocationStatusCodes.SUCCESS:
 			break;

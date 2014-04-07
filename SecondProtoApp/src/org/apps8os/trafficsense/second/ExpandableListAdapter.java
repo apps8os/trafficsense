@@ -17,10 +17,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Expandable list for SchematicView.
+ */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	//private final Route mRoute;
 	private final ArrayList<Segment> mSegmentList;
 	private LayoutInflater mInflater;
+	/**
+	 * Holds the Activity to which this expandable list belongs.
+	 */
 	private Activity mActivity;
 
 	private ArrayList<View> mSegmentViews = new ArrayList<View>();
@@ -156,18 +162,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	}
 
 	/*
-	public ArrayList<View> getSegmentViewList() {
+	private ArrayList<View> getSegmentViewList() {
 		return mSegmentViews;
 	}
 
-	public ArrayList<View> getWaypointViewList() {
+	private ArrayList<View> getWaypointViewList() {
 		return mWaypointViews;
 	}
 	*/
 	
 	/*
-	//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
-	public void highlightCurrentWaypoint(View convertView) {
+	//private void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
+	private void highlightCurrentWaypoint(View convertView) {
 		System.out.println("DBG hightlightCurrentWaypoint");
 
 		TextView text = null;
