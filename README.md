@@ -5,6 +5,8 @@ TrafficSense project aims to build an [Android](http://android.com/) and [Pebble
 
 This project is developed in [Aalto University](http://aalto.fi/).
 
+See [wiki pages](https://github.com/apps8os/trafficsense/wiki) for usage.
+
 
 ### Directory structure
 
@@ -19,3 +21,4 @@ This project is developed in [Aalto University](http://aalto.fi/).
 ### License
 
 MIT License
+
