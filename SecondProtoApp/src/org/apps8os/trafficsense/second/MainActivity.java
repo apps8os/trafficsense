@@ -244,7 +244,6 @@ public class MainActivity extends Activity {
 			// Comparing if it is is walking and is not in the first or last segment 
 			if (s.isWalking() == true && !(i == 0)
 					&& !(r.getSegmentList().size() - 1 == i)) {
-				System.out.println("ENTERRRRR");
 				map.addPolyline(o);
 				 o = new PolylineOptions().geodesic(true);
 				Segment prev = r.getSegment(i - 1);
@@ -287,9 +286,10 @@ public class MainActivity extends Activity {
 				 * for journey end point.
 				 */
 				if (w.getWaypointName().equals(
-						r.getSegment(0).getWaypoint(0).getWaypointName())) {
+						r.getSegment(1).getWaypoint(0).getWaypointName())) {
+						//r.getSegment(0).getWaypoint(0).getWaypointName())) {
 
-					// This waypoint is the start of the segment
+					// This waypoint is the start of the segment, ignoring the first walking segment
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Departure on " + s.getSegmentMode() + ": "
@@ -298,11 +298,12 @@ public class MainActivity extends Activity {
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-							.anchor(0.5f, 0.5f));
+							);
 				} else if (w.getWaypointName().equals(
-						r.getLastSegment().getLastWaypoint().getWaypointName())) {
+						r.getSegment( r.getSegmentList().size()-2).getLastWaypoint().getWaypointName())) {
+						//r.getLastSegment().getLastWaypoint().getWaypointName())) {
 
-					// This waypoint is the end of this segment.
+					// This waypoint is the end of this segment ignoring the walking last segment
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Arrival on " + s.getSegmentMode() + ": "
@@ -311,7 +312,7 @@ public class MainActivity extends Activity {
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-							.anchor(0.5f, 0.5f));
+							);
 				} else {
 					// Intermediate points.
 					map.addMarker(new MarkerOptions()
