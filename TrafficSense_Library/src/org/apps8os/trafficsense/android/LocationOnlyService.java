@@ -324,11 +324,13 @@ public class LocationOnlyService extends Service implements
 	private class EnteredWaypointAlertReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context arg0, Intent arg1) {
-			// the intent could also have been sent to indicate an error
+			// This Intent could also indicate an error
 			if (LocationClient.hasError(arg1) == true) {
-				int error = LocationClient.getErrorCode(arg1);
-				// TODO error handling ?
-				if (error == LocationStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+				// TODO error handling
+				switch (LocationClient.getErrorCode(arg1)) {
+				case LocationStatusCodes.GEOFENCE_NOT_AVAILABLE:
+					System.out.println("DBG EnteredWaypoint GEOFENCE_NOT_AVAILABLE");
+					break;
 				}
 				return;
 			}
@@ -342,6 +344,8 @@ public class LocationOnlyService extends Service implements
 			String parts[] = id.split(",");
 			mRouteSegmentIndex = Integer.parseInt(parts[0]);
 			mSegmentWaypointIndex = Integer.parseInt(parts[1]) + 1;
+			
+			System.out.println("DBG EnteredWaypoint iSeg:" + mRouteSegmentIndex + " iWp:" + mSegmentWaypointIndex);
 
 			Segment currentSegment = mRoute.setNextSegment(
 					mRouteSegmentIndex);
@@ -354,35 +358,45 @@ public class LocationOnlyService extends Service implements
 			}
 			// Segment has ended
 			if (nextWaypoint == null) {
+				//System.out.println("DBG EnteredWaypoint segment ended");
 				// Advance to next segment
 				mRouteSegmentIndex++;
 				try {
 					currentSegment = mRoute.setNextSegment(mRouteSegmentIndex);
 				} catch (CursorIndexOutOfBoundsException e) {
-					// The journey is ended.
+					//System.out.println("DBG EnteredWaypoint journey ended");
+					// No more next segment: the journey is ended.
 					mRouteSegmentIndex = -1;
 					mSegmentWaypointIndex = -1;
 					mRoute.setJourneyEnded(true);
-					// Inform clients that waypoint has changed
-					((LocationOnlyService) mContext).sendNextWaypointIntent("");
-					// Stop the service.
-					((LocationOnlyService) mContext).stopSelf();
-					return;
+					currentSegment = null;
 				}
-
-				mSegmentWaypointIndex = 0;
-				nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+				if (currentSegment != null) {
+					//System.out.println("DBG EnteredWaypoint entered next segment");
+					mSegmentWaypointIndex = 0;
+					nextWaypoint = currentSegment.setNextWaypoint(mSegmentWaypointIndex);
+				}
 			}
 			
+			if (nextWaypoint != null) {
+				System.out.println("DBG EnteredWaypoint next waypoint: " + nextWaypoint.getWaypointName());
+			}
+
 			// Update the pebble UI
 			mContainer.getPebbleUiController().update();
-
-			// Inform clients that the next waypoint has changed.
-			if (nextWaypoint.getWaypointName() != null)
-				System.out.println("DBG Next position is "
-						+ nextWaypoint.getWaypointName());
+			
 			((LocationOnlyService) mContext).makeNotificationAndAlert();
 			((LocationOnlyService) mContext).sendNextWaypointIntent("");
+			
+			/**
+			 * TODO: journey may be left un-ended if the last segment is a
+			 * walking segment since we will not receive any new
+			 * EnteredWaypoint event.
+			 */
+			if (mRoute.isJourneyEnded() == true) {
+				// Stop the service.
+				((LocationOnlyService) mContext).stopSelf();
+			}
 		}
 	}
 	
