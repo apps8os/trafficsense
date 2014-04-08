@@ -1,26 +1,30 @@
 package org.apps8os.trafficsense.second;
 
 
+import java.util.ArrayList;
+
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.Route;
 import android.app.Activity;
+import android.app.ExpandableListActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
-public class SchematicView extends Activity{
+public class SchematicView extends ExpandableListActivity{
 	
-	//private EditText mEditText;
-	//private Button mButton;
+	
 	private TextView mTextView;
 	//private String mKey=null;
 	//private String mRequest;
@@ -28,7 +32,7 @@ public class SchematicView extends Activity{
 	private Route mRoute;
 	//private CoordsReadyReceiver mCoordsReadyReceiver;*/
 	WaypointChanged mWaypointChangedReceiver;
-	//private SparseArray<Group> mGroups = new SparseArray<Group>();
+	ExpandableListAdapter mAdapter;
 	
 
 	@Override
@@ -117,21 +121,40 @@ public class SchematicView extends Activity{
 				return;
 			}
 
-			//changeColor();
+			changeColor();
 			//TODO: call method that highlights current waypoint
 		} 
 
-		/*
+		
 		private void changeColor() {
+			System.out.println("Stuff");
 			TrafficsenseContainer container = TrafficsenseContainer.getInstance();
+			//mAdapter.notifyDataSetChanged();
 			int seg = container.getRoute().getCurrentIndex();
 			int way = container.getRoute().getCurrentSegment().getCurrentIndex();
+			try{
 			ArrayList <View> segView = mAdapter.getSegmentViewList();
-			ArrayList <View> wayView = mAdapter.getWaypointViewList();
-			segView.get(seg-1).setBackgroundColor(Color.CYAN);
-			wayView.get(way-1).setBackgroundColor(Color.CYAN);
+			if (segView !=null){
+				System.out.println("Change color of seg");
+				segView.get(seg-1).setBackgroundColor(Color.CYAN);
+			}}
+			catch(NullPointerException npe){
+				System.out.println("NPE on segView");
+			}
+			
+			try{
+			ArrayList<ArrayList<View>> wayView = mAdapter.getWaypointViewList();
+			if(wayView != null){
+				System.out.println("Change color of way");
+				wayView.get(seg-1).get(way-1).setBackgroundColor(Color.RED);
+			}}
+			catch (NullPointerException npe){
+				System.out.println("NPE on wayView");
+			}
+			
+			
 		}
-		*/
+		
 	}
 
 }
