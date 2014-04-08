@@ -6,6 +6,7 @@ import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.OutputLogic;
 import org.apps8os.trafficsense.core.Route;
+import org.apps8os.trafficsense.core.RouteConstants;
 import org.apps8os.trafficsense.core.Segment;
 import org.apps8os.trafficsense.core.Waypoint;
 import org.apps8os.trafficsense.util.EmailCredential;
@@ -33,13 +34,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.google.android.gms.location.LocationStatusCodes;
-
 
 public class MainActivity extends Activity {
 
 	private CoordsReadyReceiver mCoordsReadyReceiver;
-	private WaypointChanged mWaypointChangedReceiver;
+	private WaypointChangedReceiver mWaypointChangedReceiver;
 
 	private TrafficsenseContainer mContainer;
 	private GoogleMap map;
@@ -56,7 +55,7 @@ public class MainActivity extends Activity {
 		listview.setVisibility(View.INVISIBLE);
 		map.setMyLocationEnabled(true);
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
-		mWaypointChangedReceiver = new WaypointChanged();
+		mWaypointChangedReceiver = new WaypointChangedReceiver();
 		String welcome[] = { "Welcome" };
 		showList(welcome);
 
@@ -153,10 +152,12 @@ public class MainActivity extends Activity {
 	 */
 	private void startJourney() {
 		// TODO: check for network connectivity
-		EmailCredential cred = new EmailCredential(
-				"trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
+		
+		// TODO: hard-coded
+		EmailCredential cred;
+		cred = new EmailCredential("trafficsense.aalto@gmail.com", "ag47)h(58P", "imap.gmail.com");
+		//cred = new EmailCredential("developer@trafficsense.org", "trafficsense", "mail.trafficsense.org");
 		mContainer.startJourneyTracker(Constants.SERVICE_LOCATION_ONLY, cred);
-
 	}
 
 	/**
@@ -197,72 +198,94 @@ public class MainActivity extends Activity {
 
 		boolean zoomed = false;
 		// Get the image that will be used as the bus stop icon
-		int resID = getResources().getIdentifier("bus_stop_marker", "drawable",
-				getPackageName());
-		Bitmap icon = resizeIcon(resID);
+		int resID ;
+		Bitmap icon ;
 		PolylineOptions o = new PolylineOptions().geodesic(true);
+		
 		for (Segment s : r.getSegmentList()) {
+			
+			// Determine the icon for waypoints in this segment
+			switch (s.getSegmentType()) {
+			case RouteConstants.UNKNOWN:
+				resID = getResources().getIdentifier("unknown_black_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.WALKING:
+				resID = getResources().getIdentifier("walking_pink_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.TRAMS:
+				resID = getResources().getIdentifier("tram_yellow_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.METRO:
+				resID = getResources().getIdentifier("metro_orange_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.FERRY:
+				resID = getResources().getIdentifier("ferry_gray_marker","drawable", getPackageName());
+				break;
+			case RouteConstants.CONMUTER_TRAINS:
+				resID = getResources().getIdentifier("train_brown_marker","drawable", getPackageName());
+				break;
+			default:
+				resID = getResources().getIdentifier("bus_blue_marker","drawable", getPackageName());
+				break;
+			}
+			icon = resizeIcon(resID);
 
 			/**
-			 * Do not draw walking segments because they have no GPS coordinates.
+			 * The sequence number of this waypoint in the polyline plotted on map.
 			 */
-			if (s.isWalking()) {
-				continue;
-			}
-			
-			int indexInSegment = 1;
-			
+			int sequenceInSegmentOnMap = 1;
+
 			for (Waypoint w : s.getWaypointList()) {
-				
 				/**
 				 * Ignore waypoints without valid GPS coordinates.
 				 * 
-				 * TODO: What to do if this is the start or end of a segment?
+				 * TODO: What to do if this is the start or end of a segment/the journey?
 				 */
 				if (w.hasCoord() == false) {
 					continue;
 				}
 
 				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
-				
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
-
+				
 				/**
-				 * Make a green marker for starting point and a red marker for end point.
+				 * Make a green marker for journey starting point and 
+				 * Red marker for journey end point.
 				 */
-				if (s.getWaypoint(0).getWaypointName()
-						.equals(w.getWaypointName())) {
+				if(s.getWaypoint(0).getWaypointName().equals(
+						r.getSegment(0).getWaypoint(0).getWaypointName())){
+					
 					// This waypoint is the start of the segment
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Departure on " + s.getSegmentMode() + ": "
-									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ sequenceInSegmentOnMap + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
-							.icon(BitmapDescriptorFactory
+									.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 							);
-				} else if (s.getLastWaypoint().getWaypointName()
-						.equals(w.getWaypointName())) {
+				}else if (s.getLastWaypoint().getWaypointName().equals(
+						r.getLastSegment().getLastWaypoint().getWaypointName())){
+				
 					// This waypoint is the end of this segment.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
 							.title("Arrival on " + s.getSegmentMode() + ": "
-									+ indexInSegment + "." + w.getWaypointName() + "("
+									+ sequenceInSegmentOnMap + "." + w.getWaypointName() + "("
 									+ w.getWaypointStopCode() + ")")
-							.icon(BitmapDescriptorFactory
+									.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 							);
-				} else {
+				}else {
 					// Intermediate points.
 					map.addMarker(new MarkerOptions()
 							.position(coord)
-							.title(indexInSegment + "." + w.getWaypointName() + " ("
+							.title(sequenceInSegmentOnMap + "." + w.getWaypointName() + " ("
 									+ w.getWaypointStopCode() + ")")
 							.icon(BitmapDescriptorFactory.fromBitmap(icon)));
-				}
-				
+				}				
 				o.add(coord);
-				indexInSegment++;
+				sequenceInSegmentOnMap++;
 
 				if (zoomed == false) {
 					centerLocationOnMap(coord);
@@ -273,7 +296,6 @@ public class MainActivity extends Activity {
 
 		// Plot the polyline
 		map.addPolyline(o);
-
 	}
 
 	/**
@@ -331,7 +353,7 @@ public class MainActivity extends Activity {
 	/**
 	 * Class that receives an intent when current waypoint has changed.
 	 */
-	private class WaypointChanged extends BroadcastReceiver {
+	private class WaypointChangedReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {

@@ -20,6 +20,11 @@ public class Constants {
 	 */
 	final public static boolean useWallClock = false;
 	/**
+	 * Whethre to try to obtain GPS coordinates for waypoints whose
+	 * HSL stopCode is unavailable (such as walking waypoints).
+	 */
+	final public static boolean getCoordsForNoStopCode = false;
+	/**
 	 * Radius of GeoFence regions (meters?).
 	 */
 	final public static int GEOFENCE_RADIUS = 100;

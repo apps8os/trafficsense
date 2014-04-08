@@ -1,12 +1,18 @@
-#include "main.h"
+#include "common.h"
 
 Stop stopArray[NUM_STOPS];
+/**
+ * Code of the current public transport line of the current segment
+ */
 char currentLineCode[LINE_CODE_LENGTH];
 char firstStopName[STOP_NAME_LENGTH];
 char firstStopCode[STOP_CODE_LENGTH];
 
 TimeOfDay startTime = {23, 59, 59}; // 23:59:59 for testing purpose
 
+/**
+ * Get current time of day.
+ */
 TimeOfDay getCurrentTime() {
   time_t now;
   struct tm *now_tm;
@@ -22,6 +28,9 @@ TimeOfDay getCurrentTime() {
   return currentTime;
 }
 
+/**
+ * Get time to start of segment.
+ */
 TimeOfDay getTimeToStart() {
   TimeOfDay currentTime = getCurrentTime();
   int startTimeSec = 0;
@@ -49,6 +58,9 @@ TimeOfDay getTimeToStart() {
   return timeToStart;
 }
 
+/**
+ * TODO: documentation.
+ */
 void init_stopArray() {
   for (int i = 0; i < NUM_STOPS; i++) {
     strncpy(stopArray[i].name, "A stop", STOP_NAME_LENGTH-1);
@@ -57,17 +69,25 @@ void init_stopArray() {
   }
 }
 
+/**
+ * Initializes the application.
+ * Called in main().
+ */
 void init(void) {
-  //Initializes the app, called when the app is started, in main()
+  // TODO: Some initial place holders ...
   strncpy(currentLineCode, "280", LINE_CODE_LENGTH-1);
   strncpy(firstStopName, "Some stop2", STOP_NAME_LENGTH-1);
   strncpy(firstStopCode, "1235", STOP_CODE_LENGTH-1);
   init_stopArray();
   init_windows();
   init_app_message();
-  send_cmd(PEBBLE_COMMAND_GET); // Get currently required information from the Android app
+  // Gets required information from Android side.
+  send_cmd(PEBBLE_COMMAND_GET);
 }
 
+/**
+ * Clean up.
+ */
 void deinit(void) {
   menu_layer_destroy(menu_layer);
   for (int i = 0; i < NUM_WINDOWS; i++) {
@@ -75,10 +95,17 @@ void deinit(void) {
   }
 }
 
+/**
+ * Present a Get Off alarm.
+ * Called by communication.c:message_received()
+ */
 void alarm_get_off() {
   show_get_off_alarm();
 }
 
+/**
+ * Pebble application starts here.
+ */
 int main(void) {
   init();
   app_event_loop();
