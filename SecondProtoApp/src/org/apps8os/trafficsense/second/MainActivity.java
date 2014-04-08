@@ -254,7 +254,7 @@ public class MainActivity extends Activity {
 						.getLatitude(), prev.getLastWaypoint().getLongitude());
 				LatLng coord_next = new LatLng(next.getWaypoint(0)
 						.getLatitude(), next.getWaypoint(0).getLongitude());
-				o.add(coord_next).color(Color.LTGRAY);
+				o.add(coord_next).color(Color.MAGENTA);
 				o.add(coord_prev);
 				map.addPolyline(o);
 				o = new PolylineOptions().geodesic(true);
