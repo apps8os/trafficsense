@@ -2,11 +2,13 @@ package org.apps8os.trafficsense.second;
 
 import java.util.ArrayList;
 
+import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.RouteConstants;
 import org.apps8os.trafficsense.core.Segment;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,21 +19,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * Expandable list for SchematicView.
- */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	//private final Route mRoute;
 	private final ArrayList<Segment> mSegmentList;
 	private LayoutInflater mInflater;
-	/**
-	 * Holds the Activity to which this expandable list belongs.
-	 */
 	private Activity mActivity;
-
+	TrafficsenseContainer container = TrafficsenseContainer.getInstance();
 	private ArrayList<View> mSegmentViews = new ArrayList<View>();
 
-	//private ArrayList <ArrayList<View>> mWaypointViews = new ArrayList<ArrayList<View>>();
+	private ArrayList <ArrayList<View>> mWaypointViews = new ArrayList<ArrayList<View>>();
 
 	public ExpandableListAdapter(Activity act, Route route) {
 		mActivity = act;
@@ -62,12 +58,26 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		TextView text = null;
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.waypoint_layout, null);
+			ArrayList<View> temp = new ArrayList<View>();
+			mWaypointViews.add(temp);
+			try{
+				if(mWaypointViews.get(groupPosition).contains(convertView) == false){
+					mWaypointViews.get(groupPosition).add(childPosition, convertView);
+				}
+			}catch(IndexOutOfBoundsException IOOBE){
+				
+				System.out.println("IOOBE");
+			}
 		}
-		//mWaypointViews.add(index, object);
+		
+		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
+			convertView.setBackgroundColor(Color.RED);
+		}
+		
 		text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setText(children);
-		//highlightCurrentWaypoint(convertView);
-
+		
+		
 		convertView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -80,20 +90,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public int getChildrenCount(int groupPosition) {
 		return mSegmentList.get(groupPosition).getWaypointList().size();
-		//return groups.get(groupPosition).children.size();
 	}
 
 	@Override
 	public Object getGroup(int groupPosition) {
 		return mSegmentList.get(groupPosition) + ", "
 				+ mSegmentList.get(groupPosition).getSegmentStartTime();
-		//return groups.get(groupPosition);
 	}
 
 	@Override
 	public int getGroupCount() {
 		return mSegmentList.size();
-		//return groups.size();
 	}
 
 	@Override
@@ -108,7 +115,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public long getGroupId(int groupPosition) {
-		return 0;
+		return groupPosition;
 	}
 
 	@Override
@@ -117,8 +124,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.segment_layout, null);
+			//If the View is not already in the list it will be added.
+			if (mSegmentViews.contains(convertView) == false){
+				mSegmentViews.add(groupPosition,convertView);
+			}
 		}
-		mSegmentViews.add(convertView);
+		
+		
+		if(container.getRoute().getCurrentIndex() == groupPosition){
+			convertView.setBackgroundColor(Color.CYAN);
+		}
+		/*else{
+			convertView.setBackgroundColor(Color.RED);
+		}*/
+		
+		
 		int hslSegMode = mSegmentList.get(groupPosition).getSegmentType();
 		CheckedTextView textview = (CheckedTextView) convertView
 				.findViewById(R.id.checkedTextView);
@@ -161,19 +181,23 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return false;
 	}
 
-	/*
-	private ArrayList<View> getSegmentViewList() {
+	
+	public ArrayList<View> getSegmentViewList() {
+		if(mSegmentViews == null){
+			return null;
+		}
+		else
 		return mSegmentViews;
 	}
-
-	private ArrayList<View> getWaypointViewList() {
+	
+	public ArrayList<ArrayList<View>> getWaypointViewList() {
 		return mWaypointViews;
 	}
-	*/
+	
 	
 	/*
-	//private void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
-	private void highlightCurrentWaypoint(View convertView) {
+	//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
+	public void highlightCurrentWaypoint(View convertView) {
 		System.out.println("DBG hightlightCurrentWaypoint");
 
 		TextView text = null;

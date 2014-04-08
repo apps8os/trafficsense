@@ -1,21 +1,29 @@
 package org.apps8os.trafficsense.second;
 
 
+import java.util.ArrayList;
+
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.Route;
 import android.app.Activity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+
+
+	
 
 /**
  * Class for Schematic View.
@@ -27,6 +35,7 @@ public class SchematicView extends Activity {
 	/**
 	 * The top banner.
 	 */
+
 	private TextView mTextView;
 	//private String mKey=null;
 	//private String mRequest;
@@ -35,8 +44,15 @@ public class SchematicView extends Activity {
 	 * The journey we are tracking.
 	 */
 	private Route mRoute;
-	private WaypointChangedReceiver mWaypointChangedReceiver;
+
+	//private CoordsReadyReceiver mCoordsReadyReceiver;*/
+	WaypointChangedReceiver mWaypointChangedReceiver;
+	ExpandableListAdapter mAdapter;
+	
+
+	
 	//private SparseArray<Group> mGroups = new SparseArray<Group>();
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +62,14 @@ public class SchematicView extends Activity {
 		mRoute = mContainer.getRoute();
 
 		ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-		ExpandableListAdapter adapter = new ExpandableListAdapter(this, mRoute);
-		listView.setAdapter(adapter);
+		mAdapter = new ExpandableListAdapter(this, mRoute);
+		listView.setAdapter(mAdapter);
 
 		mTextView = (TextView) findViewById(R.id.checkedTextView);
 		mTextView.setText("\t From: " + mRoute.getStart() + "\n\t To: "
 				+ mRoute.getDestination() + "\n");
 
-		mWaypointChangedReceiver = new WaypointChangedReceiver(adapter);
+		mWaypointChangedReceiver = new WaypointChangedReceiver(mAdapter);
 	}
 
 	@Override
@@ -127,23 +143,53 @@ public class SchematicView extends Activity {
 				return;
 			}
 
+
+			changeColor();
 			//TODO: Highlight or colour current waypoint/segment.
 			//changeColor();
+
 			//TODO: call method that highlights current waypoint
 		} 
 
-		/*
+		
 		private void changeColor() {
+			
 			TrafficsenseContainer container = TrafficsenseContainer.getInstance();
+			System.out.println("Trying to update!");
+			ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
+			listView.setAdapter(mAdapter);		}
+			/*
+		if(mAdapter != null){
+			System.out.println("it should update!");
+			
+			else{
+				System.out.println("Why is this null?");
+			}
 			int seg = container.getRoute().getCurrentIndex();
 			int way = container.getRoute().getCurrentSegment().getCurrentIndex();
+			try{
 			ArrayList <View> segView = mAdapter.getSegmentViewList();
-			ArrayList <View> wayView = mAdapter.getWaypointViewList();
-			segView.get(seg-1).setBackgroundColor(Color.CYAN);
-			wayView.get(way-1).setBackgroundColor(Color.CYAN);
-		}
-		*/
+			if (segView !=null){
+				System.out.println("Change color of seg");
+				segView.get(seg-1).setBackgroundColor(Color.CYAN);
+			}}
+			catch(NullPointerException npe){
+				System.out.println("NPE on segView: ");
+			}
+			
+			try{
+			ArrayList<ArrayList<View>> wayView = mAdapter.getWaypointViewList();
+			if(wayView != null && wayView.size() !=0){
+				System.out.println("Change color of way");
+				wayView.get(seg-1).get(way-1).setBackgroundColor(Color.RED);
+			}}
+			catch (NullPointerException npe){
+				System.out.println("NPE on wayView:");
+			}
+			
+			*/
+		
+		
 	}
-
 }
 
