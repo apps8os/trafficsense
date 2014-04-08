@@ -196,16 +196,23 @@ public class MainActivity extends Activity {
 	 * These lines do not follow roads.
 	 */
 	public void drawRoute() {
-		map.clear();
 		Route r = mContainer.getRoute();
-
 		boolean zoomed = false;
-		// Get the image that will be used as the bus stop icon
-		int resID;
+		/**
+		 * Image that will be used as waypoint icons.
+		 */
 		Bitmap icon;
-		boolean seg_walk = false;
+		/**
+		 * Resource ID for icon.
+		 */
+		int resID;
+		/**
+		 * The polyline shown on the map.
+		 */
 		PolylineOptions o = new PolylineOptions().geodesic(true);
 
+		map.clear();
+		
 		for (int i = 0; i < r.getSegmentList().size(); i++) {
 
 			Segment s = r.getSegmentList().get(i);
@@ -277,8 +284,7 @@ public class MainActivity extends Activity {
 					continue;
 				}
 
-				// System.out.println("DBG waypoint: (" + w.getLatitude() + ","
-				// + w.getLongitude() + ")");
+				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 
 				/**
