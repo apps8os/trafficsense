@@ -1,5 +1,6 @@
 package org.apps8os.trafficsense.pebble;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -228,13 +229,15 @@ public class PebbleUiController {
 		updateList(currentSegment);
 		
 		// TODO: test this
+		SimpleDateFormat hhmm = new SimpleDateFormat("kk:mm");
 		long wpMillis = TimeParser.strWaypointTimeToMillisCrossDay(mRoute, currentSegment.getSegmentStartTime());
-		String currentTimeStr = currentDate.toString(); // Not sure if in correct form kk:mm
+		String currentTimeStr = hhmm.format(currentDate); // Not sure if in correct form kk:mm
 		long currentMillis = TimeParser.strWaypointTimeToMillisCrossDay(mRoute, currentTimeStr);
-		
+		System.out.println("DBG PebbleUiController current time parsed as:" + currentTimeStr + " wpMillis: " + wpMillis + " currentMillis: " + currentMillis);
 		
 		// If the segment start time has already passed, switch to the 3stop screen
 		if (wpMillis < currentMillis) {
+			System.out.println("DBG PebbleUiController segment start was before current time:" + currentTimeStr);
 			mPblCom.switchTo3stopScreen();
 		}
 	}
