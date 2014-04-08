@@ -40,7 +40,7 @@ public class EmailReader {
 		try {
 			store = session.getStore();
 		} catch (NoSuchProviderException ex) {
-			System.out.println("DBG initMailbox getStore:"+ex.getMessage());
+			//System.out.println("DBG EmailReader.initMailbox getStore:"+ex.getMessage());
 			throw new EmailException("No such service provider:"+ex.getMessage());
 		}
 		// Connect to the server using IMAP over SSL (imaps).
@@ -48,11 +48,11 @@ public class EmailReader {
 			store.connect(credential.getImapServer(), credential.getAddress(),
 					credential.getPassword());
 		} catch (MessagingException e) {
-			System.out.println("DBG initMailbox connect(): " + e.getMessage());
+			//System.out.println("DBG EmailReader.initMailbox connect(): " + e.getMessage());
 			throw new EmailException("Error connecting to mail server:"+e.getMessage());
 		}
 
-		// specify the folder from which to get email
+		// Specify the folder from which to get email
 		try {
 			inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);
@@ -60,7 +60,7 @@ public class EmailReader {
 			throw new EmailException("Error opening email folder:"+e.getMessage());
 		}
 
-		// set the amount of mail in the box.
+		// Set the amount of mail in the box.
 		try {
 			mailboxMsgCount = inbox.getMessageCount();
 		} catch (MessagingException e) {
@@ -95,7 +95,7 @@ public class EmailReader {
 		} catch (MessagingException e) {
 			throw new EmailException("Error retreiving e-mail:"+e.getMessage()); 
 		}
-		System.out.println("DBG: getNextMail: "+msg.toString());
+		System.out.println("DBG: EmailReader.getNextMail message retrieved");
          /**
           * Create an email object and put the current email information into it. 
           */
@@ -149,6 +149,8 @@ public class EmailReader {
 		 */
 		msgPointer--;
 
+		System.out.println("DBG: EmailReader.getNextMail message prepared");
+		
 		return email;
 	}
 	
