@@ -18,36 +18,22 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 
-	
 
 /**
  * Class for Schematic View.
  */
 public class SchematicView extends Activity {
-	
-	//private EditText mEditText;
-	//private Button mButton;
 	/**
 	 * The top banner.
 	 */
-
 	private TextView mTextView;
-	//private String mKey=null;
-	//private String mRequest;
 	private TrafficsenseContainer mContainer;
 	/**
 	 * The journey we are tracking.
 	 */
 	private Route mRoute;
-
-	//private CoordsReadyReceiver mCoordsReadyReceiver;*/
 	WaypointChangedReceiver mWaypointChangedReceiver;
 	ExpandableListAdapter mAdapter;
-	
-
-	
-	//private SparseArray<Group> mGroups = new SparseArray<Group>();
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +50,7 @@ public class SchematicView extends Activity {
 		mTextView.setText("\t From: " + mRoute.getStart() + "\n\t To: "
 				+ mRoute.getDestination() + "\n");
 
-		mWaypointChangedReceiver = new WaypointChangedReceiver(mAdapter);
+		mWaypointChangedReceiver = new WaypointChangedReceiver();
 	}
 
 	@Override
@@ -118,13 +104,6 @@ public class SchematicView extends Activity {
 	 * Change UI current waypoint has changed.
 	 */
 	private class WaypointChangedReceiver extends BroadcastReceiver {
-		
-		//ExpandableListAdapter mAdapter;
-
-		public WaypointChangedReceiver (ExpandableListAdapter adapter) {
-			super();
-			//mAdapter = adapter;
-		}
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -137,60 +116,7 @@ public class SchematicView extends Activity {
 				//TODO: handle error
 				return;
 			}
-
-
-			//changeColor();
-			//TODO: Highlight or colour current waypoint/segment.
-			//changeColor();
-
-			//TODO: call method that highlights current waypoint
 		} 
-
-		
-//		private void changeColor() {
-//			System.out.println("DBG SchematicView changeColor");
-//			ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-//			listView.setAdapter(mAdapter);
-//			// TODO: Delete these code from master branch
-//			// This kind of experiment should be done in a separate branch.
-//			
-//			/*
-//			if(mAdapter != null) {
-//				System.out.println("DBG SchematicView it should update!");
-//
-//				else{
-//					System.out.println("DBG SchematicView Why is this null?");
-//				}
-//				int seg = container.getRoute().getCurrentIndex();
-//				int way = container.getRoute().getCurrentSegment().getCurrentIndex();
-//				try {
-//					ArrayList <View> segView = mAdapter.getSegmentViewList();
-//					if (segView !=null) {
-//						System.out.println("DBG SchematicView Change color of seg");
-//						segView.get(seg-1).setBackgroundColor(Color.CYAN);
-//					}
-//				} catch (NullPointerException npe){
-//					// TODO ???
-//					System.out.println("DBG SchematicView NPE on segView: ");
-//					throw npe;
-//				}
-//
-//				try {
-//					// This does not look good ...
-//					ArrayList<ArrayList<View>> wayView = mAdapter.getWaypointViewList();
-//					if(wayView != null && wayView.size() !=0) {
-//						System.out.println("DBG SchematicView Change color of way");
-//						wayView.get(seg-1).get(way-1).setBackgroundColor(Color.RED);
-//					}
-//				} catch (NullPointerException npe) {
-//					// TODO ???
-//					// Actually, you get the line number if you just let it through...
-//					System.out.println("DBG SchematicView NPE on wayView:");
-//					throw npe;
-//				}
-//				*/
-//		}		
-
 	}
 
 }
