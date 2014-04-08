@@ -70,9 +70,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 			}
 		}
 		
-		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
-			convertView.setBackgroundColor(Color.RED);
-		}
+//		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
+//			convertView.setBackgroundColor(Color.RED);
+//		}
 		
 		text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setText(children);
@@ -130,10 +130,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 			}
 		}
 		
-		
-		if(container.getRoute().getCurrentIndex() == groupPosition){
-			convertView.setBackgroundColor(Color.CYAN);
-		}
+//		
+//		if(container.getRoute().getCurrentIndex() == groupPosition){
+//			convertView.setBackgroundColor(Color.CYAN);
+//		}
 		/*else{
 			convertView.setBackgroundColor(Color.RED);
 		}*/
