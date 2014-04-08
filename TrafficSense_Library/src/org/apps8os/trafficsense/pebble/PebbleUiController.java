@@ -236,10 +236,10 @@ public class PebbleUiController {
 		System.out.println("DBG PebbleUiController current time parsed as:" + currentTimeStr + " wpMillis: " + wpMillis + " currentMillis: " + currentMillis);
 		
 		// If the segment start time has already passed, switch to the 3stop screen
-		if (wpMillis < currentMillis) {
-			System.out.println("DBG PebbleUiController segment start was before current time:" + currentTimeStr);
-			mPblCom.switchTo3stopScreen();
-		}
+		//if (wpMillis < currentMillis) {
+			//System.out.println("DBG PebbleUiController segment start was before current time:" + currentTimeStr);
+			//mPblCom.switchTo3stopScreen();
+		//}
 	}
 	
 	/**
