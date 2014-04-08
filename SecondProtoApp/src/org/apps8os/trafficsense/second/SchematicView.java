@@ -32,8 +32,8 @@ public class SchematicView extends Activity {
 	 * The journey we are tracking.
 	 */
 	private Route mRoute;
-	WaypointChangedReceiver mWaypointChangedReceiver;
-	ExpandableListAdapter mAdapter;
+	private WaypointChangedReceiver mWaypointChangedReceiver;
+	private ExpandableListAdapter mAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
