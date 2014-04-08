@@ -163,7 +163,7 @@ public class TrafficsenseContainer {
 		if (mRunningServices < 0 || mAttachedActivities < 0) {
 			System.out.println("DBG Containter: last: attached count below zero");
 		}
-		System.out.println("DBG Container: isLast: Ser:"+mRunningServices+"Act:"+mAttachedActivities);
+		System.out.println("DBG Container: isLast: Ser:"+mRunningServices+" Act:"+mAttachedActivities);
 		if (mRunningServices == 0 && mAttachedActivities == 0) {
 			return true;
 		}
