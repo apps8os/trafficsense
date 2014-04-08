@@ -58,13 +58,22 @@ public class OutputLogic {
 			// General case
 			switch (curSegment.getSegmentType()) {
 			case RouteConstants.METRO:
-				message = "Take metro";
+				message = "Take the metro";
 				break;
 			case RouteConstants.CONMUTER_TRAINS:
-				message = "Take" + curSegment.getSegmentMode() + " train";
+				message = "Take the" + curSegment.getSegmentMode() + " train";
 				break;
+			case RouteConstants.U_LINES:
+				message = "Take the " + curSegment.getSegmentMode() + " train";
+				break;
+			case RouteConstants.TRAMS:
+				message = "Take the " + curSegment.getSegmentMode() + " tram";
+				break;
+			case RouteConstants.FERRY:
+				message = "Take the " + curSegment.getSegmentMode() + " ferry";
+				break;		
 			default:
-				message = "Take bus " + curSegment.getSegmentMode();
+				message = "Take the bus " + curSegment.getSegmentMode();
 				break;
 			}
 			message += " to " + curSegment.getLastWaypoint().getWaypointName();
