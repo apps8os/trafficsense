@@ -22,18 +22,39 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+<<<<<<< HEAD
 public class SchematicView extends ExpandableListActivity{
 	
 	
+=======
+/**
+ * Class for Schematic View.
+ */
+public class SchematicView extends Activity {
+	
+	//private EditText mEditText;
+	//private Button mButton;
+	/**
+	 * The top banner.
+	 */
+>>>>>>> 1e7400231d7d8e9c6703e60a2bfde91964e9f6f6
 	private TextView mTextView;
 	//private String mKey=null;
 	//private String mRequest;
 	private TrafficsenseContainer mContainer;
+	/**
+	 * The journey we are tracking.
+	 */
 	private Route mRoute;
+<<<<<<< HEAD
 	//private CoordsReadyReceiver mCoordsReadyReceiver;*/
 	WaypointChanged mWaypointChangedReceiver;
 	ExpandableListAdapter mAdapter;
 	
+=======
+	private WaypointChangedReceiver mWaypointChangedReceiver;
+	//private SparseArray<Group> mGroups = new SparseArray<Group>();
+>>>>>>> 1e7400231d7d8e9c6703e60a2bfde91964e9f6f6
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +66,12 @@ public class SchematicView extends ExpandableListActivity{
 		ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
 		ExpandableListAdapter adapter = new ExpandableListAdapter(this, mRoute);
 		listView.setAdapter(adapter);
+
 		mTextView = (TextView) findViewById(R.id.checkedTextView);
 		mTextView.setText("\t From: " + mRoute.getStart() + "\n\t To: "
 				+ mRoute.getDestination() + "\n");
-		mWaypointChangedReceiver = new WaypointChanged(adapter);
+
+		mWaypointChangedReceiver = new WaypointChangedReceiver(adapter);
 	}
 
 	@Override
@@ -61,6 +84,7 @@ public class SchematicView extends ExpandableListActivity{
 	/**
 	 * Makes the options menu. 
 	 */
+	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
 		super.onPrepareOptionsMenu(menu);
 		MenuItem map_view = menu.findItem(R.id.menu_map_view);
@@ -98,22 +122,22 @@ public class SchematicView extends ExpandableListActivity{
 	}
 
 	/**
-	 * Handle Intents generated when current waypoint has changed. 
+	 * Change UI current waypoint has changed.
 	 */
-	private class WaypointChanged extends BroadcastReceiver {
+	private class WaypointChangedReceiver extends BroadcastReceiver {
 		
 		//ExpandableListAdapter mAdapter;
 
-		public WaypointChanged (ExpandableListAdapter adapter) {
+		public WaypointChangedReceiver (ExpandableListAdapter adapter) {
 			super();
 			//mAdapter = adapter;
 		}
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			System.out.println("DBG Schematic View. Waypoint changed");
+			System.out.println("DBG SchematicView.WaypointChangedReceiver.onReceive");
 			if (intent.hasExtra(Constants.ROUTE_STOPPED)) {
-				//TODO: handle route stoped
+				//TODO: Restore or clean UI if user stopped the journey.
 				return;
 			}
 			if (intent.hasExtra(Constants.ERROR)) {
@@ -121,7 +145,12 @@ public class SchematicView extends ExpandableListActivity{
 				return;
 			}
 
+<<<<<<< HEAD
 			changeColor();
+=======
+			//TODO: Highlight or colour current waypoint/segment.
+			//changeColor();
+>>>>>>> 1e7400231d7d8e9c6703e60a2bfde91964e9f6f6
 			//TODO: call method that highlights current waypoint
 		} 
 

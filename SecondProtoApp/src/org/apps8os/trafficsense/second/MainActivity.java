@@ -38,7 +38,7 @@ import android.widget.ListView;
 public class MainActivity extends Activity {
 
 	private CoordsReadyReceiver mCoordsReadyReceiver;
-	private WaypointChanged mWaypointChangedReceiver;
+	private WaypointChangedReceiver mWaypointChangedReceiver;
 
 	private TrafficsenseContainer mContainer;
 	private GoogleMap map;
@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
 		listview.setVisibility(View.INVISIBLE);
 		map.setMyLocationEnabled(true);
 		mCoordsReadyReceiver = new CoordsReadyReceiver();
-		mWaypointChangedReceiver = new WaypointChanged();
+		mWaypointChangedReceiver = new WaypointChangedReceiver();
 		String welcome[] = { "Welcome" };
 		showList(welcome);
 
@@ -353,7 +353,7 @@ public class MainActivity extends Activity {
 	/**
 	 * Class that receives an intent when current waypoint has changed.
 	 */
-	private class WaypointChanged extends BroadcastReceiver {
+	private class WaypointChangedReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {

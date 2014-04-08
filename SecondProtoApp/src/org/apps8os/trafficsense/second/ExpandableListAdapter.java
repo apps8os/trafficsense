@@ -19,10 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Expandable list for SchematicView.
+ */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	//private final Route mRoute;
 	private final ArrayList<Segment> mSegmentList;
 	private LayoutInflater mInflater;
+	/**
+	 * Holds the Activity to which this expandable list belongs.
+	 */
 	private Activity mActivity;
 	TrafficsenseContainer container = TrafficsenseContainer.getInstance();
 	private ArrayList<View> mSegmentViews = new ArrayList<View>();
@@ -175,6 +181,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return false;
 	}
 
+<<<<<<< HEAD
 	
 	public ArrayList<View> getSegmentViewList() {
 		if(mSegmentViews == null){
@@ -184,13 +191,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	}
 	
 	public ArrayList<ArrayList<View>> getWaypointViewList() {
+=======
+	/*
+	private ArrayList<View> getSegmentViewList() {
+		return mSegmentViews;
+	}
+
+	private ArrayList<View> getWaypointViewList() {
+>>>>>>> 1e7400231d7d8e9c6703e60a2bfde91964e9f6f6
 		return mWaypointViews;
 	}
 	
 	
 	/*
-	//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
-	public void highlightCurrentWaypoint(View convertView) {
+	//private void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
+	private void highlightCurrentWaypoint(View convertView) {
 		System.out.println("DBG hightlightCurrentWaypoint");
 
 		TextView text = null;
