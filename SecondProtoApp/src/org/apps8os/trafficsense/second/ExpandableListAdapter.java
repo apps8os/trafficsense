@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
-	//private final Route mRoute;
+	private final Route mRoute;
 	private final ArrayList<Segment> mSegmentList;
 	private LayoutInflater mInflater;
 	private Activity mActivity;
@@ -31,7 +31,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	public ExpandableListAdapter(Activity act, Route route) {
 		mActivity = act;
-		//mRoute = route;
+		mRoute = route;
 		mInflater = act.getLayoutInflater();
 		mSegmentList = route.getSegmentList();
 	}
@@ -70,9 +70,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 			}
 		}
 		
-//		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
-//			convertView.setBackgroundColor(Color.RED);
-//		}
+		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
+			convertView.setBackgroundColor(Color.RED);
+		}
 		
 		text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setText(children);
@@ -129,14 +129,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 				mSegmentViews.add(groupPosition,convertView);
 			}
 		}
-		
-//		
-//		if(container.getRoute().getCurrentIndex() == groupPosition){
-//			convertView.setBackgroundColor(Color.CYAN);
-//		}
-		/*else{
+				
+		if(container.getRoute().getCurrentIndex() == groupPosition){
+			convertView.setBackgroundColor(Color.CYAN);
+		} else{
 			convertView.setBackgroundColor(Color.RED);
-		}*/
+		}
 		
 		
 		int hslSegMode = mSegmentList.get(groupPosition).getSegmentType();
@@ -194,26 +192,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return mWaypointViews;
 	}
 	
-	
-	/*
 	//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
 	public void highlightCurrentWaypoint(View convertView) {
 		System.out.println("DBG hightlightCurrentWaypoint");
 
 		TextView text = null;
-		ArrayList<View> al = mWaypointViews.get(0);
 		System.out.println("SIZEEE:" + mSegmentViews.size());
 		mRoute.getSegmentList().get(1).getWaypointList().get(0);
-		mSegmentViews.get().findViewById(R.id.checkedTextView)
-				.setBackgroundColor(Color.CYAN);
-		View v = al.get(0);
+		// TODO: get() needs an argument
+		//mSegmentViews.get().findViewById(R.id.checkedTextView).setBackgroundColor(Color.CYAN);
 		TextView p = (TextView) mWaypointViews.get(1).get(1);
 		text = (TextView) p.findViewById(R.id.checkedTextView);
 		p.setBackgroundColor(Color.CYAN);
 		text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setBackgroundColor(Color.CYAN);
-
 	}
-	*/
 
 } 
