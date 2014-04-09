@@ -89,7 +89,7 @@ public class MessageManager implements Runnable {
 
     			// DBG stuff
     			long command = messageQueue.peek().getUnsignedInteger(0);
-    			System.out.println("DBG MessageManager sent dict to pebble with command " + command);
+    			System.out.println("DBG MessageManager sent dict to Pebble with command " + command);
 
     			PebbleKit.sendDataToPebble(mContext.getApplicationContext(), mUUID, messageQueue.peek());
     			isMessagePending = Boolean.valueOf(true);

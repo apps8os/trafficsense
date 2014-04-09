@@ -14,11 +14,6 @@ import org.apps8os.trafficsense.util.TimeParser;
  * Class for Pebble user interface controller.
  */
 public class PebbleUiController {
-	/* -- UNUSED
-	private static final int WINDOW_BASIC = 0;
-	private static final int WINDOW_3STOP = 1;
-	*/
-	
 	/**
 	 * Pebble communication handler.
 	 */
@@ -123,7 +118,6 @@ public class PebbleUiController {
 	 */
 	public void totalUpdate() {
 		int newSegmentIndex = mRoute.getCurrentIndex();
-		//int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		int nonWalkingSeg = getFirstNonWalkingSegmentIndex(newSegmentIndex);
 		initializeSegment(nonWalkingSeg);
 	}
@@ -155,7 +149,6 @@ public class PebbleUiController {
 	 * Send an alarm if we are on the second last stop
 	 */
 	private void alarmIfNeeded() {
-		//int newSegmentIndex = mRoute.getCurrentIndex();
 		int newWpIndex = mRoute.getCurrentSegment().getCurrentIndex();
 		Segment newSegment = mRoute.getCurrentSegment();
 		if (newWpIndex == newSegment.getWaypointList().size() - 1) {
@@ -235,11 +228,13 @@ public class PebbleUiController {
 		long currentMillis = TimeParser.strWaypointTimeToMillisCrossDay(mRoute, currentTimeStr);
 		System.out.println("DBG PebbleUiController current time parsed as:" + currentTimeStr + " wpMillis: " + wpMillis + " currentMillis: " + currentMillis);
 		
-		// If the segment start time has already passed, switch to the 3stop screen
-		//if (wpMillis < currentMillis) {
-			//System.out.println("DBG PebbleUiController segment start was before current time:" + currentTimeStr);
-			//mPblCom.switchTo3stopScreen();
-		//}
+		// TODO: If the segment start time has already passed, switch to the 3stop screen
+		/*
+		if (wpMillis < currentMillis) {
+			System.out.println("DBG PebbleUiController segment start was before current time:" + currentTimeStr);
+			mPblCom.switchTo3stopScreen();
+		}
+		*/
 	}
 	
 	/**

@@ -37,7 +37,6 @@ public class SchematicView extends Activity {
 	private WaypointChangedReceiver mWaypointChangedReceiver;
 	private ExpandableListAdapter mAdapter;
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -131,6 +130,7 @@ public class SchematicView extends Activity {
 			int iCurWaypoint = mRoute.getCurrentSegment().getCurrentIndex();
 			mAdapter.highlighWaypoint(iCurSegment, iCurWaypoint);
 		}
+
 	}
 
 }
