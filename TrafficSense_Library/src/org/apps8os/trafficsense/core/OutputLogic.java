@@ -61,7 +61,7 @@ public class OutputLogic {
 				message = "Take the metro";
 				break;
 			case RouteConstants.CONMUTER_TRAINS:
-				message = "Take the" + curSegment.getSegmentMode() + " train";
+				message = "Take the " + curSegment.getSegmentMode() + " train";
 				break;
 			case RouteConstants.U_LINES:
 				message = "Take the " + curSegment.getSegmentMode() + " train";

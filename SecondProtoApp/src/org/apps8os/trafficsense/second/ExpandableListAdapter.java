@@ -1,8 +1,8 @@
 package org.apps8os.trafficsense.second;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.core.Route;
 import org.apps8os.trafficsense.core.RouteConstants;
 import org.apps8os.trafficsense.core.Segment;
@@ -19,21 +19,46 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * The expandable sub-lists of waypoints in schematic view. 
+ */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
-	private final Route mRoute;
-	private final ArrayList<Segment> mSegmentList;
-	private LayoutInflater mInflater;
-	private Activity mActivity;
-	TrafficsenseContainer container = TrafficsenseContainer.getInstance();
-	private ArrayList<View> mSegmentViews = new ArrayList<View>();
 
-	private ArrayList <ArrayList<View>> mWaypointViews = new ArrayList<ArrayList<View>>();
+	private final Route mRoute;
+	/**
+	 * List of segments in the journey.
+	 */
+	private final ArrayList<Segment> mSegmentList;
+	/**
+	 * Layout inflater from our parent Activity. 
+	 */
+	private LayoutInflater mInflater;
+	/**
+	 * A reference to the schematic view.
+	 */
+	private Activity mActivity;
+	/**
+	 * Holds the pool of convertView(s).
+	 */
+	private HashMap<View, HashMap<Integer,Integer>> mConvertViewPool;
+	/**
+	 * For reverse loop-up of mConvertViewPool.
+	 */
+	private HashMap<HashMap<Integer,Integer>,View> mReverseConvertViewMap;
+	private final static int SEGMENT_ITEM_VIEW = 99999;
+	/**
+	 * Previously highlighed waypoint.
+	 */
+	private View mPrevWptConvertView;
 
 	public ExpandableListAdapter(Activity act, Route route) {
 		mActivity = act;
 		mRoute = route;
 		mInflater = act.getLayoutInflater();
 		mSegmentList = route.getSegmentList();
+		mConvertViewPool = new HashMap<View, HashMap<Integer,Integer>>();
+		mReverseConvertViewMap = new HashMap<HashMap<Integer,Integer>,View>();
+		mPrevWptConvertView = null;
 	}
 
 	@Override
@@ -54,29 +79,43 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	public View getChildView(int groupPosition, final int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
 
-		final String children = (String) getChild(groupPosition, childPosition);
-		TextView text = null;
-		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.waypoint_layout, null);
-			ArrayList<View> temp = new ArrayList<View>();
-			mWaypointViews.add(temp);
-			try{
-				if(mWaypointViews.get(groupPosition).contains(convertView) == false){
-					mWaypointViews.get(groupPosition).add(childPosition, convertView);
-				}
-			}catch(IndexOutOfBoundsException IOOBE){
-				
-				System.out.println("IOOBE");
+		// TODO refactor
+		if (convertView != null) {
+			if (mPrevWptConvertView == convertView) {
+				mPrevWptConvertView = null;
 			}
+			if (mConvertViewPool.containsKey(convertView)) {
+				// A recycled convertView, delete its current entry
+				HashMap<Integer,Integer> value = mConvertViewPool.get(convertView);
+				mConvertViewPool.remove(convertView);
+				mReverseConvertViewMap.remove(value);
+			} else {
+				// Got it from somewhere ?!
+				System.out.println("DBG ExpListAdp.getChildView convertView from somewhere?");
+			}
+		} else {
+			// It is null, we have to inflate it.
+			convertView = mInflater.inflate(R.layout.waypoint_layout, null);
 		}
+		// Add it to pool
+		HashMap<Integer,Integer> viewPosition = new HashMap<Integer,Integer>();
+		viewPosition.put(groupPosition, childPosition);
+		mConvertViewPool.put(convertView, viewPosition);
+		mReverseConvertViewMap.put(viewPosition, convertView);
 		
-		if(container.getRoute().getCurrentSegment().getCurrentIndex() == childPosition){
-			convertView.setBackgroundColor(Color.RED);
-		}
-		
-		text = (TextView) convertView.findViewById(R.id.checkedTextView);
+		// Update its text
+		final String children = (String) getChild(groupPosition, childPosition);
+		TextView text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setText(children);
-		
+
+		// Set its color
+		if(mRoute.getCurrentIndex() == groupPosition &&
+			mRoute.getCurrentSegment().getCurrentIndex() == childPosition) {
+			convertView.setBackgroundColor(Color.RED);
+			mPrevWptConvertView = convertView;
+		} else {
+			convertView.setBackgroundColor(Color.CYAN);
+		}
 		
 		convertView.setOnClickListener(new OnClickListener() {
 			@Override
@@ -122,21 +161,31 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
 
-		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.segment_layout, null);
-			//If the View is not already in the list it will be added.
-			if (mSegmentViews.contains(convertView) == false){
-				mSegmentViews.add(groupPosition,convertView);
+		// TODO refactor
+		if (convertView != null) {
+			if (mPrevWptConvertView == convertView) {
+				mPrevWptConvertView = null;
 			}
+			if (mConvertViewPool.containsKey(convertView)) {
+				// A recycled convertView, delete its current entry
+				HashMap<Integer,Integer> value = mConvertViewPool.get(convertView);
+				mConvertViewPool.remove(convertView);
+				mReverseConvertViewMap.remove(value);
+			} else {
+				// Got it from somewhere ?!
+				System.out.println("DBG ExpListAdp.getGroupView convertView from somewhere?");
+			}
+		} else {
+			// It is null, we have to inflate it.
+			convertView = mInflater.inflate(R.layout.segment_layout, null);
 		}
-				
-		if(container.getRoute().getCurrentIndex() == groupPosition){
-			convertView.setBackgroundColor(Color.CYAN);
-		} else{
-			convertView.setBackgroundColor(Color.RED);
-		}
-		
-		
+		// Add it to pool
+		HashMap<Integer,Integer> viewPosition = new HashMap<Integer,Integer>();
+		viewPosition.put(groupPosition, SEGMENT_ITEM_VIEW);
+		mConvertViewPool.put(convertView, viewPosition);
+		mReverseConvertViewMap.put(viewPosition, convertView);
+
+		// Populate it
 		int hslSegMode = mSegmentList.get(groupPosition).getSegmentType();
 		CheckedTextView textview = (CheckedTextView) convertView
 				.findViewById(R.id.checkedTextView);
@@ -179,33 +228,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 		return false;
 	}
 
-	
-	public ArrayList<View> getSegmentViewList() {
-		if(mSegmentViews == null){
-			return null;
+	public void highlighWaypoint(int segment, int waypoint) {
+		HashMap<Integer,Integer> viewPosition = new HashMap<Integer,Integer>();
+		viewPosition.put(segment, waypoint);
+		// Un-highligh previous waypoint
+		if (mPrevWptConvertView != null) {
+			TextView text = (TextView) mPrevWptConvertView.findViewById(R.id.checkedTextView);
+			text.setBackgroundColor(Color.CYAN);
 		}
-		else
-		return mSegmentViews;
-	}
-	
-	public ArrayList<ArrayList<View>> getWaypointViewList() {
-		return mWaypointViews;
-	}
-	
-	//public void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
-	public void highlightCurrentWaypoint(View convertView) {
-		System.out.println("DBG hightlightCurrentWaypoint");
-
-		TextView text = null;
-		System.out.println("SIZEEE:" + mSegmentViews.size());
-		mRoute.getSegmentList().get(1).getWaypointList().get(0);
-		// TODO: get() needs an argument
-		//mSegmentViews.get().findViewById(R.id.checkedTextView).setBackgroundColor(Color.CYAN);
-		TextView p = (TextView) mWaypointViews.get(1).get(1);
-		text = (TextView) p.findViewById(R.id.checkedTextView);
-		p.setBackgroundColor(Color.CYAN);
-		text = (TextView) convertView.findViewById(R.id.checkedTextView);
-		text.setBackgroundColor(Color.CYAN);
+		// Highlight current waypoint
+		View convertView = mReverseConvertViewMap.get(viewPosition);
+		mPrevWptConvertView = convertView;
+		if (convertView != null) {
+			TextView text = (TextView) convertView.findViewById(R.id.checkedTextView);
+			text.setBackgroundColor(Color.RED);
+		}
 	}
 
 } 
