@@ -315,13 +315,14 @@ public class Route {
 	 * @return true if it is it in the past. Always false if  Constants.useWallClock is false.
 	 */
 	public boolean isJourneyInThePast() {
-		if (Constants.useWallClock == false) {
-			return false;
-		}
+		
 		long journeyStartTime = TimeParser.strDateTimeToDate(mDeparture).getTime();
 		long now = System.currentTimeMillis();
 		//System.out.println("DBG isInPast: now:"+now+" start:"+journeyStartTime);
 		if (journeyStartTime >= now) {
+			return false;
+		}
+		if (Constants.useWallClock == false) {
 			return false;
 		}
 		return true;

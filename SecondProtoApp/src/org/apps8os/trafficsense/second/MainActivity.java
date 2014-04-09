@@ -290,12 +290,11 @@ public class MainActivity extends Activity {
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());
 
 				/**
-				 * Make a green marker for journey starting point and Red marker
+				 * Make a green marker for journey starting point and red marker
 				 * for journey end point.
 				 */
 				if (w.getWaypointName().equals(
 						r.getSegment(1).getWaypoint(0).getWaypointName())) {
-						//r.getSegment(0).getWaypoint(0).getWaypointName())) {
 
 					// This waypoint is the start of the segment, ignoring the first walking segment
 					map.addMarker(new MarkerOptions()
@@ -308,8 +307,8 @@ public class MainActivity extends Activity {
 									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 							);
 				} else if (w.getWaypointName().equals(
-						r.getSegment( r.getSegmentList().size()-2).getLastWaypoint().getWaypointName())) {
-						//r.getLastSegment().getLastWaypoint().getWaypointName())) {
+						r.getSegment(r.getSegmentList().size() - 2)
+								.getLastWaypoint().getWaypointName())) {
 
 					// This waypoint is the end of this segment ignoring the walking last segment
 					map.addMarker(new MarkerOptions()

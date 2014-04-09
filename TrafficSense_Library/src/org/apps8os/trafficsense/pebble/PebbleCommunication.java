@@ -40,7 +40,8 @@ public class PebbleCommunication {
 	
 	private static final int COMMAND_INIT_SEGMENT = 2;
 	private static final int KEY_LINE_NUMBER = 1;
-	private static final int KEY_FIRST_STOP_NAME = 2; // Don't confuse with KEY_STOP_NAME and -_CODE1
+	// Do not confuse these with KEY_STOP_*
+	private static final int KEY_FIRST_STOP_NAME = 2;
 	private static final int KEY_FIRST_STOP_CODE = 3;
 	private static final int KEY_START_TIME_HOUR = 4;
 	private static final int KEY_START_TIME_MIN = 5;
@@ -51,15 +52,14 @@ public class PebbleCommunication {
 	public static final int NUM_STOPS = 3;
 	
 	/**
-	 * Commands that can be sent from pebble to android
+	 * Commands that can be sent from Pebble to Android.
+	 * Command for getting required data, such as stop names,
+	 * when the user starts the Pebble application in the middle
+	 * of the journey.
 	 */
-	// Command for getting required data, stop names etc. e.g. when the user starts
-	// the pebble app in the middle of the journey
 	private static final int PEBBLE_COMMAND_GET = 0;
-	
-	
 	/**
-	 * The Context in which we works.
+	 * The Context in which we work.
 	 */
 	private Context mContext;
 	/**
@@ -121,7 +121,7 @@ public class PebbleCommunication {
 	}
 	
 	/**
-	 * Swithches the screen shown in pebble to the 3 stop list
+	 * Swithches the screen shown in Pebble to the 3 stop list
 	 */
 	public void switchTo3stopScreen() {
 		PebbleDictionary dictionary = new PebbleDictionary();
@@ -200,15 +200,12 @@ public class PebbleCommunication {
 	 * @param waypoint new waypoint to be added to the list.
 	 */
 	public void updateList(Waypoint waypoint) {
-		// If waypoint = null, send empty waypoints to scroll the list
-		String code;
-		String name;
-		String time;
+		String code = "";
+		String name = "";
+		String time = "";
 		if (waypoint == null) {
+			// Send empty waypoints to scroll the list
 			System.out.println("DBG updateList waypoint = null");
-			name = "";
-			code = "";
-			time = "";
 		} else {
 			name = waypoint.getWaypointName();
 			code = waypoint.getWaypointStopCode();
