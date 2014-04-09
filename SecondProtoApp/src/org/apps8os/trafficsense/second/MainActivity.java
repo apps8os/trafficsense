@@ -253,17 +253,18 @@ public class MainActivity extends Activity {
 					&& !(r.getSegmentList().size() - 1 == i)) {
 				map.addPolyline(o);
 				 o = new PolylineOptions().geodesic(true);
-				Segment prev = r.getSegment(i - 1);
-				Segment next = r.getSegment(i + 1);
+				Segment prev = r.getSegment(i - 1); 
+				Segment next = r.getSegment(i + 1);  
 
-				LatLng coord_prev = new LatLng(prev.getLastWaypoint()
+				LatLng coord_prev = new LatLng(prev.getLastWaypoint() 
 						.getLatitude(), prev.getLastWaypoint().getLongitude());
 				LatLng coord_next = new LatLng(next.getWaypoint(0)
 						.getLatitude(), next.getWaypoint(0).getLongitude());
-				o.add(coord_next).color(Color.MAGENTA);
+				o.add(coord_next).color(Color.LTGRAY);
 				o.add(coord_prev);
 				map.addPolyline(o);
 				o = new PolylineOptions().geodesic(true);
+				System.out.println("Walking segment id: "+ i);
 				continue;
 			}
 
@@ -283,6 +284,7 @@ public class MainActivity extends Activity {
 				if (w.hasCoord() == false) {
 					continue;
 				}
+
 
 				//System.out.println("DBG waypoint: (" + w.getLatitude() + "," + w.getLongitude() + ")");
 				LatLng coord = new LatLng(w.getLatitude(), w.getLongitude());

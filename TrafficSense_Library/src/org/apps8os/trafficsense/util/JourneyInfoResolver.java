@@ -221,10 +221,19 @@ public class JourneyInfoResolver {
 		if (waypoint == null) {
 			throw new JourneyInfoResolverException("null waypoint");
 		}
-
 		String url;
 		if (waypoint.hasStopCode() == false) {
 			if (Constants.getCoordsForNoStopCode == false) {
+				
+				//kamppi is an important stop but doesnt have a stop id so we set its location manually
+				System.out.println("DBG " + waypoint.getWaypointName().replaceAll(" ", ""));
+				if(waypoint.getWaypointName().replaceAll(" ","").equals("Kamppi,tulolaituri")){
+					
+					double latCord = 24.93000;
+					double longCord = 60.16859;
+					waypoint.setCoordinate(longCord, latCord);
+					System.out.print("DBG kamppi coordinates set manually\n");
+				}
 				return;
 			}
 			url = buildGetGeocodingUrl(geocodingResponseLimit, "address",
