@@ -18,26 +18,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Expandable list for SchematicView.
+ * The expandable sub-lists of waypoints in schematic view. 
  */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
-	//private final Route mRoute;
+	/**
+	 * List of segments in the journey.
+	 */
 	private final ArrayList<Segment> mSegmentList;
+	/**
+	 * Layout inflater from our parent Activity. 
+	 */
 	private LayoutInflater mInflater;
 	/**
-	 * Holds the Activity to which this expandable list belongs.
+	 * A reference to the schematic view.
 	 */
 	private Activity mActivity;
-
-	private ArrayList<View> mSegmentViews = new ArrayList<View>();
-
-	//private ArrayList <ArrayList<View>> mWaypointViews = new ArrayList<ArrayList<View>>();
+	/**
+	 * Holds the pool of convertView(s).
+	 */
+	private ArrayList<View> mConvertViewPool;
 
 	public ExpandableListAdapter(Activity act, Route route) {
 		mActivity = act;
-		//mRoute = route;
 		mInflater = act.getLayoutInflater();
 		mSegmentList = route.getSegmentList();
+		mConvertViewPool = new ArrayList<View>();
 	}
 
 	@Override
@@ -59,14 +64,23 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 			boolean isLastChild, View convertView, ViewGroup parent) {
 
 		final String children = (String) getChild(groupPosition, childPosition);
-		TextView text = null;
-		if (convertView == null) {
+		if (convertView != null) {
+			if (mConvertViewPool.contains(convertView)) {
+				// A recycled convertView, delete its current entry
+				mConvertViewPool.remove(convertView);
+			} else {
+				// Got it from somewhere ?!
+				System.out.println("DBG ExpListAdp.getChildView convertView from somewhere?");
+			}
+		} else {
+			// It is null, we have to inflate it.
 			convertView = mInflater.inflate(R.layout.waypoint_layout, null);
 		}
-		//mWaypointViews.add(index, object);
-		text = (TextView) convertView.findViewById(R.id.checkedTextView);
+		// Add it to pool
+		mConvertViewPool.add(convertView);
+		// Update its text
+		TextView text = (TextView) convertView.findViewById(R.id.checkedTextView);
 		text.setText(children);
-		//highlightCurrentWaypoint(convertView);
 
 		convertView.setOnClickListener(new OnClickListener() {
 			@Override
@@ -80,20 +94,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public int getChildrenCount(int groupPosition) {
 		return mSegmentList.get(groupPosition).getWaypointList().size();
-		//return groups.get(groupPosition).children.size();
 	}
 
 	@Override
 	public Object getGroup(int groupPosition) {
 		return mSegmentList.get(groupPosition) + ", "
 				+ mSegmentList.get(groupPosition).getSegmentStartTime();
-		//return groups.get(groupPosition);
 	}
 
 	@Override
 	public int getGroupCount() {
 		return mSegmentList.size();
-		//return groups.size();
 	}
 
 	@Override
@@ -108,17 +119,29 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public long getGroupId(int groupPosition) {
-		return 0;
+		return groupPosition;
 	}
 
 	@Override
 	public View getGroupView(int groupPosition, boolean isExpanded,
 			View convertView, ViewGroup parent) {
 
-		if (convertView == null) {
+		if (convertView != null) {
+			if (mConvertViewPool.contains(convertView)) {
+				// A recycled convertView, delete its current entry
+				mConvertViewPool.remove(convertView);
+			} else {
+				// Got it from somewhere ?!
+				System.out.println("DBG ExpListAdp.getGroupView convertView from somewhere?");
+			}
+		} else {
+			// It is null, we have to inflate it.
 			convertView = mInflater.inflate(R.layout.segment_layout, null);
 		}
-		mSegmentViews.add(convertView);
+		// Add it to pool
+		mConvertViewPool.add(convertView);
+
+		// Populate it
 		int hslSegMode = mSegmentList.get(groupPosition).getSegmentType();
 		CheckedTextView textview = (CheckedTextView) convertView
 				.findViewById(R.id.checkedTextView);
@@ -160,36 +183,5 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
 		return false;
 	}
-
-	/*
-	private ArrayList<View> getSegmentViewList() {
-		return mSegmentViews;
-	}
-
-	private ArrayList<View> getWaypointViewList() {
-		return mWaypointViews;
-	}
-	*/
-	
-	/*
-	//private void highlightCurrentWaypoint(int groupPosition,int childPosition, View convertView, ViewGroup parent){
-	private void highlightCurrentWaypoint(View convertView) {
-		System.out.println("DBG hightlightCurrentWaypoint");
-
-		TextView text = null;
-		ArrayList<View> al = mWaypointViews.get(0);
-		System.out.println("SIZEEE:" + mSegmentViews.size());
-		mRoute.getSegmentList().get(1).getWaypointList().get(0);
-		mSegmentViews.get().findViewById(R.id.checkedTextView)
-				.setBackgroundColor(Color.CYAN);
-		View v = al.get(0);
-		TextView p = (TextView) mWaypointViews.get(1).get(1);
-		text = (TextView) p.findViewById(R.id.checkedTextView);
-		p.setBackgroundColor(Color.CYAN);
-		text = (TextView) convertView.findViewById(R.id.checkedTextView);
-		text.setBackgroundColor(Color.CYAN);
-
-	}
-	*/
 
 } 

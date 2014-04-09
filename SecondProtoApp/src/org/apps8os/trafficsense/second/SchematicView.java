@@ -1,10 +1,10 @@
 package org.apps8os.trafficsense.second;
 
-
 import org.apps8os.trafficsense.TrafficsenseContainer;
 import org.apps8os.trafficsense.android.Constants;
 import org.apps8os.trafficsense.core.Route;
 import android.app.Activity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,26 +17,23 @@ import android.view.MenuItem;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+
+
 /**
  * Class for Schematic View.
  */
 public class SchematicView extends Activity {
-	
-	//private EditText mEditText;
-	//private Button mButton;
 	/**
 	 * The top banner.
 	 */
 	private TextView mTextView;
-	//private String mKey=null;
-	//private String mRequest;
 	private TrafficsenseContainer mContainer;
 	/**
 	 * The journey we are tracking.
 	 */
 	private Route mRoute;
 	private WaypointChangedReceiver mWaypointChangedReceiver;
-	//private SparseArray<Group> mGroups = new SparseArray<Group>();
+	private ExpandableListAdapter mAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +43,14 @@ public class SchematicView extends Activity {
 		mRoute = mContainer.getRoute();
 
 		ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-		ExpandableListAdapter adapter = new ExpandableListAdapter(this, mRoute);
-		listView.setAdapter(adapter);
+		mAdapter = new ExpandableListAdapter(this, mRoute);
+		listView.setAdapter(mAdapter);
 
 		mTextView = (TextView) findViewById(R.id.checkedTextView);
 		mTextView.setText("\t From: " + mRoute.getStart() + "\n\t To: "
 				+ mRoute.getDestination() + "\n");
 
-		mWaypointChangedReceiver = new WaypointChangedReceiver(adapter);
+		mWaypointChangedReceiver = new WaypointChangedReceiver();
 	}
 
 	@Override
@@ -107,13 +104,6 @@ public class SchematicView extends Activity {
 	 * Change UI current waypoint has changed.
 	 */
 	private class WaypointChangedReceiver extends BroadcastReceiver {
-		
-		//ExpandableListAdapter mAdapter;
-
-		public WaypointChangedReceiver (ExpandableListAdapter adapter) {
-			super();
-			//mAdapter = adapter;
-		}
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -126,23 +116,7 @@ public class SchematicView extends Activity {
 				//TODO: handle error
 				return;
 			}
-
-			//TODO: Highlight or colour current waypoint/segment.
-			//changeColor();
-			//TODO: call method that highlights current waypoint
 		} 
-
-		/*
-		private void changeColor() {
-			TrafficsenseContainer container = TrafficsenseContainer.getInstance();
-			int seg = container.getRoute().getCurrentIndex();
-			int way = container.getRoute().getCurrentSegment().getCurrentIndex();
-			ArrayList <View> segView = mAdapter.getSegmentViewList();
-			ArrayList <View> wayView = mAdapter.getWaypointViewList();
-			segView.get(seg-1).setBackgroundColor(Color.CYAN);
-			wayView.get(way-1).setBackgroundColor(Color.CYAN);
-		}
-		*/
 	}
 
 }
